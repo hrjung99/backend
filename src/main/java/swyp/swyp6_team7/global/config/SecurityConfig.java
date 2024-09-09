@@ -22,6 +22,8 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .requestMatchers("/api/members/signup").permitAll()  // 회원가입은 인증 없이 허용
                 .anyRequest().authenticated();  // 다른 모든 요청은 인증 필요
+                .and()
+                .httpBasic().disable();  // HTTP Basic 인증 비활성화
 
         return http.build();
     }
