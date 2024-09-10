@@ -23,6 +23,11 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtProvider = jwtProvider;
         this.userDetailsService = userDetailsService;
     }
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        return path.equals("/api/login") || path.equals("/api/users/new"); // 로그인 및 회원가입 경로 필터링 제외
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -56,10 +61,13 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } catch (UsernameNotFoundException e) {
                     // 인증 실패 시 처리
+                    // 로그를 남기거나 예외를 처리
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token or User not found");
                 }
             }
         }
         // 필터 체인 계속 진행
         filterChain.doFilter(request, response);
     }
+
 }
