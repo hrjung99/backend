@@ -24,7 +24,7 @@ public class LoginService {
 
     public String login(LoginRequestDto loginRequestDto) {
         Users user = userRepository.findByUserEmail(loginRequestDto.getUserEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password"));
 
         if (!passwordEncoder.matches(loginRequestDto.getUserPw(), user.getUserPw())) {
             throw new BadCredentialsException("Invalid credentials");
