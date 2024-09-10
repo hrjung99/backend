@@ -1,9 +1,9 @@
 package swyp.swyp6_team7.global.config;
 
 import io.jsonwebtoken.security.Keys;
-import lombok.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
