@@ -57,4 +57,18 @@ public class Users {
     @Column(name = "role")
     private List<String> roles;
 
+    // Setters and Getters
+    public void setPassword(String password) {
+        this.userPw = password;
+    }
+    public String getEmail() {
+        return this.userEmail;
+    }
+    public Integer getId() {
+        return this.userNumber;
+    }
+
+
+
+
 }
