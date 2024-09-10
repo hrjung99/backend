@@ -40,7 +40,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new Argon2PasswordEncoder(); // Argon2 사용
+        // Argon2PasswordEncoder(int saltLength, int hashLength, int parallelism, int memory, int iterations)
+        return new Argon2PasswordEncoder(16, 32, 1, 65536, 10); // Argon2 사용
     }
 
 }
