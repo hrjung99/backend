@@ -1,24 +1,49 @@
 package swyp.swyp6_team7.member.service;
 
+import io.jsonwebtoken.Jwt;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.member.dto.UserRequestDto;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class MemberService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     @Autowired
-    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtProvider = jwtProvider;
     }
-    public void registerUser(Users user){
-        user.setUserPw(passwordEncoder.encode(user.getUserPw()));
-        userRepository.save(user);
+    public Map<String, Object> signUp(UserRequestDto userRequestDto) {
+        // Argon2로 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
+
+        // Users 객체에 암호화된 비밀번호 설정
+        Users newUser = new Users(userRequestDto);
+        newUser.setPassword(encodedPassword);
+
+        // 사용자 저장
+        userRepository.save(newUser);
+
+        // JWT 발급
+        String token = jwtProvider.createToken(newUser.getEmail(), newUser.getRoles());
+
+        // 응답 데이터에 userId와 accessToken 포함
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", newUser.getId());
+        response.put("accessToken", token);
+
+        return response;
     }
 }
