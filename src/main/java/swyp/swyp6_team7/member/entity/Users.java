@@ -2,6 +2,8 @@ package swyp.swyp6_team7.member.entity;
 import lombok.*;
 
 import jakarta.persistence.*;
+import swyp.swyp6_team7.member.dto.UserRequestDto;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,6 +21,9 @@ public class Users {
     @Column(nullable = false, unique = true, length = 255)
     private String userEmail;
 
+    @Column(nullable = false, length = 255)
+    private String userPw;
+
     @Column(nullable = false, length = 50)
     private String userFirstName;
 
@@ -28,27 +33,27 @@ public class Users {
     @Column(nullable = false, length = 2)
     private String userGender;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     private String userBirthYear;
-
-    @Column(nullable = false, length = 255)
-    private String userPw;
 
     @Column(nullable = false, length = 15)
     private String userPhone;
 
+    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime userRegDate = LocalDateTime.now();
 
     private LocalDateTime userLoginDate;
     private LocalDateTime userLogoutDate;
 
+    @Builder.Default
     @Column(nullable = false, length = 10)
     private String userRole = "user";
 
     @Column(nullable = false, length = 10)
     private String userStatus;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean userSocialTF = false;
 

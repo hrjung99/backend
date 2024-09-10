@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Component
 public class JwtProvider {
-    private final String secretKey = "your_secret_key";
+    private final String secretKey = "oRzn5UpJmgRXxtOLMBG+jNhz2aAjPXHESKdjz4hFea5GNLnB9bVeVXKxKcZtxU+DlGZ4nHGO7xrXYhTkEhe2Zg==";
     private final long validityInMilliseconds = 3600000;  // 1시간
 
     public String createToken(String userEmail, List<String> roles) {
