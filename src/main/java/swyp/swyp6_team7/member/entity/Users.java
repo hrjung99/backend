@@ -3,6 +3,7 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -50,4 +51,10 @@ public class Users {
 
     @Column(nullable = false)
     private Boolean userSocialTF = false;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "userNumber"))
+    @Column(name = "role")
+    private List<String> roles;
+
 }
