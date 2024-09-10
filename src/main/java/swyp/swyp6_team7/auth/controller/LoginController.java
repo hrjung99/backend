@@ -6,7 +6,7 @@ import swyp.swyp6_team7.auth.dto.LoginRequestDto;
 import swyp.swyp6_team7.auth.service.LoginService;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api")
 public class LoginController {
     private final LoginService loginService;
 
@@ -14,7 +14,7 @@ public class LoginController {
         this.loginService = loginService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/api/login")
     public ResponseEntity<String> login(@RequestBody LoginRequestDto loginRequestDto) {
         String token = loginService.login(loginRequestDto);
         return ResponseEntity.ok(token);  // 로그인 성공 시 JWT 토큰 반환

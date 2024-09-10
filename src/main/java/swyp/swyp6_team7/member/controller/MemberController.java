@@ -5,6 +5,8 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
 import org.springframework.web.bind.annotation.*;
 
+@RestController
+@RequestMapping("/api/users")
 public class MemberController {
     private final MemberService memberService;
 
@@ -12,7 +14,7 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/api/users/new")
     public ResponseEntity<String> signUp(@RequestBody Users user) {
         memberService.registerUser(user);
         return ResponseEntity.ok("User registered successfully");
