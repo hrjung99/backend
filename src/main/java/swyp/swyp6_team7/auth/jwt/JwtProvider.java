@@ -14,6 +14,7 @@ public class JwtProvider {
     private final long validityInMilliseconds = 3600000;  // 1시간
 
     public String createToken(String userEmail, List<String> roles) {
+        // 사용자 이메일과 역할을 기반으로 JWT 생성
         Claims claims = Jwts.claims().setSubject(userEmail);
         claims.put("roles", roles);
 
@@ -29,6 +30,7 @@ public class JwtProvider {
     }
 
     public boolean validateToken(String token) {
+        // JWT 가 유효한지 검증
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
@@ -38,6 +40,7 @@ public class JwtProvider {
     }
 
     public String getUserEmail(String token) {
+        // JWT에서 사용자 이메일을 추출
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 }
