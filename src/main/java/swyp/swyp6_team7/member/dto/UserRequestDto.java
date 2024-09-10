@@ -1,28 +1,26 @@
 package swyp.swyp6_team7.member.dto;
 
 public class UserRequestDto {
-    private String email;
-    private String password;
-    private String name;
-    private String phone;
-    private String gender;
-    private String birthYear;
-    private String introduce;
-    //private List<TagDto> tags; // Tag 정보를 담는 리스트
+    private String email;       // user_email
+    private String password;    // user_pw
+    private String firstName;   // user_first_name
+    private String lastName;    // user_last_name
+    private String gender;      // user_gender (M/F)
+    private String birthYear;   // user_birth_year (yyyy)
+    private String phone;       // user_phone (전화번호)
 
     // 기본 생성자
-
     public UserRequestDto() {
     }
 
-    public UserRequestDto(String email, String password, String name, String phone, String gender, String birthYear, String introduce) {
+    public UserRequestDto(String email, String password, String firstName, String lastName, String gender, String birthYear, String phone) {
         this.email = email;
         this.password = password;
-        this.name = name;
-        this.phone = phone;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.gender = gender;
         this.birthYear = birthYear;
-        this.introduce = introduce;
+        this.phone = phone;
     }
 
     public String getEmail() {
@@ -41,20 +39,20 @@ public class UserRequestDto {
         this.password = password;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getGender() {
@@ -73,11 +71,11 @@ public class UserRequestDto {
         this.birthYear = birthYear;
     }
 
-    public String getIntroduce() {
-        return introduce;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setIntroduce(String introduce) {
-        this.introduce = introduce;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }
