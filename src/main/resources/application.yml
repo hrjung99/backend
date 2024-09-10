@@ -3,7 +3,7 @@ spring:
     include: local-db
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
