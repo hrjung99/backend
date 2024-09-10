@@ -3,8 +3,12 @@ spring:
     include: local-db
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+  custom:
+    jwt:
+      secretKey: secretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKey
+      expirationMs: 3600000 # 토큰 만료 시간 (1시간 = 3600000ms)
