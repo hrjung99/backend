@@ -4,27 +4,43 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import swyp.swyp6_team7.auth.jwt.JwtFilter;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
+
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    private final JwtProvider jwtProvider;
+    private final JwtFilter jwtFilter;
+
+    public SecurityConfig(JwtProvider jwtProvider, JwtFilter jwtFilter) {
+        this.jwtProvider = jwtProvider;
+        this.jwtFilter = jwtFilter;
     }
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()  // CSRF 보안 해제 (테스트용)
-                .authorizeRequests()
-                .requestMatchers("/api/members/signup").permitAll()  // 회원가입은 인증 없이 허용
-                .anyRequest().authenticated();  // 다른 모든 요청은 인증 필요
-                .and()
-                .httpBasic().disable();  // HTTP Basic 인증 비활성화
+                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/login", "/api/users/new").permitAll() // 로그인, 회원가입 경로는 허용
+                        .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
         return http.build();
     }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new Argon2PasswordEncoder(); // Argon2 사용
+    }
+
 }
