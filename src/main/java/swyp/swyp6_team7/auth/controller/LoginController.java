@@ -6,7 +6,7 @@ import swyp.swyp6_team7.auth.dto.LoginRequestDto;
 import swyp.swyp6_team7.auth.service.LoginService;
 
 @RestController
-@RequestMapping("/api")
+//@RequestMapping("/api")
 public class LoginController {
     private final LoginService loginService;
 

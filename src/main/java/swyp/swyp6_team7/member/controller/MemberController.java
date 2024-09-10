@@ -17,7 +17,7 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @PostMapping("/api/users/new")
+    @PostMapping("/new")
     public ResponseEntity<String> signUp(@RequestBody UserRequestDto userRequestDto) {
         // DTO 객체를 사용하여 회원 가입 처리
         Map<String, Object> response = memberService.signUp(userRequestDto);
