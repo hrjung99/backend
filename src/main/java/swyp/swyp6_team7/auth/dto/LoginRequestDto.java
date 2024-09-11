@@ -1,22 +1,22 @@
 package swyp.swyp6_team7.auth.dto;
 
 public class LoginRequestDto {
-    private String userEmail;
-    private String userPw;
+    private String email;
+    private String password;
 
-    public String getUserEmail() {
-        return userEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getUserPw() {
-        return userPw;
+    public String getPassword() {
+        return password;
     }
 
-    public void setUserPw(String userPw) {
-        this.userPw = userPw;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
