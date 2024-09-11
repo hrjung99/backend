@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
+import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.service.TravelService;
 
@@ -40,6 +41,21 @@ public class TravelController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(TravelDetailResponse.from(travel, userNumber, userName));
+    }
+
+    @PutMapping("/api/travel/{travelNumber}")
+    public ResponseEntity<TravelDetailResponse> update(
+            @PathVariable("travelNumber") int travelNumber,
+            @RequestBody TravelUpdateRequest request) {
+
+        Travel updatedTravel = travelService.update(travelNumber, request);
+
+        //TODO: 작성자 정보 가져오기 by userNumber
+        int userNumber = 1;
+        String userName = "testName";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(TravelDetailResponse.from(updatedTravel, userNumber, userName));
     }
 
 }

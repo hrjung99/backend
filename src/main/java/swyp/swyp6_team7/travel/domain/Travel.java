@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -101,4 +102,25 @@ public class Travel {
         this.budget = budget;
         this.status = status;
     }
+
+    public Travel update(TravelUpdateRequest travelUpdate) {
+        return Travel.builder()
+                .number(this.number)
+                .userNumber(this.userNumber)
+                .title(travelUpdate.getTitle())
+                .summary(travelUpdate.getSummary())
+                .details(travelUpdate.getDetails())
+                .viewCount(this.viewCount)
+                .createdAt(this.createdAt)
+                .startAt(travelUpdate.getTravelStartAt())
+                .endAt(travelUpdate.getTravelEndAt())
+                .dueDateTime(travelUpdate.getDueDateTime())
+                .location(travelUpdate.getLocation())
+                .minPerson(travelUpdate.getMinPerson())
+                .maxPerson(travelUpdate.getMaxPerson())
+                .budget(travelUpdate.getBudget())
+                .status(TravelStatus.convertCompletionToStatus(travelUpdate.getCompletionStatus()))
+                .build();
+    }
+
 }
