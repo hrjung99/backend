@@ -53,7 +53,8 @@ public class MemberService {
         userRepository.save(newUser);
 
         // JWT 발급
-        String token = jwtProvider.createToken(newUser.getEmail(), newUser.getRoles());
+        long tokenExpirationTime = 3600000; // 토큰 만료 시간 추가(1시간)
+        String token = jwtProvider.createToken(newUser.getEmail(), newUser.getRoles(), tokenExpirationTime);
 
         // 응답 데이터에 userId와 accessToken 포함
         Map<String, Object> response = new HashMap<>();
