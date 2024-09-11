@@ -64,15 +64,8 @@ public class TravelCreateRequest {
                 .minPerson(minPerson)
                 .maxPerson(maxPerson)
                 .budget(budget)
-                .status(convertToStatus(completionStatus))
+                .status(TravelStatus.convertCompletionToStatus(completionStatus))
                 .build();
     }
 
-    private TravelStatus convertToStatus(boolean completionStatus) {
-        if (completionStatus == true) {
-            return TravelStatus.IN_PROGRESS;
-        } else {
-            return TravelStatus.DRAFT;
-        }
-    }
 }
