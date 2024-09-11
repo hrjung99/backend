@@ -28,6 +28,10 @@ public class MemberService {
         this.jwtProvider = jwtProvider;
     }
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
+        // 이메일 중복 확인
+        if (userRepository.findByUserEmail(userRequestDto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
         // Argon2로 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
 
