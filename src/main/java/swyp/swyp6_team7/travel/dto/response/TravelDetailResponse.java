@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 public class TravelDetailResponse {
 
-    private int travelId;
+    private int travelNumber;
     private String title;
     private String summary;
     private int userNumber;
@@ -34,13 +34,13 @@ public class TravelDetailResponse {
 
     @Builder
     public TravelDetailResponse(
-            int travelId, String title, String summary,
+            int travelNumber, String title, String summary,
             int userNumber, String userName, String details, int viewCount,
             LocalDateTime createdAt, LocalDate travelStartAt, LocalDate travelEndAt,
             LocalDateTime registerDue, String location, int minPerson, int maxPerson,
             int budget, String postStatus
     ) {
-        this.travelId = travelId;
+        this.travelNumber = travelNumber;
         this.title = title;
         this.summary = summary;
         this.userNumber = userNumber;
@@ -63,7 +63,7 @@ public class TravelDetailResponse {
             int userNumber, String userName
     ) {
         return TravelDetailResponse.builder()
-                .travelId(travel.getId())
+                .travelNumber(travel.getNumber())
                 .title(travel.getTitle())
                 .summary(travel.getSummary())
                 .userNumber(userNumber)

@@ -20,8 +20,8 @@ public class Travel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "travel_id", updatable = false)
-    private int id;
+    @Column(name = "travel_number", updatable = false)
+    private int number;
 
     @Column(name = "user_number", nullable = false, unique = true)
     private int userNumber;
@@ -81,11 +81,11 @@ public class Travel {
 
     @Builder
     public Travel(
-            int id, int userNumber, String title, String summary, String details, int viewCount,
+            int number, int userNumber, String title, String summary, String details, int viewCount,
             LocalDateTime createdAt, LocalDate startAt, LocalDate endAt, LocalDateTime dueDateTime,
             String location, int minPerson, int maxPerson, int budget, TravelStatus status
     ) {
-        this.id = id;
+        this.number = number;
         this.userNumber = userNumber;
         this.title = title;
         this.summary = summary;
