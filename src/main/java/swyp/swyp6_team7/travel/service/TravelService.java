@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
@@ -38,7 +39,14 @@ public class TravelService {
         return travelRepository.save(travel);
     }
 
+    @Transactional
+    public void delete(int travelNumber) {
+        Travel travel = travelRepository.findByNumber(travelNumber)
+                .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
 
+        //TODO: 작성자와 요청자 대조(인가)
 
+        travel.delete();
+    }
 
 }

@@ -123,4 +123,7 @@ public class Travel {
                 .build();
     }
 
+    public void delete() {
+        this.status = TravelStatus.DELETED;
+    }
 }

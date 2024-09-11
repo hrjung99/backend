@@ -58,4 +58,10 @@ public class TravelController {
                 .body(TravelDetailResponse.from(updatedTravel, userNumber, userName));
     }
 
+    @DeleteMapping("/api/travel/{travelNumber}")
+    public ResponseEntity delete(@PathVariable("travelNumber") int travelNumber) {
+        travelService.delete(travelNumber);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }
