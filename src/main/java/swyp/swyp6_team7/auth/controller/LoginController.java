@@ -1,5 +1,6 @@
 package swyp.swyp6_team7.auth.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,10 @@ public class LoginController {
     }
 
     @PostMapping("/api/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
         try {
-            String token = loginService.login(loginRequestDto);
-            return ResponseEntity.ok(token);  // 로그인 성공 시 JWT 토큰 반환
+            String accessToken = loginService.login(loginRequestDto, response); // response 추가
+            return ResponseEntity.ok("Bearer " + accessToken); // Access Token 반환
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());  // 404 Not Found 반환
         } catch (IllegalArgumentException e) {
