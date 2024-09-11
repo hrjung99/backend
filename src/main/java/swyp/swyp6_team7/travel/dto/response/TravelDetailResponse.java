@@ -1,5 +1,6 @@
 package swyp.swyp6_team7.travel.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class TravelDetailResponse {
     private String userName;
     private String details;
     private int viewCount;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     private LocalDate travelStartAt;
     private LocalDate travelEndAt;
