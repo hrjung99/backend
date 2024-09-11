@@ -2,10 +2,13 @@ package swyp.swyp6_team7.member.entity;
 import lombok.*;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -62,6 +65,13 @@ public class Users {
     @Column(name = "role")
     private List<String> roles;
 
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> (GrantedAuthority) () -> role) // Lambda expression for GrantedAuthority
+                .collect(Collectors.toList());
+    }
+
     // Setters and Getters
     public void setPassword(String password) {
         this.userPw = password;
@@ -73,6 +83,24 @@ public class Users {
         return this.userNumber;
     }
 
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+
+    public boolean isEnabled() {
+        return true;
+    }
 
 
 
