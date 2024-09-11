@@ -16,4 +16,9 @@ public class TravelService {
         return travelRepository.save(request.toEntity(userNumber));
     }
 
+    public Travel getByNumber(int travelNumber) {
+        return travelRepository.findByNumber(travelNumber)
+                .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
+    }
+
 }
