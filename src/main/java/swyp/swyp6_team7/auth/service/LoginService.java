@@ -23,11 +23,15 @@ public class LoginService {
     }
 
     public String login(LoginRequestDto loginRequestDto) {
-        Users user = userRepository.findByUserEmail(loginRequestDto.getUserEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password"));
+        Users user = userRepository.findByUserEmail(loginRequestDto.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 이메일을 찾을 수 없습니다."));
 
-        if (!passwordEncoder.matches(loginRequestDto.getUserPw(), user.getUserPw())) {
-            throw new BadCredentialsException("Invalid credentials");
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getUserPw())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (user.getUserSocialTF()) { //소셜 로그인으로 가입된 사용자일 경우 예외 처리
+            throw new IllegalArgumentException("간편 로그인으로 가입된 계정입니다. 소셜 로그인으로 접속해 주세요.");
         }
 
         // 로그인 성공 시 JWT 토큰 발급
