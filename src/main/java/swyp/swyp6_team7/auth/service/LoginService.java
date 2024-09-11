@@ -1,6 +1,8 @@
 package swyp.swyp6_team7.auth.service;
 
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +24,7 @@ public class LoginService {
         this.jwtProvider = jwtProvider;
     }
 
-    public String login(LoginRequestDto loginRequestDto) {
+    public String login(LoginRequestDto loginRequestDto,HttpServletResponse response) {
         Users user = userRepository.findByUserEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("사용자 이메일을 찾을 수 없습니다."));
 
@@ -34,7 +36,18 @@ public class LoginService {
             throw new IllegalArgumentException("간편 로그인으로 가입된 계정입니다. 소셜 로그인으로 접속해 주세요.");
         }
 
-        // 로그인 성공 시 JWT 토큰 발급
-        return jwtProvider.createToken(user.getUserEmail(), user.getRoles());
+        // Access Token 생성
+        String accessToken = jwtProvider.createAccessToken(user.getUserEmail(), user.getRoles());
+
+        // Refresh Token 생성 및 httpOnly 쿠키로 설정
+        String refreshToken = jwtProvider.createRefreshToken(user.getUserEmail());
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 1주일
+        response.addCookie(refreshTokenCookie);
+
+        // Access Token을 반환
+        return accessToken;
     }
 }
