@@ -39,8 +39,7 @@ public class MemberService {
         Users newUser =  Users.builder()
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)  // 암호화된 비밀번호 설정
-                .userFirstName(userRequestDto.getFirstName())
-                .userLastName(userRequestDto.getLastName())
+                .userName(userRequestDto.getName())
                 .userPhone(userRequestDto.getPhone())
                 .userGender(userRequestDto.getGender())
                 .userBirthYear(userRequestDto.getBirthYear())
