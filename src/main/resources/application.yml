@@ -8,6 +8,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  server:
+    port: 8080
 custom:
   jwt:
     secretKey: oRzn5UpJmgRXxtOLMBG+jNhz2aAjPXHESKdjz4hFea5GNLnB9bVeVXKxKcZtxU+DlGZ4nHGO7xrXYhTkEhe2Zg==

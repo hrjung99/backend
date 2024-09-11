@@ -28,10 +28,7 @@ public class Users {
     private String userPw;
 
     @Column(nullable = false, length = 50)
-    private String userFirstName;
-
-    @Column(nullable = false, length = 50)
-    private String userLastName;
+    private String userName;
 
     @Column(nullable = false, length = 2)
     private String userGender;

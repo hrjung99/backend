@@ -3,7 +3,7 @@ package swyp.swyp6_team7.member.dto;
 public class UserRequestDto {
     private String email;       // user_email
     private String password;    // user_pw
-    private String firstName;   // user_first_name
+    private String Name;   // user_name
     private String lastName;    // user_last_name
     private String gender;      // user_gender (M/F)
     private String birthYear;   // user_birth_year (yyyy)
@@ -13,11 +13,10 @@ public class UserRequestDto {
     public UserRequestDto() {
     }
 
-    public UserRequestDto(String email, String password, String firstName, String lastName, String gender, String birthYear, String phone) {
+    public UserRequestDto(String email, String password, String name, String gender, String birthYear, String phone) {
         this.email = email;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.Name = name;
         this.gender = gender;
         this.birthYear = birthYear;
         this.phone = phone;
@@ -39,12 +38,12 @@ public class UserRequestDto {
         this.password = password;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return Name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setName(String name) {
+        Name = name;
     }
 
     public String getLastName() {
