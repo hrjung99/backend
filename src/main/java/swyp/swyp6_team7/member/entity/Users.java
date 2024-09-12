@@ -30,8 +30,13 @@ public class Users {
     @Column(nullable = false, length = 50)
     private String userName;
 
+    // 성별 ENUM으로 관리
+    public enum Gender{
+        M,F
+    }
+
     @Column(nullable = false, length = 2)
-    private String userGender;
+    private Gender userGender;
 
     @Column(nullable = false, length = 5)
     private String userBirthYear;
@@ -50,8 +55,12 @@ public class Users {
     @Column(nullable = false, length = 10)
     private String userRole = "user";
 
+    // 회원 상태 enum으로 관리
+    public enum MemberStatus{
+        ABLE, DELETED, SLEEP
+    }
     @Column(nullable = false, length = 10)
-    private String userStatus;
+    private MemberStatus userStatus;
 
     @Builder.Default
     @Column(nullable = false)
