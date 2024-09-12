@@ -36,6 +36,7 @@ public class Users {
     }
 
     @Column(nullable = false, length = 2)
+    @Enumerated(EnumType.STRING)
     private Gender userGender;
 
     @Column(nullable = false, length = 5)
@@ -60,6 +61,7 @@ public class Users {
         ABLE, DELETED, SLEEP
     }
     @Column(nullable = false, length = 10)
+    @Enumerated(EnumType.STRING)
     private MemberStatus userStatus;
 
     @Builder.Default
