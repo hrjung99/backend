@@ -35,16 +35,25 @@ public class MemberService {
         // Argon2로 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
 
+        // 전화번호 포맷팅 (000-0000-0000 형식으로 변환)
+        String formattedPhoneNumber = formatPhoneNumber(userRequestDto.getPhone());
+
+        // 성별 ENUM 변환
+        Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+
+        // 기본 상태를 ABLE로 설정 (회원 상태 ENUM 사용)
+        Users.MemberStatus status = Users.MemberStatus.ABLE;
+
         // Users 객체에 암호화된 비밀번호 설정
         Users newUser =  Users.builder()
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)  // 암호화된 비밀번호 설정
                 .userName(userRequestDto.getName())
-                .userPhone(userRequestDto.getPhone())
-                .userGender(userRequestDto.getGender())
+                .userPhone(formattedPhoneNumber)
+                .userGender(gender)
                 .userBirthYear(userRequestDto.getBirthYear())
                 .roles(List.of("ROLE_USER"))  // 기본 역할 설정
-                .userStatus("active")  // 기본 사용자 상태 설정
+                .userStatus(status)  // 기본 사용자 상태 설정
                 .build();
         newUser.setPassword(encodedPassword);
 
@@ -62,5 +71,10 @@ public class MemberService {
         response.put("accessToken", token);
 
         return response;
+    }
+    public String formatPhoneNumber(String phoneNumber) {
+        // 숫자만 남기고 000-0000-0000 형식으로 변환
+        phoneNumber = phoneNumber.replaceAll("[^0-9]", "");
+        return phoneNumber.replaceFirst("(\\d{3})(\\d{4})(\\d+)", "$1-$2-$3");
     }
 }
