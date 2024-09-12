@@ -5,12 +5,13 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import swyp.swyp6_team7.travel.domain.Travel;
 
 import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TravelSimpleResponse {
+public class TravelSimpleDto {
 
     private int travelNumber;
     private String title;
@@ -25,7 +26,7 @@ public class TravelSimpleResponse {
 
 
     @Builder
-    public TravelSimpleResponse(
+    public TravelSimpleDto(
             int travelNumber, String title, String summary,
             int userNumber, String userName,
             LocalDateTime createdAt, LocalDateTime registerDue, String postStatus
@@ -38,6 +39,19 @@ public class TravelSimpleResponse {
         this.createdAt = createdAt;
         this.registerDue = registerDue;
         this.postStatus = postStatus;
+    }
+
+    public static TravelSimpleDto from(Travel travel) {
+        return TravelSimpleDto.builder()
+                .travelNumber(travel.getNumber())
+                .title(travel.getTitle())
+                .summary(travel.getSummary())
+                .userNumber(travel.getUserNumber())
+                //.userName(travel.getuserNam)
+                .createdAt(travel.getCreatedAt())
+                .registerDue(travel.getDueDateTime())
+                .postStatus(travel.getStatus().getName())
+                .build();
     }
 
 }

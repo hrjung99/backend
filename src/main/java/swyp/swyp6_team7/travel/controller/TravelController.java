@@ -1,6 +1,7 @@
 package swyp.swyp6_team7.travel.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -9,6 +10,7 @@ import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
+import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 @RequiredArgsConstructor
@@ -63,5 +65,17 @@ public class TravelController {
         travelService.delete(travelNumber);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+
+    @GetMapping("/api/travels")
+    public ResponseEntity getSortedByCreatedAtPaging(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        Page<TravelSimpleDto> travelPage = travelService.getPagedTravels(page, size);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(travelPage);
+    }
+
 
 }

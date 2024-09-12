@@ -1,12 +1,15 @@
 package swyp.swyp6_team7.travel.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
+import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 @RequiredArgsConstructor
@@ -47,6 +50,13 @@ public class TravelService {
         //TODO: 작성자와 요청자 대조(인가)
 
         travel.delete();
+    }
+
+
+    public Page<TravelSimpleDto> getPagedTravels(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Travel> travelPage = travelRepository.findByStatusIsNotOrderByCreatedAtDesc(TravelStatus.DRAFT, pageable);
+        return travelPage.map(TravelSimpleDto::from);
     }
 
 }
