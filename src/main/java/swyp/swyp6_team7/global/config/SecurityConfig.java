@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import swyp.swyp6_team7.auth.jwt.JwtFilter;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 
@@ -35,6 +37,20 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
         return http.build();
+    }
+    // 전역 CORS 설정
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/api/**")  // CORS 허용할 API 경로
+                        .allowedOrigins("http://localhost:9999")  // 허용할 프론트엔드 도메인
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")  // 허용할 HTTP 메서드
+                        .allowedHeaders("*")  // 모든 헤더 허용
+                        .allowCredentials(true);  // 인증 정보 허용
+            }
+        };
     }
 
 
