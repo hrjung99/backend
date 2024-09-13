@@ -18,8 +18,9 @@ public class TravelSimpleDto {
     private String summary;
     private int userNumber;
     private String userName;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY년 MM월 dd일")
     private LocalDateTime createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY년 MM월 dd일")
     private LocalDateTime registerDue;
     private String postStatus;
     //TODO: 태그, 이미지
