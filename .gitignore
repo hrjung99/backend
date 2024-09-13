@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 application-local-db.yml
 data.sql
+**/generated
 
 ### STS ###
 .apt_generated
