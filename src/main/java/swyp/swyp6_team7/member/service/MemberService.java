@@ -27,11 +27,9 @@ public class MemberService {
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
     }
+
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
-        // 이메일 중복 확인
-        if (userRepository.findByUserEmail(userRequestDto.getEmail().toLowerCase().trim()).isPresent()) { //대소문자 공백 처리 추가
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-        }
+
         // Argon2로 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
 
@@ -44,13 +42,15 @@ public class MemberService {
         // 기본 상태를 ABLE로 설정 (회원 상태 ENUM 사용)
         Users.MemberStatus status = Users.MemberStatus.ABLE;
 
+        // 성별 변환
+        Users.Gender convertedgender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
         // Users 객체에 암호화된 비밀번호 설정
         Users newUser =  Users.builder()
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)  // 암호화된 비밀번호 설정
                 .userName(userRequestDto.getName())
                 .userPhone(formattedPhoneNumber)
-                .userGender(gender)
+                .userGender(convertedgender)
                 .userBirthYear(userRequestDto.getBirthYear())
                 .roles(List.of("ROLE_USER"))  // 기본 역할 설정
                 .userStatus(status)  // 기본 사용자 상태 설정
@@ -76,5 +76,12 @@ public class MemberService {
         // 숫자만 남기고 000-0000-0000 형식으로 변환
         phoneNumber = phoneNumber.replaceAll("[^0-9]", "");
         return phoneNumber.replaceFirst("(\\d{3})(\\d{4})(\\d+)", "$1-$2-$3");
+    }
+    // 이메일 중복 확인 로직
+    public boolean checkEmailDuplicate(String email) {
+        if (userRepository.findByUserEmail(email).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+        return false; // 중복된 이메일이 없을 경우 false반환
     }
 }
