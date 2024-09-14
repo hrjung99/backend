@@ -14,3 +14,9 @@ custom:
   jwt:
     secretKey: oRzn5UpJmgRXxtOLMBG+jNhz2aAjPXHESKdjz4hFea5GNLnB9bVeVXKxKcZtxU+DlGZ4nHGO7xrXYhTkEhe2Zg==
     expirationMs: 3600000 # 토큰 만료 시간 (1시간 = 3600000ms)
+
+kakao:
+  client-id: f5cf47810199f2ab9734d6d95446654e #12bb6e58ce1251d39bedcb7255d4d18c
+  redirect-uri: http://localhost:8080/login/oauth/kakao/callback
+  token-url: https://kauth.kakao.com/oauth/token
+  user-info-url: https://kapi.kakao.com/v2/user/me
