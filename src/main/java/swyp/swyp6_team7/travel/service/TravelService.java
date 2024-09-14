@@ -12,6 +12,9 @@ import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
+import java.util.List;
+import java.util.SimpleTimeZone;
+
 @RequiredArgsConstructor
 @Service
 public class TravelService {
@@ -59,4 +62,9 @@ public class TravelService {
         return travelPage.map(TravelSimpleDto::from);
     }
 
+    public List<TravelSimpleDto> search(String keyword) {
+        return travelRepository.search(keyword).stream()
+                .map(TravelSimpleDto::from)
+                .toList();
+    }
 }

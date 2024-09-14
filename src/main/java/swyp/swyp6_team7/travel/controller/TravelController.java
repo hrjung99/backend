@@ -13,6 +13,8 @@ import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class TravelController {
@@ -77,5 +79,14 @@ public class TravelController {
                 .body(travelPage);
     }
 
+
+    @GetMapping("/api/travels/search")
+    public ResponseEntity search(
+            @RequestParam(name = "keyword") String keyword
+    ) {
+        List<TravelSimpleDto> travels = travelService.search(keyword);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(travels);
+    }
 
 }
