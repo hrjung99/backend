@@ -27,11 +27,12 @@ public class SecurityConfig {
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        http.cors().and() // CORS 허용
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/login", "/api/users/new","/api/refresh-token").permitAll() // 로그인, 회원가입, 토큰 재발급 경로 경로는 허용
+                        // 로그인, 회원가입, 토큰 재발급, kakao 로그인 요청 경로 경로는 허용
+                        .requestMatchers("/api/login", "/api/users/new","/api/refresh-token","/login/oauth/kakao/**","/error","/api/users-email").permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
