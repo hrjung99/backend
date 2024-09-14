@@ -24,7 +24,7 @@ public class Travel {
     @Column(name = "travel_number", updatable = false)
     private int number;
 
-    @Column(name = "user_number", nullable = false, unique = true)
+    @Column(name = "user_number", nullable = false)
     private int userNumber;
 
     @Column(name = "travel_title", length = 20)
