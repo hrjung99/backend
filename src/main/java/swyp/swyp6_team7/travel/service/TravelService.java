@@ -7,10 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
+import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
+
+import java.util.List;
+import java.util.SimpleTimeZone;
 
 @RequiredArgsConstructor
 @Service
@@ -53,10 +57,8 @@ public class TravelService {
     }
 
 
-    public Page<TravelSimpleDto> getPagedTravels(int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size);
-        Page<Travel> travelPage = travelRepository.findByStatusIsNotOrderByCreatedAtDesc(TravelStatus.DRAFT, pageable);
-        return travelPage.map(TravelSimpleDto::from);
+    public Page<TravelSimpleDto> search(TravelSearchCondition condition) {
+        return travelRepository.search(condition)
+                .map(TravelSimpleDto::from);
     }
-
 }
