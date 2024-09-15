@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
+import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
@@ -56,15 +57,8 @@ public class TravelService {
     }
 
 
-    public Page<TravelSimpleDto> getPagedTravels(int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size);
-        Page<Travel> travelPage = travelRepository.findByStatusIsNotOrderByCreatedAtDesc(TravelStatus.DRAFT, pageable);
-        return travelPage.map(TravelSimpleDto::from);
-    }
-
-    public List<TravelSimpleDto> search(String keyword) {
-        return travelRepository.search(keyword).stream()
-                .map(TravelSimpleDto::from)
-                .toList();
+    public Page<TravelSimpleDto> search(TravelSearchCondition condition) {
+        return travelRepository.search(condition)
+                .map(TravelSimpleDto::from);
     }
 }

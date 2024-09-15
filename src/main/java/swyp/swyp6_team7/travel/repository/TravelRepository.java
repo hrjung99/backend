@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface TravelRepository extends JpaRepository<Travel, Integer>, TravelCustomRepository {
     Optional<Travel> findByNumber(Integer integer);
 
-    Page<Travel> findByStatusIsNotOrderByCreatedAtDesc(TravelStatus status, Pageable pageable);
 }
