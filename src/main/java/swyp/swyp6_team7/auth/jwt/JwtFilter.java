@@ -26,7 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
-        return  path.startsWith("/login/oauth/naver") ||path.startsWith("/login/oauth/kakao") || path.equals("/api/login") || path.equals("/api/users/new") || path.equals("/api/refresh-token"); // 로그인 및 회원가입 경로 필터링 제외
+        return  path.startsWith("/login/oauth/google")||path.startsWith("/login/oauth/naver") ||path.startsWith("/login/oauth/kakao") || path.equals("/api/login") || path.equals("/api/users/new") || path.equals("/api/refresh-token"); // 로그인 및 회원가입 경로 필터링 제외
     }
 
     @Override
