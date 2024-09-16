@@ -14,11 +14,9 @@ public class TagService {
     private final TagRepository tagRepository;
 
     @Transactional
-    public Tag getByName(String name) {
-        if(!tagRepository.existsByName(name)){
-            return tagRepository.save(Tag.of(name));
-        }
-        return tagRepository.getByName(name);
+    public Tag findByName(String name) {
+        return tagRepository.findByName(name)
+                .orElseGet(() -> tagRepository.save(Tag.of(name)));
     }
 
 }
