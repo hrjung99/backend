@@ -9,6 +9,7 @@ import swyp.swyp6_team7.travel.domain.TravelStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Getter
@@ -17,7 +18,7 @@ public class TravelCreateRequest {
 
     private String title;
     private String summary;
-    //TODO: List<Tag> tags
+    private List<String> tags;
     private String details;
     private LocalDateTime dueDateTime;
     private LocalDate travelStartAt;
@@ -32,12 +33,13 @@ public class TravelCreateRequest {
 
     @Builder
     public TravelCreateRequest(
-            String title, String summary, String details,
+            String title, String summary, List<String> tags, String details,
             LocalDateTime dueDateTime, LocalDate travelStartAt, LocalDate travelEndAt,
             String location, int minPerson, int maxPerson, int budget, boolean completionStatus
     ) {
         this.title = title;
         this.summary = summary;
+        this.tags = tags;
         this.details = details;
         this.dueDateTime = dueDateTime;
         this.travelStartAt = travelStartAt;
@@ -50,7 +52,7 @@ public class TravelCreateRequest {
     }
 
 
-    public Travel toEntity(int userNumber) {
+    public Travel toTravelEntity(int userNumber) {
         return Travel.builder()
                 .userNumber(userNumber)
                 .title(title)

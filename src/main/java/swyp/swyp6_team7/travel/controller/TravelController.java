@@ -31,9 +31,8 @@ public class TravelController {
         int userNumber = 1;
         String userName = "testName";
 
-        Travel savedTravel = travelService.save(request, userNumber);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(TravelDetailResponse.from(savedTravel, userNumber, userName));
+                .body(travelService.save(request, userNumber));
     }
 
     @GetMapping("/api/travel/detail/{travelNumber}")
@@ -46,7 +45,8 @@ public class TravelController {
         String userName = "testName";
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(TravelDetailResponse.from(travel, userNumber, userName));
+                .body(null);
+                //.body(TravelDetailResponse.from(travel, userNumber, userName));
     }
 
     @PutMapping("/api/travel/{travelNumber}")
@@ -61,7 +61,8 @@ public class TravelController {
         String userName = "testName";
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(TravelDetailResponse.from(updatedTravel, userNumber, userName));
+                .body(null);
+                //.body(TravelDetailResponse.from(updatedTravel, userNumber, userName));
     }
 
     @DeleteMapping("/api/travel/{travelNumber}")
