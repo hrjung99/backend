@@ -39,13 +39,15 @@ public class TravelService {
         return TravelDetailResponse.from(savedTravel, tags, userNumber, "username");
     }
 
-    public Travel getByNumber(int travelNumber) {
+    public TravelDetailResponse getDetailsByNumber(int travelNumber) {
         Travel travel = travelRepository.findByNumber(travelNumber)
                 .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
 
         //TODO: 임시저장, 삭제 상태에 따른 처리 추가
 
-        return travel;
+        List<String> tags = travelTagService.getTagsByTravelNumber(travel.getNumber());
+
+        return TravelDetailResponse.from(travel, tags, travel.getUserNumber(), "username");
     }
 
     @Transactional

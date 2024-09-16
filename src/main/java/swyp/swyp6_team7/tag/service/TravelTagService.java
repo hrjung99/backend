@@ -11,7 +11,7 @@ import swyp.swyp6_team7.travel.domain.Travel;
 import java.util.List;
 
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Service
 public class TravelTagService {
     public static final int TRAVEL_TAG_MAX_COUNT = 5;
@@ -31,6 +31,14 @@ public class TravelTagService {
 
         return checkedTags.stream()
                 .map(tag -> travelTagRepository.save(TravelTag.of(travel, tag)).getTag())
+                .toList();
+    }
+
+
+    public List<String> getTagsByTravelNumber(int travelNumber) {
+        return travelTagRepository.findTagsByTravelNumber(travelNumber)
+                .stream()
+                .map(tag -> tag.getTag().getName())
                 .toList();
     }
 
