@@ -30,9 +30,9 @@ public class TravelService {
     private final TravelTagService travelTagService;
 
     @Transactional
-    public TravelDetailResponse save(TravelCreateRequest request, int userNumber) {
+    public TravelDetailResponse create(TravelCreateRequest request, int userNumber) {
         Travel savedTravel = travelRepository.save(request.toTravelEntity(userNumber));
-        List<String> tags = travelTagService.save(savedTravel, request.getTags()).stream()
+        List<String> tags = travelTagService.create(savedTravel, request.getTags()).stream()
                 .map(tag -> tag.getName())
                 .toList();
 

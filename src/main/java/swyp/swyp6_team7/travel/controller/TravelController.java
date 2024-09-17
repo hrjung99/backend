@@ -32,7 +32,7 @@ public class TravelController {
         String userName = "testName";
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(travelService.save(request, userNumber));
+                .body(travelService.create(request, userNumber));
     }
 
     @GetMapping("/api/travel/detail/{travelNumber}")

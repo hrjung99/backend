@@ -21,7 +21,7 @@ public class TravelTagService {
 
 
     @Transactional
-    public List<Tag> save(Travel travel, List<String> tags) {
+    public List<Tag> create(Travel travel, List<String> tags) {
 
         List<Tag> checkedTags = tags.stream()
                 .distinct()
@@ -46,7 +46,7 @@ public class TravelTagService {
     @Transactional
     public List<String> update(Travel travel, List<String> newTags) {
 
-        travelTagRepository.deleteTravelTagsByTravel(travel);
+        travelTagRepository.deleteByTravel(travel);
 
         newTags.stream()
                 .distinct()

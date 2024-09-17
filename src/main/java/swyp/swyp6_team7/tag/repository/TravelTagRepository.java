@@ -13,5 +13,5 @@ public interface TravelTagRepository extends JpaRepository<TravelTag, Long> {
     @Query("select t from TravelTag t join fetch t.tag where t.travel.number = :travelNumber")
     List<TravelTag> findTagsByTravelNumber(@Param("travelNumber") int travelNumber);
 
-    void deleteTravelTagsByTravel(Travel travel);
+    void deleteByTravel(Travel travel);
 }
