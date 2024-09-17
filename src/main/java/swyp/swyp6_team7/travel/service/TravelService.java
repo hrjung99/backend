@@ -51,14 +51,16 @@ public class TravelService {
     }
 
     @Transactional
-    public Travel update(int travelNumber, TravelUpdateRequest travelUpdate) {
+    public TravelDetailResponse update(int travelNumber, TravelUpdateRequest travelUpdate) {
         Travel travel = travelRepository.findByNumber(travelNumber)
                 .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
 
         //TODO: 작성자와 요청자 대조(인가)
 
-        travel = travel.update(travelUpdate);
-        return travelRepository.save(travel);
+        Travel updatedTravel = travel.update(travelUpdate);
+        List<String> updatedTags = travelTagService.update(updatedTravel, travelUpdate.getTags());
+
+        return TravelDetailResponse.from(updatedTravel, updatedTags, updatedTravel.getUserNumber(), "username");
     }
 
     @Transactional

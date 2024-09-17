@@ -50,15 +50,14 @@ public class TravelController {
             @PathVariable("travelNumber") int travelNumber,
             @RequestBody TravelUpdateRequest request) {
 
-        Travel updatedTravel = travelService.update(travelNumber, request);
-
         //TODO: 작성자 정보 가져오기 by userNumber
         int userNumber = 1;
         String userName = "testName";
 
+        TravelDetailResponse updatedTravel = travelService.update(travelNumber, request);
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(null);
-        //.body(TravelDetailResponse.from(updatedTravel, userNumber, userName));
+                .body(updatedTravel);
     }
 
     @DeleteMapping("/api/travel/{travelNumber}")

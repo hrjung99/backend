@@ -26,7 +26,7 @@ public class TravelTagService {
         List<Tag> checkedTags = tags.stream()
                 .distinct()
                 .limit(TRAVEL_TAG_MAX_COUNT)
-                .map(tag -> tagService.getByName(tag))
+                .map(tagName -> tagService.findByName(tagName))
                 .toList();
 
         return checkedTags.stream()
@@ -37,6 +37,25 @@ public class TravelTagService {
 
     public List<String> getTagsByTravelNumber(int travelNumber) {
         return travelTagRepository.findTagsByTravelNumber(travelNumber)
+                .stream()
+                .map(tag -> tag.getTag().getName())
+                .toList();
+    }
+
+
+    @Transactional
+    public List<String> update(Travel travel, List<String> newTags) {
+
+        travelTagRepository.deleteTravelTagsByTravel(travel);
+
+        newTags.stream()
+                .distinct()
+                .limit(TRAVEL_TAG_MAX_COUNT)
+                .map(tagName -> tagService.findByName(tagName))
+                .map(tag -> travelTagRepository.save(TravelTag.of(travel, tag)).getTag())
+                .toList();
+
+        return travelTagRepository.findTagsByTravelNumber(travel.getNumber())
                 .stream()
                 .map(tag -> tag.getTag().getName())
                 .toList();
