@@ -37,7 +37,7 @@ public class NaverController {
     }
 
     // 네이버 콜백 처리
-    @PostMapping("/login/oauth/naver/callback")
+    @GetMapping("/login/oauth/naver/callback")
     public ResponseEntity<?> naverCallback(@RequestParam String code, @RequestParam String state) {
         String tokenUrl = "https://nid.naver.com/oauth2.0/token";
         RestTemplate restTemplate = new RestTemplate();

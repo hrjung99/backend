@@ -10,13 +10,15 @@ import lombok.Setter;
 public class SocialUsers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int socialNumber;
+    private Integer socialNumber;  // 자동 증가, 정수 타입으로 수정
+
+    private String socialLoginId;  // 소셜 로그인 제공자의 고유 ID
 
     @Column(nullable = false, length = 320)
     private String socialEmail;
 
     @ManyToOne
-    @JoinColumn(name = "user_number", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @Column(nullable = false, length = 10)
