@@ -45,15 +45,23 @@ public class TravelTagService {
 
     @Transactional
     public List<String> update(Travel travel, List<String> newTags) {
-
-        travelTagRepository.deleteByTravel(travel);
-
-        newTags.stream()
-                .distinct()
-                .limit(TRAVEL_TAG_MAX_COUNT)
-                .map(tagName -> tagService.findByName(tagName))
-                .map(tag -> travelTagRepository.save(TravelTag.of(travel, tag)).getTag())
+        
+        List<TravelTag> oldTravelTags = travelTagRepository.findTagsByTravelNumber(travel.getNumber());
+        List<String> oldTags = oldTravelTags.stream()
+                .map(tag -> tag.getTag().getName())
                 .toList();
+
+        for (String tagName : newTags) {
+            if (!oldTags.contains(tagName)) {
+                travelTagRepository.save(TravelTag.of(travel, tagService.findByName(tagName)));
+            }
+        }
+
+        for (TravelTag travelTag : oldTravelTags) {
+            if (!newTags.contains(travelTag.getTag().getName())) {
+                travelTagRepository.delete(travelTag);
+            }
+        }
 
         return travelTagRepository.findTagsByTravelNumber(travel.getNumber())
                 .stream()
