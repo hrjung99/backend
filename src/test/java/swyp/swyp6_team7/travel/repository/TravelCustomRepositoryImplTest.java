@@ -9,11 +9,18 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import swyp.swyp6_team7.config.DataConfig;
+import swyp.swyp6_team7.tag.domain.Tag;
+import swyp.swyp6_team7.tag.domain.TravelTag;
+import swyp.swyp6_team7.tag.repository.TagRepository;
+import swyp.swyp6_team7.tag.repository.TravelTagRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
+import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,6 +31,10 @@ class TravelCustomRepositoryImplTest {
 
     @Autowired
     private TravelRepository travelRepository;
+    @Autowired
+    private TravelTagRepository travelTagRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     @BeforeEach
     void setUp() {
@@ -145,5 +156,81 @@ class TravelCustomRepositoryImplTest {
         assertThat(result.getTotalPages()).isEqualTo(2);
         assertThat(result.getTotalElements()).isEqualTo(6);
     }
+
+//    @DisplayName("search: 주어지는 태그가 달린 콘텐츠를 가져온다")
+//    @Test
+//    public void searchWithTags() {
+//        // given
+//        Tag tag = tagRepository.save(Tag.of("테스트"));
+//        for (int i = 0; i < 6; i++) {
+//            Travel travel = travelRepository.save(Travel.builder()
+//                    .title("추가 테스트 데이터" + i)
+//                    .userNumber(1)
+//                    .viewCount(0)
+//                    .createdAt(LocalDateTime.now())
+//                    .status(TravelStatus.IN_PROGRESS)
+//                    .build());
+//            travelTagRepository.save(TravelTag.of(travel, tag));
+//        }
+//
+//        List<String> tags = new ArrayList<>();
+//        tags.add("테스트");
+//        TravelSearchCondition condition = TravelSearchCondition.builder()
+//                .pageRequest(PageRequest.of(0, 5))
+//                .tags(tags)
+//                .build();
+//
+//        // when
+//        Page<Travel> result = travelRepository.search(condition);
+//
+//        // then
+//        Page<TravelSearchDto> temp = travelRepository.search(condition)
+//                .map(TravelSearchDto::from);
+//        for (TravelSearchDto travelSearchDto : temp) {
+//            System.out.println(travelSearchDto.toString());
+//        }
+//        assertThat(result.getTotalElements()).isEqualTo(6);
+//    }
+//
+//    @DisplayName("search: 여러 개의 태그가 주어졌을 때, 모든 태그를 가진 콘텐츠만 가져온다")
+//    @Test
+//    public void searchWithMultipleTags() {
+//        // given
+//        Tag tag1 = tagRepository.save(Tag.of("한국"));
+//        Tag tag2 = tagRepository.save(Tag.of("투어"));
+//
+//        Travel travel1 = travelRepository.save(Travel.builder()
+//                .title("추가 테스트 데이터1")
+//                .userNumber(1)
+//                .viewCount(0)
+//                .createdAt(LocalDateTime.now())
+//                .status(TravelStatus.IN_PROGRESS)
+//                .build());
+//        travelTagRepository.save(TravelTag.of(travel1, tag1));
+//        travelTagRepository.save(TravelTag.of(travel1, tag2));
+//
+//        Travel travel2 = travelRepository.save(Travel.builder()
+//                .title("추가 테스트 데이터2")
+//                .userNumber(1)
+//                .viewCount(0)
+//                .createdAt(LocalDateTime.now())
+//                .status(TravelStatus.IN_PROGRESS)
+//                .build());
+//        travelTagRepository.save(TravelTag.of(travel2, tag1));
+//
+//        List<String> tags = new ArrayList<>();
+//        tags.add("한국");
+//        tags.add("투어");
+//        TravelSearchCondition condition = TravelSearchCondition.builder()
+//                .pageRequest(PageRequest.of(0, 5))
+//                .tags(tags)
+//                .build();
+//
+//        // when
+//        Page<Travel> result = travelRepository.search(condition);
+//
+//        // then
+//        assertThat(result.getTotalElements()).isEqualTo(1);
+//    }
 
 }

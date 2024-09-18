@@ -1,22 +1,23 @@
 package swyp.swyp6_team7.travel.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
-import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
+import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 public class TravelController {
@@ -71,15 +72,18 @@ public class TravelController {
     public ResponseEntity search(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size,
-            @RequestParam(name = "keyword") String keyword
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "tags", required = false) List<String> tags
     ) {
 
         TravelSearchCondition condition = TravelSearchCondition.builder()
                 .keyword(keyword)
                 .pageRequest(PageRequest.of(page, size))
+                .tags(tags)
                 .build();
+        log.info("search tags: " + condition.getTags());
 
-        Page<TravelSimpleDto> travels = travelService.search(condition);
+        Page<TravelSearchDto> travels = travelService.search(condition);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(travels);
     }

@@ -1,26 +1,22 @@
 package swyp.swyp6_team7.travel.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import swyp.swyp6_team7.tag.domain.Tag;
-import swyp.swyp6_team7.tag.domain.TravelTag;
-import swyp.swyp6_team7.tag.repository.TravelTagRepository;
 import swyp.swyp6_team7.tag.service.TravelTagService;
 import swyp.swyp6_team7.travel.domain.Travel;
-import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
-import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
+import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.util.List;
-import java.util.SimpleTimeZone;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -74,8 +70,12 @@ public class TravelService {
     }
 
 
-    public Page<TravelSimpleDto> search(TravelSearchCondition condition) {
-        return travelRepository.search(condition)
-                .map(TravelSimpleDto::from);
+    public Page<TravelSearchDto> search(TravelSearchCondition condition) {
+        Page<TravelSearchDto> result = travelRepository.search(condition)
+                .map(TravelSearchDto::from);
+        for (TravelSearchDto travelSearchDto : result) {
+            log.info("service: " + travelSearchDto.toString());
+        }
+        return result;
     }
 }

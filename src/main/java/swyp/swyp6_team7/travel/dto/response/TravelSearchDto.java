@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.domain.TravelStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +30,6 @@ public class TravelSearchDto {
     private String postStatus;
     //TODO: 이미지
 
-    @QueryProjection
     @Builder
     public TravelSearchDto(
             int travelNumber, String title,  int userNumber,  //String userName,
@@ -48,6 +48,24 @@ public class TravelSearchDto {
         this.postStatus = postStatus;
     }
 
+    @QueryProjection
+    public TravelSearchDto(
+            int travelNumber, String title,  int userNumber,  //String userName,
+            List<String> tags, int maxPerson,
+            LocalDateTime createdAt, LocalDateTime registerDue, TravelStatus postStatus
+    ) {
+        this.travelNumber = travelNumber;
+        this.title = title;
+        this.userNumber = userNumber;
+        //this.userName = userName;
+        this.tags = tags;
+        //현재 인원
+        this.maxPerson = maxPerson;
+        this.createdAt = createdAt;
+        this.registerDue = registerDue;
+        this.postStatus = postStatus.getName();
+    }
+
     public static TravelSearchDto from(Travel travel) {
         return TravelSearchDto.builder()
                 .travelNumber(travel.getNumber())
@@ -62,4 +80,14 @@ public class TravelSearchDto {
                 .build();
     }
 
+    @Override
+    public String toString() {
+        return "TravelSearchDto{" +
+                "travelNumber=" + travelNumber +
+                ", title='" + title + '\'' +
+                ", userNumber=" + userNumber +
+                ", userName='" + userName + '\'' +
+                ", tags=" + tags +
+                '}';
+    }
 }
