@@ -1,5 +1,6 @@
 package swyp.swyp6_team7.travel.repository;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -14,8 +15,12 @@ import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
+import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 
 import java.util.List;
+
+import static com.querydsl.core.group.GroupBy.groupBy;
+import static com.querydsl.core.group.GroupBy.list;
 
 @Slf4j
 @Repository
@@ -30,6 +35,26 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     QTravel travel = QTravel.travel;
     QTag tag = QTag.tag;
     QTravelTag travelTag = QTravelTag.travelTag;
+
+
+    @Override
+    public List<TravelRecentDto> findAllSortedByCreatedAt() {
+
+        List<TravelRecentDto> content = queryFactory
+                .select(travel)
+                .from(travel)
+                .leftJoin(travel.travelTags, travelTag)
+                .leftJoin(travelTag.tag, tag)
+                .where(
+                        statusActivated()
+                )
+                .orderBy(travel.createdAt.desc())
+                .transform(groupBy(travel.number).list(
+                        Projections.constructor(TravelRecentDto.class,
+                                travel, list(tag)))
+                );
+        return content;
+    }
 
 
     @Override
