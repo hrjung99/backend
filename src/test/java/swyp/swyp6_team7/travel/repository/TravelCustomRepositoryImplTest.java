@@ -64,12 +64,13 @@ class TravelCustomRepositoryImplTest {
         }
 
         // when
-        List<TravelRecentDto> results = travelRepository.findAllSortedByCreatedAt();
+        Page<TravelRecentDto> results = travelRepository
+                .findAllSortedByCreatedAt(PageRequest.of(0, 5));
 
         // then
-        assertThat(results.size()).isEqualTo(2);
-        assertThat(results.get(0).getTitle()).isEqualTo("추가 테스트 데이터");
-        assertThat(results.get(0).getTags().size()).isEqualTo(3);
+        assertThat(results.getContent().size()).isEqualTo(2);
+        assertThat(results.getContent().get(0).getTitle()).isEqualTo("추가 테스트 데이터");
+        assertThat(results.getContent().get(0).getTags().size()).isEqualTo(3);
     }
 
     @DisplayName("search: 제목에 keyword가 포함된 데이터를 찾을 수 있다")
