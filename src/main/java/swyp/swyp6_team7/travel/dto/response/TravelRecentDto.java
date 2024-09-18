@@ -15,7 +15,7 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TravelRecentResponse {
+public class TravelRecentDto {
 
     private static final int TAG_MAX_NUMBER = 3;
 
@@ -37,7 +37,7 @@ public class TravelRecentResponse {
 
     @Builder
     @QueryProjection
-    public TravelRecentResponse(
+    public TravelRecentDto(
             int travelNumber, String title, String summary, int userNumber, String userName,
             LocalDateTime createdAt, LocalDateTime registerDue, int maxPerson, int nowPerson,
             List<String> tags) {
@@ -54,7 +54,7 @@ public class TravelRecentResponse {
     }
 
 
-    public TravelRecentResponse(Travel travel, List<Tag> tags) {
+    public TravelRecentDto(Travel travel, List<Tag> tags) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
         this.summary = travel.getSummary();

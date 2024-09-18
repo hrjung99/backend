@@ -16,7 +16,7 @@ import swyp.swyp6_team7.tag.repository.TravelTagRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
-import swyp.swyp6_team7.travel.dto.response.TravelRecentResponse;
+import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,7 +64,7 @@ class TravelCustomRepositoryImplTest {
         }
 
         // when
-        List<TravelRecentResponse> results = travelRepository.findAllSortedByCreatedAt();
+        List<TravelRecentDto> results = travelRepository.findAllSortedByCreatedAt();
 
         // then
         assertThat(results.size()).isEqualTo(2);
