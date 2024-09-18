@@ -1,21 +1,23 @@
 package swyp.swyp6_team7.travel.repository;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import swyp.swyp6_team7.tag.domain.QTag;
+import swyp.swyp6_team7.tag.domain.QTravelTag;
 import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
-import swyp.swyp6_team7.travel.dto.response.TravelSimpleDto;
 
 import java.util.List;
 
+@Slf4j
 @Repository
 public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
@@ -26,6 +28,8 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     }
 
     QTravel travel = QTravel.travel;
+    QTag tag = QTag.tag;
+    QTravelTag travelTag = QTravelTag.travelTag;
 
 
     @Override
@@ -63,6 +67,13 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     private BooleanExpression statusActivated() {
         return travel.status.eq(TravelStatus.IN_PROGRESS)
                 .or(travel.status.eq(TravelStatus.CLOSED));
+    }
+
+    private BooleanExpression eqTags(List<String> tags) {
+        if (tags.isEmpty()) {
+            return null;
+        }
+        return tag.name.in(tags);
     }
 
 }

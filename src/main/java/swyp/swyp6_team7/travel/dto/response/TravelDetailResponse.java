@@ -9,6 +9,7 @@ import swyp.swyp6_team7.travel.domain.Travel;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -19,6 +20,7 @@ public class TravelDetailResponse {
     private String summary;
     private int userNumber;
     private String userName;
+    private List<String> tags;
     private String details;
     private int viewCount;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -37,7 +39,7 @@ public class TravelDetailResponse {
     @Builder
     public TravelDetailResponse(
             int travelNumber, String title, String summary,
-            int userNumber, String userName, String details, int viewCount,
+            int userNumber, String userName, List<String> tags, String details, int viewCount,
             LocalDateTime createdAt, LocalDate travelStartAt, LocalDate travelEndAt,
             LocalDateTime registerDue, String location, int minPerson, int maxPerson,
             int budget, String postStatus
@@ -47,6 +49,7 @@ public class TravelDetailResponse {
         this.summary = summary;
         this.userNumber = userNumber;
         this.userName = userName;
+        this.tags = tags;
         this.details = details;
         this.viewCount = viewCount;
         this.createdAt = createdAt;
@@ -62,6 +65,7 @@ public class TravelDetailResponse {
 
     public static TravelDetailResponse from(
             Travel travel,
+            List<String> tags,
             int userNumber, String userName
     ) {
         return TravelDetailResponse.builder()
@@ -70,6 +74,7 @@ public class TravelDetailResponse {
                 .summary(travel.getSummary())
                 .userNumber(userNumber)
                 .userName(userName)
+                .tags(tags)
                 .details(travel.getDetails())
                 .viewCount(travel.getViewCount())
                 .createdAt(travel.getCreatedAt())

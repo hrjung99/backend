@@ -5,13 +5,15 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class TravelUpdateRequest {
 
     private String title;
     private String summary;
-    //TODO: List<Tag> tags
+    @NotNull
+    private List<String> tags;
     private String details;
     private LocalDateTime dueDateTime;
     private LocalDate travelStartAt;
