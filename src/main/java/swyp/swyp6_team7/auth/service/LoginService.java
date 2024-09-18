@@ -50,4 +50,9 @@ public class LoginService {
         // Access Token을 반환
         return accessToken;
     }
+    // 이메일로 유저를 조회하는 메서드 추가
+    public Users getUserByEmail(String email) {
+        return userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
 }
