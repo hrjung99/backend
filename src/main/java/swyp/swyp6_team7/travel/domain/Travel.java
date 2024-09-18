@@ -7,10 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Table(name = "travels")
@@ -79,6 +82,8 @@ public class Travel {
     @Column(name = "travel_status", nullable = false)
     private TravelStatus status;
 
+    @OneToMany(mappedBy = "travel")
+    private List<TravelTag> travelTags = new ArrayList<>();
 
     @Builder
     public Travel(

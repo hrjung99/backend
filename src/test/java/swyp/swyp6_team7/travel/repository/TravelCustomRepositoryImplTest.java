@@ -16,11 +16,9 @@ import swyp.swyp6_team7.tag.repository.TravelTagRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
-import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
+import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,6 +43,53 @@ class TravelCustomRepositoryImplTest {
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
+    }
+
+    @DisplayName("findAll: 여행 콘텐츠를 DTO로 만들어 최신순으로 정렬해 반환한다")
+    @Test
+    public void findAllSortedByCreatedAt() {
+        // given
+        Travel travel = Travel.builder()
+                .title("추가 테스트 데이터")
+                .userNumber(1)
+                .viewCount(0)
+                .createdAt(LocalDateTime.now().plusDays(1))
+                .status(TravelStatus.IN_PROGRESS)
+                .build();
+        travelRepository.save(travel);
+        for (int i = 0; i < 5; i++) {
+            Tag tag = tagRepository.save(Tag.of("태그" + i));
+            travelTagRepository.save(TravelTag.of(travel, tag));
+        }
+
+        // when
+        Page<TravelRecentDto> results = travelRepository
+                .findAllSortedByCreatedAt(PageRequest.of(0, 5));
+
+        // then
+        for (TravelRecentDto result : results) {
+            System.out.println(result.toString());
+        }
+        assertThat(results.getContent().size()).isEqualTo(2);
+        assertThat(results.getContent().get(0).getTitle()).isEqualTo("추가 테스트 데이터");
+        assertThat(results.getContent().get(0).getTags().size()).isEqualTo(3);
+    }
+
+    @DisplayName("findAll: 최신순으로 정렬해 반환할 때 데이터가 없을 경우에도 오류가 나지 않는다")
+    @Test
+    public void findAllSortedByCreatedAtNoData() {
+        // given
+        travelRepository.deleteAll();
+
+        // when
+        Page<TravelRecentDto> results = travelRepository
+                .findAllSortedByCreatedAt(PageRequest.of(0, 5));
+
+        // then
+        for (TravelRecentDto result : results) {
+            System.out.println(result.toString());
+        }
+        assertThat(results.getContent().size()).isEqualTo(0);
     }
 
     @DisplayName("search: 제목에 keyword가 포함된 데이터를 찾을 수 있다")

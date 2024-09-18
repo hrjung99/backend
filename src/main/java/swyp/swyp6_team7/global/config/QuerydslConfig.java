@@ -1,5 +1,6 @@
 package swyp.swyp6_team7.global.config;
 
+import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,6 @@ public class QuerydslConfig {
 
     @Bean
     public JPAQueryFactory querydsl() {
-        return new JPAQueryFactory(entityManager);
+        return new JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager);
     }
 }
