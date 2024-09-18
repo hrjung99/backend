@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import swyp.swyp6_team7.tag.domain.QTag;
@@ -38,7 +39,18 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
 
     @Override
-    public List<TravelRecentDto> findAllSortedByCreatedAt() {
+    public Page<TravelRecentDto> findAllSortedByCreatedAt(PageRequest pageRequest) {
+
+        List<Integer> travels = queryFactory
+                .select(travel.number)
+                .from(travel)
+                .where(
+                        statusActivated()
+                )
+                .orderBy(travel.createdAt.desc())
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
+                .fetch();
 
         List<TravelRecentDto> content = queryFactory
                 .select(travel)
@@ -46,6 +58,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
+                        travel.number.in(travels),
                         statusActivated()
                 )
                 .orderBy(travel.createdAt.desc())
@@ -53,7 +66,15 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         Projections.constructor(TravelRecentDto.class,
                                 travel, list(tag)))
                 );
-        return content;
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(travel.count())
+                .from(travel)
+                .where(
+                        statusActivated()
+                );
+
+        return PageableExecutionUtils.getPage(content, pageRequest, countQuery::fetchOne);
     }
 
 
