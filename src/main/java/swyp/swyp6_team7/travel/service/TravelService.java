@@ -71,8 +71,7 @@ public class TravelService {
 
 
     public Page<TravelSearchDto> search(TravelSearchCondition condition) {
-        Page<TravelSearchDto> result = travelRepository.search(condition)
-                .map(TravelSearchDto::from);
+        Page<TravelSearchDto> result = travelRepository.search(condition);
         for (TravelSearchDto travelSearchDto : result) {
             log.info("service: " + travelSearchDto.toString());
         }
