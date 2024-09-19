@@ -69,7 +69,7 @@ public class TravelController {
 
 
     @GetMapping("/api/travels/search")
-    public ResponseEntity search(
+    public ResponseEntity<Page<TravelSearchDto>> search(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size,
             @RequestParam(name = "keyword", required = false) String keyword,
