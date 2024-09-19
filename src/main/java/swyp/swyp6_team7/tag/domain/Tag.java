@@ -15,13 +15,13 @@ public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tag_number", updatable = false)
-    private Long number;
+    private int number;
 
     @Column(name = "tag_name", nullable = false, unique = true, length = 20)
     private String name;
 
     @Builder
-    public Tag(Long number, String name) {
+    public Tag(int number, String name) {
         this.number = number;
         this.name = name;
     }
