@@ -13,10 +13,10 @@ import org.springframework.stereotype.Repository;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
 import swyp.swyp6_team7.travel.domain.QTravel;
-import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
+import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 
 import java.util.List;
 
@@ -79,25 +79,48 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
 
     @Override
-    public Page<Travel> search(TravelSearchCondition condition) {
-        List<Travel> content = queryFactory
-                .select(travel)
+    public Page<TravelSearchDto> search(TravelSearchCondition condition) {
+        List<Integer> travels = queryFactory
+                .select(travel.number)
                 .from(travel)
+                .leftJoin(travel.travelTags, travelTag)
+                .leftJoin(travelTag.tag, tag)
                 .where(
                         titleLike(condition.getKeyword()),
-                        statusActivated()
+                        statusActivated(),
+                        eqTags(condition.getTags())
                 )
+                .groupBy(travel.number)
+                .having(tag.name.count().goe((long) condition.getTags().size()))
                 .orderBy(travel.createdAt.desc())
                 .offset(condition.getPageRequest().getOffset())
                 .limit(condition.getPageRequest().getPageSize())
                 .fetch();
 
+        List<TravelSearchDto> content = queryFactory
+                .select(travel)
+                .from(travel)
+                .leftJoin(travel.travelTags, travelTag)
+                .leftJoin(travelTag.tag, tag)
+                .where(
+                        travel.number.in(travels)
+                )
+                .orderBy(travel.createdAt.desc())
+                .transform(groupBy(travel.number).list(
+                        Projections.constructor(TravelSearchDto.class,
+                                travel, list(tag.name)))
+                );
+
+
         JPAQuery<Long> countQuery = queryFactory
                 .select(travel.count())
                 .from(travel)
+                .leftJoin(travel.travelTags, travelTag)
+                .leftJoin(travelTag.tag, tag)
                 .where(
                         titleLike(condition.getKeyword()),
-                        statusActivated()
+                        statusActivated(),
+                        eqTags(condition.getTags())
                 );
 
         return PageableExecutionUtils.getPage(content, condition.getPageRequest(), countQuery::fetchOne);
