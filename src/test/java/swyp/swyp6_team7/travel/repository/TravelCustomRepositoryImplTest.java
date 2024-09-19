@@ -17,8 +17,11 @@ import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
+import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -111,10 +114,11 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<Travel> results = travelRepository.search(condition);
+        Page<TravelSearchDto> results = travelRepository.search(condition);
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(1);
+        assertThat(results.getContent().size()).isEqualTo(1);
     }
 
     @DisplayName("search: 키워드가 주어지지 않을 경우 가능한 모든 콘텐츠를 전달")
@@ -131,15 +135,16 @@ class TravelCustomRepositoryImplTest {
         travelRepository.save(travel);
 
         TravelSearchCondition condition = TravelSearchCondition.builder()
-                .keyword("")
+                //.keyword("")
                 .pageRequest(PageRequest.of(0, 5))
                 .build();
 
         // when
-        Page<Travel> results = travelRepository.search(condition);
+        Page<TravelSearchDto> results = travelRepository.search(condition);
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(2);
+        assertThat(results.getContent().size()).isEqualTo(2);
     }
 
     @DisplayName("search: 콘텐츠의 상태가 DELETED, DRAFT일 경우 제외하고 가져온다")
@@ -169,10 +174,11 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<Travel> results = travelRepository.search(condition);
+        Page<TravelSearchDto> results = travelRepository.search(condition);
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(1);
+        assertThat(results.getContent().size()).isEqualTo(1);
     }
 
     @DisplayName("search: 페이징을 이용해 콘텐츠를 가져올 수 있다")
@@ -195,87 +201,92 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<Travel> result = travelRepository.search(condition);
+        Page<TravelSearchDto> result = travelRepository.search(condition);
 
         // then
         assertThat(result.getTotalPages()).isEqualTo(2);
         assertThat(result.getTotalElements()).isEqualTo(6);
+        assertThat(result.getContent().size()).isEqualTo(5);
     }
 
-//    @DisplayName("search: 주어지는 태그가 달린 콘텐츠를 가져온다")
-//    @Test
-//    public void searchWithTags() {
-//        // given
-//        Tag tag = tagRepository.save(Tag.of("테스트"));
-//        for (int i = 0; i < 6; i++) {
-//            Travel travel = travelRepository.save(Travel.builder()
-//                    .title("추가 테스트 데이터" + i)
-//                    .userNumber(1)
-//                    .viewCount(0)
-//                    .createdAt(LocalDateTime.now())
-//                    .status(TravelStatus.IN_PROGRESS)
-//                    .build());
-//            travelTagRepository.save(TravelTag.of(travel, tag));
-//        }
-//
-//        List<String> tags = new ArrayList<>();
-//        tags.add("테스트");
-//        TravelSearchCondition condition = TravelSearchCondition.builder()
-//                .pageRequest(PageRequest.of(0, 5))
-//                .tags(tags)
-//                .build();
-//
-//        // when
-//        Page<Travel> result = travelRepository.search(condition);
-//
-//        // then
-//        Page<TravelSearchDto> temp = travelRepository.search(condition)
-//                .map(TravelSearchDto::from);
-//        for (TravelSearchDto travelSearchDto : temp) {
-//            System.out.println(travelSearchDto.toString());
-//        }
-//        assertThat(result.getTotalElements()).isEqualTo(6);
-//    }
-//
-//    @DisplayName("search: 여러 개의 태그가 주어졌을 때, 모든 태그를 가진 콘텐츠만 가져온다")
-//    @Test
-//    public void searchWithMultipleTags() {
-//        // given
-//        Tag tag1 = tagRepository.save(Tag.of("한국"));
-//        Tag tag2 = tagRepository.save(Tag.of("투어"));
-//
-//        Travel travel1 = travelRepository.save(Travel.builder()
-//                .title("추가 테스트 데이터1")
-//                .userNumber(1)
-//                .viewCount(0)
-//                .createdAt(LocalDateTime.now())
-//                .status(TravelStatus.IN_PROGRESS)
-//                .build());
-//        travelTagRepository.save(TravelTag.of(travel1, tag1));
-//        travelTagRepository.save(TravelTag.of(travel1, tag2));
-//
-//        Travel travel2 = travelRepository.save(Travel.builder()
-//                .title("추가 테스트 데이터2")
-//                .userNumber(1)
-//                .viewCount(0)
-//                .createdAt(LocalDateTime.now())
-//                .status(TravelStatus.IN_PROGRESS)
-//                .build());
-//        travelTagRepository.save(TravelTag.of(travel2, tag1));
-//
-//        List<String> tags = new ArrayList<>();
-//        tags.add("한국");
-//        tags.add("투어");
-//        TravelSearchCondition condition = TravelSearchCondition.builder()
-//                .pageRequest(PageRequest.of(0, 5))
-//                .tags(tags)
-//                .build();
-//
-//        // when
-//        Page<Travel> result = travelRepository.search(condition);
-//
-//        // then
-//        assertThat(result.getTotalElements()).isEqualTo(1);
-//    }
+    @DisplayName("search: 주어지는 태그가 달린 콘텐츠를 가져온다")
+    @Test
+    public void searchWithTags() {
+        // given
+        Tag tag = tagRepository.save(Tag.of("테스트"));
+        for (int i = 0; i < 6; i++) {
+            Travel travel = travelRepository.save(Travel.builder()
+                    .title("추가 테스트 데이터" + i)
+                    .userNumber(1)
+                    .viewCount(0)
+                    .createdAt(LocalDateTime.now())
+                    .status(TravelStatus.IN_PROGRESS)
+                    .build());
+            travelTagRepository.save(TravelTag.of(travel, tag));
+        }
+
+        List<String> tags = new ArrayList<>();
+        tags.add("테스트");
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .pageRequest(PageRequest.of(0, 5))
+                .tags(tags)
+                .build();
+
+        // when
+        Page<TravelSearchDto> result = travelRepository.search(condition);
+
+        // then;
+        assertThat(result.getTotalPages()).isEqualTo(2);
+        assertThat(result.getTotalElements()).isEqualTo(6);
+        assertThat(result.getContent().size()).isEqualTo(5);
+    }
+
+    @DisplayName("search: 여러 개의 태그가 주어졌을 때, 모든 태그를 가진 콘텐츠만 가져온다")
+    @Test
+    public void searchWithMultipleTags() {
+        // given
+        Tag tag1 = tagRepository.save(Tag.of("한국"));
+        Tag tag2 = tagRepository.save(Tag.of("투어"));
+        Tag tag3 = tagRepository.save(Tag.of("도시"));
+
+        Travel travel1 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터1")
+                .userNumber(1)
+                .viewCount(0)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        //tags: 한국, 도시
+        travelTagRepository.save(TravelTag.of(travel1, tag1));
+        travelTagRepository.save(TravelTag.of(travel1, tag3));
+
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터2")
+                .userNumber(1)
+                .viewCount(0)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        //tags: 한국, 투어
+        travelTagRepository.save(TravelTag.of(travel2, tag1));
+        travelTagRepository.save(TravelTag.of(travel2, tag2));
+
+        List<String> tags = new ArrayList<>();
+        tags.add("한국");
+        tags.add("투어");
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .pageRequest(PageRequest.of(0, 5))
+                .tags(tags)
+                .build();
+
+        // when
+        Page<TravelSearchDto> result = travelRepository.search(condition);
+
+        // then
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().size()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("추가 테스트 데이터2");
+    }
 
 }
