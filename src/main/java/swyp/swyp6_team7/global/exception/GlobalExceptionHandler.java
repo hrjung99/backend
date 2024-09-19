@@ -1,4 +1,4 @@
-package swyp.swyp6_team7.global.config;
+package swyp.swyp6_team7.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
