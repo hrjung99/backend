@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.tag.service.TravelTagService;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
@@ -24,15 +26,19 @@ public class TravelService {
 
     private final TravelRepository travelRepository;
     private final TravelTagService travelTagService;
+    private final MemberService memberService;
 
     @Transactional
-    public TravelDetailResponse create(TravelCreateRequest request, int userNumber) {
-        Travel savedTravel = travelRepository.save(request.toTravelEntity(userNumber));
+    public TravelDetailResponse create(TravelCreateRequest request, String email) {
+
+        Users user = memberService.findByEmail(email);
+
+        Travel savedTravel = travelRepository.save(request.toTravelEntity(user.getUserNumber()));
         List<String> tags = travelTagService.create(savedTravel, request.getTags()).stream()
                 .map(tag -> tag.getName())
                 .toList();
 
-        return TravelDetailResponse.from(savedTravel, tags, userNumber, "username");
+        return TravelDetailResponse.from(savedTravel, tags, user.getUserNumber(), user.getUserName());
     }
 
     public TravelDetailResponse getDetailsByNumber(int travelNumber) {

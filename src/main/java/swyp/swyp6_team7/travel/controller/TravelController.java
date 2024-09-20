@@ -15,6 +15,7 @@ import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -26,14 +27,10 @@ public class TravelController {
 
     @PostMapping("/api/travel")
     public ResponseEntity<TravelDetailResponse> create(
-            @RequestBody @Validated TravelCreateRequest request
+            @RequestBody @Validated TravelCreateRequest request, Principal principal
     ) {
-        //TODO: 토큰으로 유저 number 가져오는 작업 추가
-        int userNumber = 1;
-        String userName = "testName";
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(travelService.create(request, userNumber));
+                .body(travelService.create(request, principal.getName()));
     }
 
     @GetMapping("/api/travel/detail/{travelNumber}")

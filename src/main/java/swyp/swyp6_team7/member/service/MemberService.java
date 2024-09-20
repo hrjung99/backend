@@ -3,6 +3,7 @@ package swyp.swyp6_team7.member.service;
 import io.jsonwebtoken.Jwt;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
 import swyp.swyp6_team7.member.entity.Users;
@@ -22,10 +23,16 @@ public class MemberService {
     private final JwtProvider jwtProvider;
 
     @Autowired
-    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder,@Lazy JwtProvider jwtProvider){
+    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, @Lazy JwtProvider jwtProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
+    }
+
+    @Transactional(readOnly = true)
+    public Users findByEmail(String email) {
+        return userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
     }
 
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
@@ -45,7 +52,7 @@ public class MemberService {
         // 성별 변환
         Users.Gender convertedgender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
         // Users 객체에 암호화된 비밀번호 설정
-        Users newUser =  Users.builder()
+        Users newUser = Users.builder()
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)  // 암호화된 비밀번호 설정
                 .userName(userRequestDto.getName())
@@ -72,11 +79,13 @@ public class MemberService {
 
         return response;
     }
+
     public String formatPhoneNumber(String phoneNumber) {
         // 숫자만 남기고 000-0000-0000 형식으로 변환
         phoneNumber = phoneNumber.replaceAll("[^0-9]", "");
         return phoneNumber.replaceFirst("(\\d{3})(\\d{4})(\\d+)", "$1-$2-$3");
     }
+
     // 이메일 중복 확인 로직
     public boolean checkEmailDuplicate(String email) {
         if (userRepository.findByUserEmail(email).isPresent()) {
