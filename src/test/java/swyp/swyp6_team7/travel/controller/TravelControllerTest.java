@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,13 +20,17 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
+import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,7 +64,7 @@ class TravelControllerTest {
         userRepository.deleteAll();
         user = userRepository.save(Users.builder()
                 .userNumber(1)
-                .userEmail("test@naver.com")
+                .userEmail("abc@test.com")
                 .userPw("1234")
                 .userName("username")
                 .userGender(Users.Gender.M)
@@ -74,6 +80,34 @@ class TravelControllerTest {
 
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities()));
+    }
+
+    @DisplayName("create: 사용자는 여행 콘텐츠를 생성할 수 있다")
+    @Test
+    public void create() throws Exception {
+        // given
+        String url = "/api/travel";
+        TravelCreateRequest request = TravelCreateRequest.builder()
+                .title("Controller create")
+                .completionStatus(true)
+                .build();
+
+        Principal principal = Mockito.mock(Principal.class);
+        Mockito.when(principal.getName()).thenReturn(user.getEmail());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .principal(principal)
+                .content(objectMapper.writeValueAsString(request)));
+
+        // then
+        resultActions.
+                andExpect(status().isCreated());
+        List<Travel> travels = travelRepository.findAll();
+        assertThat(travels.size()).isEqualTo(1);
+        assertThat(travels.get(0).getTitle()).isEqualTo("Controller create");
+        assertThat(travels.get(0).getUserNumber()).isEqualTo(user.getUserNumber());
     }
 
 
