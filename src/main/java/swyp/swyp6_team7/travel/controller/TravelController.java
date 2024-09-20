@@ -34,11 +34,9 @@ public class TravelController {
     }
 
     @GetMapping("/api/travel/detail/{travelNumber}")
-    public ResponseEntity<TravelDetailResponse> getDetailsByNumber(@PathVariable("travelNumber") int travelNumber) {
-        //TODO: 작성자 정보 가져오기 by userNumber
-        int userNumber = 1;
-        String userName = "testName";
-
+    public ResponseEntity<TravelDetailResponse> getDetailsByNumber(
+            @PathVariable("travelNumber") int travelNumber
+    ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(travelService.getDetailsByNumber(travelNumber));
     }
