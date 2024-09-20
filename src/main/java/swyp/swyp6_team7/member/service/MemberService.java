@@ -9,6 +9,8 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
+import swyp.swyp6_team7.profile.service.ProfileService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,12 +22,14 @@ public class MemberService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final ProfileService profileService;
 
     @Autowired
-    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder,@Lazy JwtProvider jwtProvider){
+    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
+        this.profileService = profileService;
     }
 
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
@@ -59,6 +63,11 @@ public class MemberService {
 
         // 사용자 저장
         userRepository.save(newUser);
+
+        // 프로필 생성 요청
+        ProfileCreateRequest profileCreateRequest = new ProfileCreateRequest();
+        profileCreateRequest.setUserNumber(newUser.getUserNumber());
+        profileService.createProfile(profileCreateRequest);
 
         // JWT 발급
         long tokenExpirationTime = 3600000; // 토큰 만료 시간 추가(1시간)
