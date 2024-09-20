@@ -1,6 +1,7 @@
 package swyp.swyp6_team7.travel.dto.request;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,16 +10,19 @@ import swyp.swyp6_team7.travel.domain.TravelStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
 @Getter
-@NoArgsConstructor
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelCreateRequest {
 
     private String title;
     private String summary;
-    private List<String> tags;
+    @NotNull @Builder.Default
+    private List<String> tags = new ArrayList<>();
     private String details;
     private LocalDateTime dueDateTime;
     private LocalDate travelStartAt;
@@ -28,10 +32,10 @@ public class TravelCreateRequest {
     private int maxPerson;
     private int budget;
     @NotNull
-    private Boolean completionStatus;
+    private boolean completionStatus;
 
 
-    @Builder
+    //@Builder
     public TravelCreateRequest(
             String title, String summary, List<String> tags, String details,
             LocalDateTime dueDateTime, LocalDate travelStartAt, LocalDate travelEndAt,
