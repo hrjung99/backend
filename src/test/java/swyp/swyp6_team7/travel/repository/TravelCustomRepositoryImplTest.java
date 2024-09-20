@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import swyp.swyp6_team7.config.DataConfig;
+import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.tag.repository.TagRepository;
@@ -16,6 +18,7 @@ import swyp.swyp6_team7.tag.repository.TravelTagRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
+import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 
@@ -36,6 +39,8 @@ class TravelCustomRepositoryImplTest {
     private TravelTagRepository travelTagRepository;
     @Autowired
     private TagRepository tagRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
@@ -46,6 +51,43 @@ class TravelCustomRepositoryImplTest {
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
+    }
+
+    @DisplayName("getDetailsByNumber: 여행콘텐츠 식별자로 디테일 정보를 가져온다")
+    @Test
+    public void getDetailsByNumber() {
+        // given
+        Users user = userRepository.save(Users.builder()
+                .userEmail("test@naver.com")
+                .userPw("1234")
+                .userName("모잉")
+                .userGender(Users.Gender.M)
+                .userBirthYear("2000")
+                .userPhone("01012345678")
+                .userRegDate(LocalDateTime.now())
+                .userStatus(Users.MemberStatus.ABLE)
+                .build());
+        Tag tag1 = tagRepository.save(Tag.of("한국"));
+        Tag tag2 = tagRepository.save(Tag.of("투어"));
+        Travel travel = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터1")
+                .userNumber(user.getUserNumber())
+                .viewCount(0)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        travelTagRepository.save(TravelTag.of(travel, tag1));
+        travelTagRepository.save(TravelTag.of(travel, tag2));
+
+        // when
+        TravelDetailResponse details = travelRepository.getDetailsByNumber(travel.getNumber());
+
+        // then
+        System.out.println(details.toString());
+        assertThat(details.getTitle()).isEqualTo("추가 테스트 데이터1");
+        assertThat(details.getUserNumber()).isEqualTo(user.getUserNumber());
+        assertThat(details.getUserName()).isEqualTo("모잉");
+        assertThat(details.getTags().size()).isEqualTo(2);
     }
 
     @DisplayName("findAll: 여행 콘텐츠를 DTO로 만들어 최신순으로 정렬해 반환한다")
