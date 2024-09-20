@@ -10,11 +10,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
 import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
+import swyp.swyp6_team7.travel.dto.response.QTravelDetailResponse;
+import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 
@@ -34,8 +37,27 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     }
 
     QTravel travel = QTravel.travel;
+    QUsers users = QUsers.users;
     QTag tag = QTag.tag;
     QTravelTag travelTag = QTravelTag.travelTag;
+
+
+    @Override
+    public TravelDetailResponse getDetailsByNumber(int travelNumber) {
+        return queryFactory
+                .select(travel)
+                .from(travel)
+                .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
+                .leftJoin(travel.travelTags, travelTag)
+                .leftJoin(travelTag.tag, tag)
+                .where(travel.number.eq(travelNumber))
+                .transform(groupBy(travel.number).as(new QTravelDetailResponse(
+                        travel,
+                        users.userNumber,
+                        users.userName,
+                        list(tag.name)
+                ))).get(travelNumber);
+    }
 
 
     @Override
