@@ -57,16 +57,14 @@ public class TravelService {
     }
 
     @Transactional
-    public TravelDetailResponse update(int travelNumber, TravelUpdateRequest travelUpdate) {
+    public void update(int travelNumber, TravelUpdateRequest travelUpdate) {
         Travel travel = travelRepository.findByNumber(travelNumber)
                 .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
 
-        //TODO: 작성자와 요청자 대조(인가)
+        authorizeTravelOwner(travel);
 
         Travel updatedTravel = travel.update(travelUpdate);
         List<String> updatedTags = travelTagService.update(updatedTravel, travelUpdate.getTags());
-
-        return TravelDetailResponse.from(updatedTravel, updatedTags, updatedTravel.getUserNumber(), "username");
     }
 
     @Transactional
@@ -74,15 +72,15 @@ public class TravelService {
         Travel travel = travelRepository.findByNumber(travelNumber)
                 .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
 
-        //TODO: 작성자와 요청자 대조(인가)
-
+        authorizeTravelOwner(travel);
         travel.delete();
     }
 
     private void authorizeTravelOwner(Travel travel) {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (memberService.findByEmail(userName).getUserNumber() != travel.getUserNumber()) {
-            throw new IllegalArgumentException("Forbidden Travel Contents");
+        int userNumber = memberService.findByEmail(userName).getUserNumber();
+        if (travel.getUserNumber() != userNumber) {
+            throw new IllegalArgumentException("Forbidden Travel");
         }
     }
 

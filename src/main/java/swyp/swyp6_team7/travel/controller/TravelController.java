@@ -44,16 +44,11 @@ public class TravelController {
     @PutMapping("/api/travel/{travelNumber}")
     public ResponseEntity<TravelDetailResponse> update(
             @PathVariable("travelNumber") int travelNumber,
-            @RequestBody TravelUpdateRequest request) {
-
-        //TODO: 작성자 정보 가져오기 by userNumber
-        int userNumber = 1;
-        String userName = "testName";
-
-        TravelDetailResponse updatedTravel = travelService.update(travelNumber, request);
-
+            @RequestBody TravelUpdateRequest request
+    ) {
+        travelService.update(travelNumber, request);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(updatedTravel);
+                .body(travelService.getDetailsByNumber(travelNumber));
     }
 
     @DeleteMapping("/api/travel/{travelNumber}")
