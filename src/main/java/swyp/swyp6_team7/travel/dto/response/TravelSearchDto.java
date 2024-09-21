@@ -16,8 +16,6 @@ import java.util.List;
 @Getter
 public class TravelSearchDto {
 
-    private static final int TAG_MAX_NUMBER = 3;
-
     private int travelNumber;
     private String title;
     private int userNumber;
@@ -58,7 +56,7 @@ public class TravelSearchDto {
         this.title = travel.getTitle();
         this.userNumber = travel.getUserNumber();
         this.userName = "testuser";
-        this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();
+        this.tags = tags;
         this.nowPerson = 1;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
