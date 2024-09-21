@@ -58,7 +58,7 @@ public class Travel {
     private int maxPerson;
 
     //모집 성별 카테고리
-    @Column(name = "travel_gender_type", nullable = false)
+    @Column(name = "travel_gender", nullable = false)
     private GenderType genderType;
 
     //모집 종료 일시
