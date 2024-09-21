@@ -9,7 +9,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum GenderType {
 
-    MIXED("혼성"),
+    MIXED("모두"),
     WOMAN_ONLY("여자만"),
     MAN_ONLY("남자만"),
     NONE("없음");
