@@ -1,15 +1,19 @@
 package swyp.swyp6_team7.travel.dto.request;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import swyp.swyp6_team7.travel.domain.GenderType;
+import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,57 +23,50 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelCreateRequest {
 
-    private String title;
-    private String summary;
-    @NotNull @Builder.Default
-    private List<String> tags = new ArrayList<>();
-    private String details;
-    private LocalDateTime dueDateTime;
-    private LocalDate travelStartAt;
-    private LocalDate travelEndAt;
     private String location;
-    private int minPerson;
+    @Size(max = 20)
+    private String title;
+    private String details;
+    @PositiveOrZero
     private int maxPerson;
-    private int budget;
+    private String genderType;
+    @FutureOrPresent
+    private LocalDate dueDate;
+    private String periodType;
+    @NotNull
+    @Builder.Default
+    private List<String> tags = new ArrayList<>();
     @NotNull
     private boolean completionStatus;
 
 
-    //@Builder
     public TravelCreateRequest(
-            String title, String summary, List<String> tags, String details,
-            LocalDateTime dueDateTime, LocalDate travelStartAt, LocalDate travelEndAt,
-            String location, int minPerson, int maxPerson, int budget, boolean completionStatus
+            String location, String title, String details,
+            int maxPerson, String genderType, LocalDate dueDate, String periodType,
+            List<String> tags, boolean completionStatus
     ) {
-        this.title = title;
-        this.summary = summary;
-        this.tags = tags;
-        this.details = details;
-        this.dueDateTime = dueDateTime;
-        this.travelStartAt = travelStartAt;
-        this.travelEndAt = travelEndAt;
         this.location = location;
-        this.minPerson = minPerson;
+        this.title = title;
+        this.details = details;
         this.maxPerson = maxPerson;
-        this.budget = budget;
+        this.genderType = genderType;
+        this.dueDate = dueDate;
+        this.periodType = periodType;
+        this.tags = tags;
         this.completionStatus = completionStatus;
     }
-
 
     public Travel toTravelEntity(int userNumber) {
         return Travel.builder()
                 .userNumber(userNumber)
+                .location(location)
                 .title(title)
-                .summary(summary)
                 .details(details)
                 .viewCount(0)
-                .startAt(travelStartAt)
-                .endAt(travelEndAt)
-                .dueDateTime(dueDateTime)
-                .location(location)
-                .minPerson(minPerson)
                 .maxPerson(maxPerson)
-                .budget(budget)
+                .genderType(GenderType.of(genderType))
+                .dueDate(dueDate)
+                .periodType(PeriodType.of(periodType))
                 .status(TravelStatus.convertCompletionToStatus(completionStatus))
                 .build();
     }

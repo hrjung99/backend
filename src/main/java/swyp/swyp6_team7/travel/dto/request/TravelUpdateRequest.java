@@ -1,10 +1,12 @@
 package swyp.swyp6_team7.travel.dto.request;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,19 +16,19 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelUpdateRequest {
 
+    private String location;
+    @Size(max = 20)
     private String title;
-    private String summary;
+    private String details;
+    @PositiveOrZero
+    private int maxPerson;
+    private String genderType;
+    @FutureOrPresent
+    private LocalDate dueDate;
+    private String periodType;
     @NotNull
     @Builder.Default
     private List<String> tags = new ArrayList<>();
-    private String details;
-    private LocalDateTime dueDateTime;
-    private LocalDate travelStartAt;
-    private LocalDate travelEndAt;
-    private String location;
-    private int minPerson;
-    private int maxPerson;
-    private int budget;
     @NotNull
     private Boolean completionStatus;
 
