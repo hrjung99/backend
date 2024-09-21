@@ -67,7 +67,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .select(travel.number)
                 .from(travel)
                 .where(
-                        statusActivated()
+                        statusInProgress()
                 )
                 .orderBy(travel.createdAt.desc())
                 .offset(pageRequest.getOffset())
@@ -80,8 +80,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
-                        travel.number.in(travels),
-                        statusActivated()
+                        travel.number.in(travels)
                 )
                 .orderBy(travel.createdAt.desc())
                 .transform(groupBy(travel.number).list(
@@ -158,6 +157,10 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     private BooleanExpression statusActivated() {
         return travel.status.eq(TravelStatus.IN_PROGRESS)
                 .or(travel.status.eq(TravelStatus.CLOSED));
+    }
+
+    private BooleanExpression statusInProgress() {
+        return travel.status.eq(TravelStatus.IN_PROGRESS);
     }
 
     private BooleanExpression eqTags(List<String> tags) {
