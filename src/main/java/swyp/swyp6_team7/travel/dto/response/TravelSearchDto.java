@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import swyp.swyp6_team7.travel.domain.Travel;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,15 +28,14 @@ public class TravelSearchDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY년 MM월 dd일")
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY년 MM월 dd일")
-    private LocalDateTime registerDue;
+    private LocalDate registerDue;
     private String postStatus;
-    //TODO: 이미지
 
     @Builder
     public TravelSearchDto(
             int travelNumber, String title, int userNumber, String userName,
             List<String> tags, int maxPerson, int nowPerson,
-            LocalDateTime createdAt, LocalDateTime registerDue, String postStatus
+            LocalDateTime createdAt, LocalDate registerDue, String postStatus
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
@@ -62,7 +62,7 @@ public class TravelSearchDto {
         this.nowPerson = 1;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
-        this.registerDue = travel.getDueDateTime();
+        this.registerDue = travel.getDueDate();
         this.postStatus = travel.getStatus().getName();
     }
 
