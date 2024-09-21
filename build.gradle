@@ -26,8 +26,15 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    //implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'//OAuth2
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2' //JWT
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    implementation 'org.springframework.security:spring-security-crypto' //Argon2
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -56,6 +63,7 @@ def generated = 'src/main/generated'
 //Querydsl QClass file location
 tasks.withType(JavaCompile) {
     options.getGeneratedSourceOutputDirectory().set(file(generated))
+    options.compilerArgs << "-parameters"
 }
 
 // java source set에 Querydsl QClass location 추가
@@ -67,3 +75,7 @@ sourceSets {
 clean {
     delete file(generated)
 }
+
+//tasks.withType(JavaCompile) {
+//    options.compilerArgs << "-parameters"
+//}

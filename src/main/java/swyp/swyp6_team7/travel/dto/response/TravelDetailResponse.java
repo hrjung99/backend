@@ -1,10 +1,13 @@
 package swyp.swyp6_team7.travel.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.travel.domain.Travel;
 
 import java.time.LocalDate;
@@ -25,8 +28,11 @@ public class TravelDetailResponse {
     private int viewCount;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate travelStartAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate travelEndAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime registerDue;
     private String location;
     private int minPerson;
@@ -63,6 +69,30 @@ public class TravelDetailResponse {
         this.postStatus = postStatus;
     }
 
+    @QueryProjection
+    public TravelDetailResponse(
+            Travel travel, int userNumber, String userName,
+            List<String> tags
+    ) {
+        this.travelNumber = travel.getNumber();
+        this.title = travel.getTitle();
+        this.summary = travel.getSummary();
+        this.userNumber = userNumber;
+        this.userName = userName;
+        this.tags = tags;
+        this.details = travel.getDetails();
+        this.viewCount = travel.getViewCount();
+        this.createdAt = travel.getCreatedAt();
+        this.travelStartAt = travel.getStartAt();
+        this.travelEndAt = travel.getEndAt();
+        this.registerDue = travel.getDueDateTime();
+        this.location = travel.getLocation();
+        this.minPerson = travel.getMinPerson();
+        this.maxPerson = travel.getMaxPerson();
+        this.budget = travel.getBudget();
+        this.postStatus = travel.getStatus().getName();
+    }
+
     public static TravelDetailResponse from(
             Travel travel,
             List<String> tags,
@@ -87,5 +117,28 @@ public class TravelDetailResponse {
                 .budget(travel.getBudget())
                 .postStatus(travel.getStatus().getName())
                 .build();
+    }
+
+    @Override
+    public String toString() {
+        return "TravelDetailResponse{" +
+                "travelNumber=" + travelNumber +
+                ", title='" + title + '\'' +
+                ", summary='" + summary + '\'' +
+                ", userNumber=" + userNumber +
+                ", userName='" + userName + '\'' +
+                ", tags=" + tags +
+                ", details='" + details + '\'' +
+                ", viewCount=" + viewCount +
+                ", createdAt=" + createdAt +
+                ", travelStartAt=" + travelStartAt +
+                ", travelEndAt=" + travelEndAt +
+                ", registerDue=" + registerDue +
+                ", location='" + location + '\'' +
+                ", minPerson=" + minPerson +
+                ", maxPerson=" + maxPerson +
+                ", budget=" + budget +
+                ", postStatus='" + postStatus + '\'' +
+                '}';
     }
 }

@@ -109,23 +109,18 @@ public class Travel {
     }
 
     public Travel update(TravelUpdateRequest travelUpdate) {
-        return Travel.builder()
-                .number(this.number)
-                .userNumber(this.userNumber)
-                .title(travelUpdate.getTitle())
-                .summary(travelUpdate.getSummary())
-                .details(travelUpdate.getDetails())
-                .viewCount(this.viewCount)
-                .createdAt(this.createdAt)
-                .startAt(travelUpdate.getTravelStartAt())
-                .endAt(travelUpdate.getTravelEndAt())
-                .dueDateTime(travelUpdate.getDueDateTime())
-                .location(travelUpdate.getLocation())
-                .minPerson(travelUpdate.getMinPerson())
-                .maxPerson(travelUpdate.getMaxPerson())
-                .budget(travelUpdate.getBudget())
-                .status(TravelStatus.convertCompletionToStatus(travelUpdate.getCompletionStatus()))
-                .build();
+        this.title = travelUpdate.getTitle();
+        this.summary = travelUpdate.getSummary();
+        this.details = travelUpdate.getDetails();
+        this.startAt = travelUpdate.getTravelStartAt();
+        this.endAt = travelUpdate.getTravelEndAt();
+        this.dueDateTime = travelUpdate.getDueDateTime();
+        this.location = travelUpdate.getLocation();
+        this.minPerson = travelUpdate.getMinPerson();
+        this.maxPerson = travelUpdate.getMaxPerson();
+        this.budget = travelUpdate.getBudget();
+        this.status = TravelStatus.convertCompletionToStatus(travelUpdate.getCompletionStatus());
+        return this;
     }
 
     public void delete() {

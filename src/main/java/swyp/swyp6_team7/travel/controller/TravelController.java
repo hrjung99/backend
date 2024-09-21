@@ -15,6 +15,7 @@ import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -26,22 +27,16 @@ public class TravelController {
 
     @PostMapping("/api/travel")
     public ResponseEntity<TravelDetailResponse> create(
-            @RequestBody @Validated TravelCreateRequest request
+            @RequestBody @Validated TravelCreateRequest request, Principal principal
     ) {
-        //TODO: 토큰으로 유저 number 가져오는 작업 추가
-        int userNumber = 1;
-        String userName = "testName";
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(travelService.create(request, userNumber));
+                .body(travelService.create(request, principal.getName()));
     }
 
     @GetMapping("/api/travel/detail/{travelNumber}")
-    public ResponseEntity<TravelDetailResponse> getDetailsByNumber(@PathVariable("travelNumber") int travelNumber) {
-        //TODO: 작성자 정보 가져오기 by userNumber
-        int userNumber = 1;
-        String userName = "testName";
-
+    public ResponseEntity<TravelDetailResponse> getDetailsByNumber(
+            @PathVariable("travelNumber") int travelNumber
+    ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(travelService.getDetailsByNumber(travelNumber));
     }
@@ -49,16 +44,11 @@ public class TravelController {
     @PutMapping("/api/travel/{travelNumber}")
     public ResponseEntity<TravelDetailResponse> update(
             @PathVariable("travelNumber") int travelNumber,
-            @RequestBody TravelUpdateRequest request) {
-
-        //TODO: 작성자 정보 가져오기 by userNumber
-        int userNumber = 1;
-        String userName = "testName";
-
-        TravelDetailResponse updatedTravel = travelService.update(travelNumber, request);
-
+            @RequestBody TravelUpdateRequest request
+    ) {
+        travelService.update(travelNumber, request);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(updatedTravel);
+                .body(travelService.getDetailsByNumber(travelNumber));
     }
 
     @DeleteMapping("/api/travel/{travelNumber}")
@@ -69,7 +59,7 @@ public class TravelController {
 
 
     @GetMapping("/api/travels/search")
-    public ResponseEntity search(
+    public ResponseEntity<Page<TravelSearchDto>> search(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size,
             @RequestParam(name = "keyword", required = false) String keyword,

@@ -19,7 +19,7 @@ public class TravelHomeController {
 
 
     @GetMapping("/api/travels/recent")
-    public ResponseEntity getRecentlyCreatedTravels(
+    public ResponseEntity<Page<TravelRecentDto>> getRecentlyCreatedTravels(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size
     ) {
