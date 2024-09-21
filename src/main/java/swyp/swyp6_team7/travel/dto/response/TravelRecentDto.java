@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.travel.domain.Travel;
 
 import java.time.LocalDate;
@@ -32,15 +31,13 @@ public class TravelRecentDto {
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY년 MM월 dd일")
     private LocalDate registerDue;
-    private String postStatus;
 
 
     @Builder
-    @QueryProjection
     public TravelRecentDto(
             int travelNumber, String title, int userNumber, String userName,
             List<String> tags, int nowPerson, int maxPerson,
-            LocalDateTime createdAt, LocalDate registerDue, String postStatus
+            LocalDateTime createdAt, LocalDate registerDue
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
@@ -51,27 +48,22 @@ public class TravelRecentDto {
         this.maxPerson = maxPerson;
         this.createdAt = createdAt;
         this.registerDue = registerDue;
-        this.postStatus = postStatus;
     }
 
-
-    public TravelRecentDto(Travel travel, List<Tag> tags) {
+    @QueryProjection
+    public TravelRecentDto(
+            Travel travel, int userNumber, String userName,
+            List<String> tags
+    ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
-        this.userNumber = travel.getUserNumber();
-        this.userName = "testuser"; //todo
-        this.tags = convertToTagNames(tags);
+        this.userNumber = userNumber;
+        this.userName = userName;
+        this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();
         this.nowPerson = 1; //todo
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
-    }
-
-    private List<String> convertToTagNames(List<Tag> tags) {
-        return tags.stream()
-                .limit(TAG_MAX_NUMBER)
-                .map(tag -> tag.getName())
-                .toList();
     }
 
 }

@@ -77,6 +77,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         List<TravelRecentDto> content = queryFactory
                 .select(travel)
                 .from(travel)
+                .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
@@ -85,7 +86,10 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .orderBy(travel.createdAt.desc())
                 .transform(groupBy(travel.number).list(
                         Projections.constructor(TravelRecentDto.class,
-                                travel, list(tag)))
+                                travel,
+                                users.userNumber,
+                                users.userName,
+                                list(tag.name)))
                 );
 
         JPAQuery<Long> countQuery = queryFactory
@@ -121,6 +125,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         List<TravelSearchDto> content = queryFactory
                 .select(travel)
                 .from(travel)
+                .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
@@ -129,7 +134,10 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .orderBy(travel.createdAt.desc())
                 .transform(groupBy(travel.number).list(
                         Projections.constructor(TravelSearchDto.class,
-                                travel, list(tag.name)))
+                                travel,
+                                users.userNumber,
+                                users.userName,
+                                list(tag.name)))
                 );
 
 
