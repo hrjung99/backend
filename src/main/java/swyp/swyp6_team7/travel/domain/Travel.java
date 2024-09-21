@@ -58,7 +58,8 @@ public class Travel {
     private int maxPerson;
 
     //모집 성별 카테고리
-    @Column(name = "travel_gender", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "travel_gender", nullable = false, length = 20)
     private GenderType genderType;
 
     //모집 종료 일시
@@ -66,6 +67,7 @@ public class Travel {
     private LocalDate dueDate;
 
     //여행 기간 카테고리
+    @Enumerated(EnumType.STRING)
     @Column(name = "travel_period", nullable = false, length = 20)
     private PeriodType periodType;
 
