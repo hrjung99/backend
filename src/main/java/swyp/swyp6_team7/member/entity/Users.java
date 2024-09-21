@@ -3,6 +3,7 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
 
 import java.time.LocalDateTime;
