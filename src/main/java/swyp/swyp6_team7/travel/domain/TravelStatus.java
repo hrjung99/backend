@@ -13,7 +13,7 @@ public enum TravelStatus {
 
     private final String name;
 
-    public static TravelStatus convertCompletionToStatus(boolean completion) {
+    public static TravelStatus convertCompletionToStatus(boolean completion){
         if (completion == true) {
             return TravelStatus.IN_PROGRESS;
         } else {
@@ -25,4 +25,5 @@ public enum TravelStatus {
     public String toString() {
         return name;
     }
+
 }
