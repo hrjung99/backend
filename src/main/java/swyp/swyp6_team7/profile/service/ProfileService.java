@@ -54,4 +54,13 @@ public class ProfileService {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }
     }
+
+    public Optional<UserProfile> getProfileByUserNumber(Integer userNumber) {
+        return userProfileRepository.findByUserNumber(userNumber);
+    }
+
+    public Optional<Users> getUserByUserNumber(Integer userNumber) {
+        return userRepository.findById(userNumber);
+    }
+
 }

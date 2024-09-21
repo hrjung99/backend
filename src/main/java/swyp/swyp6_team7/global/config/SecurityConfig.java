@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
                         // 로그인, 회원가입, 토큰 재발급, kakao 로그인 요청 경로 경로는 허용
-                        .requestMatchers("/api/profile/update","/api/login", "/api/users/new","/api/refresh-token","/login/oauth/kakao/**","/error","/api/users-email").permitAll()
+                        .requestMatchers("/api/profile/**","/api/login", "/api/users/new","/api/refresh-token","/login/oauth/kakao/**","/error","/api/users-email").permitAll()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
