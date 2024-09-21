@@ -7,9 +7,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.travel.domain.Travel;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,71 +22,48 @@ public class TravelRecentDto {
     @NotNull
     private int travelNumber;
     private String title;
-    private String summary;
     private int userNumber;
     private String userName;
+    private List<String> tags;
+    private int nowPerson;
+    private int maxPerson;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY년 MM월 dd일")
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY년 MM월 dd일")
-    private LocalDateTime registerDue;
-    private int maxPerson;
-    private int nowPerson;
-    private List<String> tags;
-    //TODO: 이미지
+    private LocalDate registerDue;
 
 
     @Builder
-    @QueryProjection
     public TravelRecentDto(
-            int travelNumber, String title, String summary, int userNumber, String userName,
-            LocalDateTime createdAt, LocalDateTime registerDue, int maxPerson, int nowPerson,
-            List<String> tags) {
+            int travelNumber, String title, int userNumber, String userName,
+            List<String> tags, int nowPerson, int maxPerson,
+            LocalDateTime createdAt, LocalDate registerDue
+    ) {
         this.travelNumber = travelNumber;
         this.title = title;
-        this.summary = summary;
         this.userNumber = userNumber;
         this.userName = userName;
+        this.tags = tags;
+        this.nowPerson = nowPerson;
+        this.maxPerson = maxPerson;
         this.createdAt = createdAt;
         this.registerDue = registerDue;
-        this.maxPerson = maxPerson;
-        this.nowPerson = nowPerson;
-        this.tags = tags;
     }
 
-
-    public TravelRecentDto(Travel travel, List<Tag> tags) {
+    @QueryProjection
+    public TravelRecentDto(
+            Travel travel, int userNumber, String userName,
+            List<String> tags
+    ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
-        this.summary = travel.getSummary();
-        this.userNumber = travel.getUserNumber();
-        this.userName = "testuser"; //todo
-        this.createdAt = travel.getCreatedAt();
-        this.registerDue = travel.getDueDateTime();
-        this.maxPerson = travel.getMaxPerson();
+        this.userNumber = userNumber;
+        this.userName = userName;
+        this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();
         this.nowPerson = 1; //todo
-        this.tags = convertToTagNames(tags);
+        this.maxPerson = travel.getMaxPerson();
+        this.createdAt = travel.getCreatedAt();
+        this.registerDue = travel.getDueDate();
     }
 
-    private List<String> convertToTagNames(List<Tag> tags) {
-        return tags.stream()
-                .limit(TAG_MAX_NUMBER)
-                .map(tag -> tag.getName())
-                .toList();
-    }
-
-    @Override
-    public String toString() {
-        return "TravelRecentResponse{" +
-                "travelNumber=" + travelNumber +
-                ", title='" + title + '\'' +
-                ", summary='" + summary + '\'' +
-                ", userNumber=" + userNumber +
-                ", userName='" + userName + '\'' +
-                ", createdAt=" + createdAt +
-                ", registerDue=" + registerDue +
-                ", maxPerson=" + maxPerson +
-                ", nowPerson=" + nowPerson +
-                ", tags=" + tags +
-                '}';
-    }
 }

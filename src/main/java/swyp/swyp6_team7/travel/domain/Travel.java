@@ -27,15 +27,24 @@ public class Travel {
     @Column(name = "travel_number", updatable = false)
     private int number;
 
+    //작성자 식별자
     @Column(name = "user_number", nullable = false)
     private int userNumber;
 
+    //작성 일시
+    @CreatedDate
+    @Column(name = "travel_reg_date", nullable = false)
+    private LocalDateTime createdAt;
+
+    //여행지
+    @Column(name = "travel_location", length = 20)
+    private String location;
+
+    //제목
     @Column(name = "travel_title", length = 20)
     private String title;
 
-    @Column(name = "travel_summary", length = 30)
-    private String summary;
-
+    //상세 설명
     @Lob
     @Column(name = "travel_details", length = 2000)
     private String details;
@@ -44,42 +53,27 @@ public class Travel {
     @Column(name = "view_count", nullable = false)
     private int viewCount;
 
-    //작성 일시
-    @CreatedDate
-    @Column(name = "travel_reg_date", nullable = false)
-    private LocalDateTime createdAt;
-
-    //여행 시작 날짜
-    @Column(name = "travel_start_at")
-    private LocalDate startAt;
-
-    //여행 종료 날짜
-    @Column(name = "travel_end_at")
-    private LocalDate endAt;
-
-    //모집 종료 일시(날짜+시간)
-    @Column(name = "travel_due_datetime")
-    private LocalDateTime dueDateTime;
-
-    //여행지
-    @Column(name = "travel_location", length = 20)
-    private String location;
-
-    //모집 최소 인원
-    @Column(name = "travel_min_person")
-    private int minPerson;
-
-    //모집 최대 인원
+    //최대 모집 인원
     @Column(name = "travel_max_person")
     private int maxPerson;
 
-    //예산
-    @Column(name = "travel_budget")
-    private int budget;
-
-    //TODO: StatusConverter 사용 고민
+    //모집 성별 카테고리
     @Enumerated(EnumType.STRING)
-    @Column(name = "travel_status", nullable = false)
+    @Column(name = "travel_gender", nullable = false, length = 20)
+    private GenderType genderType;
+
+    //모집 종료 일시
+    @Column(name = "travel_due_date")
+    private LocalDate dueDate;
+
+    //여행 기간 카테고리
+    @Enumerated(EnumType.STRING)
+    @Column(name = "travel_period", nullable = false, length = 20)
+    private PeriodType periodType;
+
+    //콘텐츠 상태
+    @Enumerated(EnumType.STRING)
+    @Column(name = "travel_status", nullable = false, length = 20)
     private TravelStatus status;
 
     @OneToMany(mappedBy = "travel")
@@ -87,43 +81,56 @@ public class Travel {
 
     @Builder
     public Travel(
-            int number, int userNumber, String title, String summary, String details, int viewCount,
-            LocalDateTime createdAt, LocalDate startAt, LocalDate endAt, LocalDateTime dueDateTime,
-            String location, int minPerson, int maxPerson, int budget, TravelStatus status
+            int number, int userNumber, LocalDateTime createdAt,
+            String location, String title, String details, int viewCount,
+            int maxPerson, GenderType genderType, LocalDate dueDate,
+            PeriodType periodType, TravelStatus status
     ) {
         this.number = number;
         this.userNumber = userNumber;
+        this.createdAt = createdAt;
+        this.location = location;
         this.title = title;
-        this.summary = summary;
         this.details = details;
         this.viewCount = viewCount;
-        this.createdAt = createdAt;
-        this.startAt = startAt;
-        this.endAt = endAt;
-        this.dueDateTime = dueDateTime;
-        this.location = location;
-        this.minPerson = minPerson;
         this.maxPerson = maxPerson;
-        this.budget = budget;
+        this.genderType = genderType;
+        this.dueDate = dueDate;
+        this.periodType = periodType;
         this.status = status;
     }
 
     public Travel update(TravelUpdateRequest travelUpdate) {
-        this.title = travelUpdate.getTitle();
-        this.summary = travelUpdate.getSummary();
-        this.details = travelUpdate.getDetails();
-        this.startAt = travelUpdate.getTravelStartAt();
-        this.endAt = travelUpdate.getTravelEndAt();
-        this.dueDateTime = travelUpdate.getDueDateTime();
         this.location = travelUpdate.getLocation();
-        this.minPerson = travelUpdate.getMinPerson();
+        this.title = travelUpdate.getTitle();
+        this.details = travelUpdate.getDetails();
         this.maxPerson = travelUpdate.getMaxPerson();
-        this.budget = travelUpdate.getBudget();
+        this.genderType = GenderType.of(travelUpdate.getGenderType());
+        this.dueDate = travelUpdate.getDueDate();
+        this.periodType = PeriodType.of(travelUpdate.getPeriodType());
         this.status = TravelStatus.convertCompletionToStatus(travelUpdate.getCompletionStatus());
         return this;
     }
 
     public void delete() {
         this.status = TravelStatus.DELETED;
+    }
+
+    @Override
+    public String toString() {
+        return "Travel{" +
+                "number=" + number +
+                ", userNumber=" + userNumber +
+                ", createdAt=" + createdAt +
+                ", location='" + location + '\'' +
+                ", title='" + title + '\'' +
+                ", details='" + details + '\'' +
+                ", viewCount=" + viewCount +
+                ", maxPerson=" + maxPerson +
+                ", genderType=" + genderType +
+                ", dueDate=" + dueDate +
+                ", periodType=" + periodType +
+                ", status=" + status +
+                '}';
     }
 }

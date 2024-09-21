@@ -11,7 +11,6 @@ public enum TravelStatus {
     CLOSED("모집 종료"),
     DELETED("삭제");
 
-
     private final String name;
 
     public static TravelStatus convertCompletionToStatus(boolean completion){
@@ -21,4 +20,10 @@ public enum TravelStatus {
             return TravelStatus.DRAFT;
         }
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

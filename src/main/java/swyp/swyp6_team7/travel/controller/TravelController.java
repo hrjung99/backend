@@ -16,6 +16,7 @@ import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -67,9 +68,9 @@ public class TravelController {
     ) {
 
         TravelSearchCondition condition = TravelSearchCondition.builder()
-                .keyword(keyword)
                 .pageRequest(PageRequest.of(page, size))
-                .tags(tags)
+                .keyword(keyword)
+                .tags(tags == null ? new ArrayList<>() : tags)
                 .build();
         log.info("search tags: " + condition.getTags());
 

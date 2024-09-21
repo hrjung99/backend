@@ -15,6 +15,8 @@ import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.tag.repository.TagRepository;
 import swyp.swyp6_team7.tag.repository.TravelTagRepository;
+import swyp.swyp6_team7.travel.domain.GenderType;
+import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
@@ -48,6 +50,8 @@ class TravelCustomRepositoryImplTest {
                 .title("기본 테스트 데이터")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
@@ -73,6 +77,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터1")
                 .userNumber(user.getUserNumber())
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
@@ -98,6 +104,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now().plusDays(1))
                 .status(TravelStatus.IN_PROGRESS)
                 .build();
@@ -145,6 +153,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build();
@@ -171,6 +181,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build();
@@ -197,6 +209,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터1")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.DELETED)
                 .build();
@@ -205,6 +219,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터2")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.DELETED)
                 .build();
@@ -232,6 +248,8 @@ class TravelCustomRepositoryImplTest {
                     .title("추가 테스트 데이터")
                     .userNumber(1)
                     .viewCount(0)
+                    .periodType(PeriodType.NONE)
+                    .genderType(GenderType.NONE)
                     .createdAt(LocalDateTime.now())
                     .status(TravelStatus.IN_PROGRESS)
                     .build());
@@ -261,6 +279,8 @@ class TravelCustomRepositoryImplTest {
                     .title("추가 테스트 데이터" + i)
                     .userNumber(1)
                     .viewCount(0)
+                    .periodType(PeriodType.NONE)
+                    .genderType(GenderType.NONE)
                     .createdAt(LocalDateTime.now())
                     .status(TravelStatus.IN_PROGRESS)
                     .build());
@@ -295,6 +315,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터1")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
@@ -306,6 +328,8 @@ class TravelCustomRepositoryImplTest {
                 .title("추가 테스트 데이터2")
                 .userNumber(1)
                 .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
