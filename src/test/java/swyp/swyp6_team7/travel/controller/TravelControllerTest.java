@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.travel.domain.GenderType;
+import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
@@ -163,6 +165,8 @@ class TravelControllerTest {
         return travelRepository.save(Travel.builder()
                 .title("Travel Controller")
                 .userNumber(userNumber)
+                .genderType(GenderType.NONE)
+                .periodType(PeriodType.NONE)
                 .status(status)
                 .build()
         );
