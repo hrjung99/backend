@@ -43,16 +43,5 @@ public class LoginController {
         }
     }
 
-    @PostMapping("/api/logout")
-    public String logout() {
-        // 현재 인증된 유저 정보 가져오기
-        Users user = (Users) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userLoginHistoryService.updateLogoutHistory(user);  // 로그아웃 이력 업데이트
-        memberService.updateLogoutDate(user);
 
-        // SecurityContext에서 인증 정보 제거
-        SecurityContextHolder.clearContext();
-
-        return "Logout successful";
-    }
 }

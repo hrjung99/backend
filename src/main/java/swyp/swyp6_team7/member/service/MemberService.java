@@ -95,4 +95,8 @@ public class MemberService {
         user.setUserLogoutDate(LocalDateTime.now());  // 현재 시간을 로그아웃 시간으로 설정
         userRepository.save(user);  // 업데이트된 사용자 정보 저장
     }
+    public Users getUserByEmail(String email) {
+        return userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 사용자를 찾을 수 없습니다: " + email));
+    }
 }
