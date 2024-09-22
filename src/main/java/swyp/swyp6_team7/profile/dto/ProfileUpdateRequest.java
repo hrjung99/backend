@@ -2,8 +2,7 @@ package swyp.swyp6_team7.profile.dto;
 
 public class ProfileUpdateRequest {
     private Integer userNumber;
-    private String name;
-    private String phone;
+    private String name;;
     private String proIntroduce;
 
     public Integer getUserNumber() {
@@ -20,14 +19,6 @@ public class ProfileUpdateRequest {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getProIntroduce() {

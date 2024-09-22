@@ -47,11 +47,16 @@ public class MemberService {
         // Argon2로 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
 
-        // 전화번호 포맷팅 (000-0000-0000 형식으로 변환)
-        String formattedPhoneNumber = formatPhoneNumber(userRequestDto.getPhone());
-
         // 성별 ENUM 변환
         Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+
+        // 연령대 ENUM 변환 및 검증
+        Users.AgeGroup ageGroup;
+        try {
+            ageGroup =  Users.AgeGroup.fromValue(userRequestDto.getAgegroup());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid age group provided.");
+        }
 
         // 기본 상태를 ABLE로 설정 (회원 상태 ENUM 사용)
         Users.MemberStatus status = Users.MemberStatus.ABLE;
@@ -64,9 +69,8 @@ public class MemberService {
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)  // 암호화된 비밀번호 설정
                 .userName(userRequestDto.getName())
-                .userPhone(formattedPhoneNumber)
                 .userGender(gender)
-                .userBirthYear(userRequestDto.getBirthYear())
+                .userAgeGroup(ageGroup)
                 .role(role) // 기본 역할 설정
                 .userStatus(status)  // 기본 사용자 상태 설정
                 .build();
@@ -108,11 +112,17 @@ public class MemberService {
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
 
-        // 전화번호 포맷팅
-        String formattedPhoneNumber = formatPhoneNumber(userRequestDto.getPhone());
 
         // 성별 ENUM 변환
         Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+
+        // 연령대 ENUM 변환 및 검증
+        Users.AgeGroup ageGroup;
+        try {
+            ageGroup = Users.AgeGroup.valueOf(userRequestDto.getAgegroup().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid age group provided.");
+        }
 
         // 관리자 상태 및 역할 설정
         Users.MemberStatus status = Users.MemberStatus.ABLE;
@@ -123,9 +133,8 @@ public class MemberService {
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)
                 .userName(userRequestDto.getName())
-                .userPhone(formattedPhoneNumber)
                 .userGender(gender)
-                .userBirthYear(userRequestDto.getBirthYear())
+                .userAgeGroup(ageGroup)
                 .role(Users.UserRole.ADMIN)
                 .userStatus(status)
                 .build();
@@ -151,12 +160,6 @@ public class MemberService {
         return response;
     }
 
-
-    public String formatPhoneNumber(String phoneNumber) {
-        // 숫자만 남기고 000-0000-0000 형식으로 변환
-        phoneNumber = phoneNumber.replaceAll("[^0-9]", "");
-        return phoneNumber.replaceFirst("(\\d{3})(\\d{4})(\\d+)", "$1-$2-$3");
-    }
     // 이메일 중복 확인 로직
     public boolean checkEmailDuplicate(String email) {
         if (userRepository.findByUserEmail(email).isPresent()) {

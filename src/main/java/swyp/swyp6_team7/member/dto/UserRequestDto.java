@@ -7,8 +7,7 @@ public class UserRequestDto {
     private String password;    // user_pw
     private String name;   // user_name
     private String gender;      // user_gender (M/F)
-    private String birthYear;   // user_birth_year (yyyy)
-    private String phone;       // user_phone (전화번호)
+    private String agegroup;   // user_age_group
 
     // 관리자로 가입할 떄 사용하는 키
     @Value("${custom.admin-secret-key}")
@@ -18,13 +17,12 @@ public class UserRequestDto {
     public UserRequestDto() {
     }
 
-    public UserRequestDto(String email, String password, String name, String gender, String birthYear, String phone) {
+    public UserRequestDto(String email, String password, String name, String gender, String agegroup) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.gender = gender;
-        this.birthYear = birthYear;
-        this.phone = phone;
+        this.agegroup = agegroup;
     }
 
     public String getEmail() {
@@ -60,20 +58,12 @@ public class UserRequestDto {
         this.gender = gender;
     }
 
-    public String getBirthYear() {
-        return birthYear;
+    public String getAgegroup() {
+        return agegroup;
     }
 
-    public void setBirthYear(String birthYear) {
-        this.birthYear = birthYear;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setAgegroup(String agegroup) {
+        this.agegroup = agegroup;
     }
 
     public String getAdminSecretKey() {

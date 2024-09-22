@@ -40,11 +40,36 @@ public class Users {
     @Enumerated(EnumType.STRING)
     private Gender userGender;
 
-    @Column(nullable = false, length = 5)
-    private String userBirthYear;
+    public enum AgeGroup{
+        TEEN("10대"), // 10대
+        TWENTY("20대"), // 20대
+        THIRTY("30대"), // 30대
+        FORTY("40대"),  // 40대
+        FIFTY_PLUS("50대 이상"); // 50대 이상
 
-    @Column(nullable = false, length = 15)
-    private String userPhone;
+        private final String value;
+
+        AgeGroup(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static AgeGroup fromValue(String value) {
+            for (AgeGroup ageGroup : AgeGroup.values()) {
+                if (ageGroup.getValue().equals(value)) {
+                    return ageGroup;
+                }
+            }
+            throw new IllegalArgumentException("Invalid age group provided.");
+        }
+    }
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AgeGroup userAgeGroup;
+
 
     @Builder.Default
     @Column(nullable = false)
@@ -72,7 +97,7 @@ public class Users {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "user_role",nullable = false)
     private UserRole role = UserRole.USER;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {

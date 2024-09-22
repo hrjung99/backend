@@ -48,7 +48,6 @@ public class ProfileService {
         if (usersOpt.isPresent()) {
             Users user = usersOpt.get();
             user.setUserName(request.getName());       // name 업데이트
-            user.setUserPhone(request.getPhone());     // phone 업데이트
             userRepository.save(user);            // Users 저장
         } else {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");

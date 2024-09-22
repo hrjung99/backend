@@ -54,22 +54,16 @@ public class ProfileController {
     // 프로필 보기 응답 객체
     public static class ProfileViewResponse {
         private String name;
-        private String phone;
         private String proIntroduce;
 
         public ProfileViewResponse(Users user, UserProfile userProfile) {
             this.name = user.getUserName();
-            this.phone = user.getUserPhone();
             this.proIntroduce = userProfile.getProIntroduce();
         }
 
         // Getters
         public String getName() {
             return name;
-        }
-
-        public String getPhone() {
-            return phone;
         }
 
         public String getProIntroduce() {
