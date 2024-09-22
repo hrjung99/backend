@@ -10,11 +10,13 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberService {
@@ -22,6 +24,7 @@ public class MemberService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final String adminSecretKey = "tZ37HBGNyfUZVzgXGiv1OEBHvmgCyVB7";
 
     @Autowired
     public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder,@Lazy JwtProvider jwtProvider){
@@ -44,26 +47,31 @@ public class MemberService {
         // 기본 상태를 ABLE로 설정 (회원 상태 ENUM 사용)
         Users.MemberStatus status = Users.MemberStatus.ABLE;
 
-        // 성별 변환
-        Users.Gender convertedgender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+        Users.UserRole role = Users.UserRole.USER;
+
+
         // Users 객체에 암호화된 비밀번호 설정
         Users newUser =  Users.builder()
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)  // 암호화된 비밀번호 설정
                 .userName(userRequestDto.getName())
                 .userPhone(formattedPhoneNumber)
-                .userGender(convertedgender)
+                .userGender(gender)
                 .userBirthYear(userRequestDto.getBirthYear())
-                .roles(List.of("ROLE_USER"))  // 기본 역할 설정
+                .role(role) // 기본 역할 설정
                 .userStatus(status)  // 기본 사용자 상태 설정
                 .build();
+
 
         // 사용자 저장
         userRepository.save(newUser);
 
+        // 역할을 리스트로 변환하여 JWT 생성 시 전달
+        List<String> roles = List.of(newUser.getRole().name());  // ENUM을 String으로 변환하여 List로 만들기
+
         // JWT 발급
         long tokenExpirationTime = 3600000; // 토큰 만료 시간 추가(1시간)
-        String token = jwtProvider.createToken(newUser.getEmail(), newUser.getRoles(), tokenExpirationTime);
+        String token = jwtProvider.createToken(newUser.getEmail(), roles, tokenExpirationTime);
 
         // 응답 데이터에 userId와 accessToken 포함
         Map<String, Object> response = new HashMap<>();
@@ -73,6 +81,61 @@ public class MemberService {
 
         return response;
     }
+    // 관리자 생성 메서드
+    @Transactional
+    public Map<String, Object> createAdmin(UserRequestDto userRequestDto) {
+        // adminSecretKey 확인
+        if (!userRequestDto.getAdminSecretKey().equals(adminSecretKey)) {
+            throw new IllegalArgumentException("잘못된 관리자 시크릿 키입니다.");
+        }
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
+
+        // 전화번호 포맷팅
+        String formattedPhoneNumber = formatPhoneNumber(userRequestDto.getPhone());
+
+        // 성별 ENUM 변환
+        Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+
+        // 관리자 상태 및 역할 설정
+        Users.MemberStatus status = Users.MemberStatus.ABLE;
+
+
+        // 새로운 관리자 생성
+        Users newAdmin = Users.builder()
+                .userEmail(userRequestDto.getEmail())
+                .userPw(encodedPassword)
+                .userName(userRequestDto.getName())
+                .userPhone(formattedPhoneNumber)
+                .userGender(gender)
+                .userBirthYear(userRequestDto.getBirthYear())
+                .role(Users.UserRole.ADMIN)
+                .userStatus(status)
+                .build();
+
+        // 관리자 저장
+        userRepository.save(newAdmin);
+
+        // 권한을 String으로 변환하여 리스트로 만들기
+        List<String> roles = newAdmin.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        // JWT 발급
+        long tokenExpirationTime = 3600000; // 토큰 만료 시간 1시간
+        String token = jwtProvider.createToken(newAdmin.getUserEmail(), roles, tokenExpirationTime);
+
+        // 응답 데이터
+        Map<String, Object> response = new HashMap<>();
+        response.put("userNumber", newAdmin.getUserNumber());
+        response.put("email", newAdmin.getUserEmail());
+        response.put("accessToken", token);
+
+        return response;
+    }
+
+
     public String formatPhoneNumber(String phoneNumber) {
         // 숫자만 남기고 000-0000-0000 형식으로 변환
         phoneNumber = phoneNumber.replaceAll("[^0-9]", "");

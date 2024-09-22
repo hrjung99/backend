@@ -1,5 +1,7 @@
 package swyp.swyp6_team7.member.dto;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class UserRequestDto {
     private String email;       // user_email
     private String password;    // user_pw
@@ -7,6 +9,10 @@ public class UserRequestDto {
     private String gender;      // user_gender (M/F)
     private String birthYear;   // user_birth_year (yyyy)
     private String phone;       // user_phone (전화번호)
+
+    // 관리자로 가입할 떄 사용하는 키
+    @Value("${custom.admin-secret-key}")
+    private String adminSecretKey;
 
     // 기본 생성자
     public UserRequestDto() {
@@ -68,5 +74,13 @@ public class UserRequestDto {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAdminSecretKey() {
+        return adminSecretKey;
+    }
+
+    public void setAdminSecretKey(String adminSecretKey) {
+        this.adminSecretKey = adminSecretKey;
     }
 }

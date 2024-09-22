@@ -43,5 +43,11 @@ public class MemberController {
             return ResponseEntity.badRequest().body(e.getMessage());  // 이미 사용 중인 이메일
         }
     }
+    // 관리자 회원 가입
+    @PostMapping("/admins/new")
+    public ResponseEntity<?> createAdmin(@RequestBody UserRequestDto userRequestDto){
+        memberService.createAdmin(userRequestDto);
+        return new ResponseEntity<>("Admin successfully registered", HttpStatus.CREATED);
+    }
 
 }
