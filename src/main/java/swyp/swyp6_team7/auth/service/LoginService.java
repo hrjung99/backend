@@ -12,6 +12,8 @@ import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 
+import java.util.List;
+
 @Service
 public class LoginService {
     private final UserRepository userRepository;
@@ -37,7 +39,7 @@ public class LoginService {
         }
 
         // Access Token 생성
-        String accessToken = jwtProvider.createAccessToken(user.getUserEmail(), user.getRoles());
+        String accessToken = jwtProvider.createAccessToken(user.getUserEmail(), List.of(user.getRole().name()));
 
         // Refresh Token 생성 및 httpOnly 쿠키로 설정
         String refreshToken = jwtProvider.createRefreshToken(user.getUserEmail());

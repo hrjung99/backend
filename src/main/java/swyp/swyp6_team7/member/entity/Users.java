@@ -53,9 +53,6 @@ public class Users {
     private LocalDateTime userLoginDate;
     private LocalDateTime userLogoutDate;
 
-    @Builder.Default
-    @Column(nullable = false, length = 10)
-    private String userRole = "user";
 
     // 회원 상태 enum으로 관리
     public enum MemberStatus{
@@ -69,16 +66,17 @@ public class Users {
     @Column(nullable = false)
     private Boolean userSocialTF = false;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "userNumber"))
-    @Column(name = "role")
-    private List<String> roles;
+    public enum UserRole {
+        USER, ADMIN
+    }
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.USER;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> (GrantedAuthority) () -> role) // Lambda expression for GrantedAuthority
-                .collect(Collectors.toList());
+        return List.of((GrantedAuthority) () -> role.name());  // 권한을 GrantedAuthority로 변환
     }
 
     // Setters and Getters

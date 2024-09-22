@@ -31,9 +31,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인, 회원가입, 토큰 재발급, kakao 로그인 요청 경로 경로는 허용
 
-                        .requestMatchers("/api/profile/**","/api/login","/api/logout", "/api/users/new","/api/refresh-token","/login/oauth/kakao/**","/error","/api/users-email").permitAll()
+                        .requestMatchers("/api/notices/**").permitAll() // 공지사항 조회는 모든 사용자 가능
+                        .requestMatchers("/api/notices", "/api/notices/**").hasRole("ADMIN") // 관리자만 CUD 가능
+
+                        .requestMatchers("/api/admins/new","/api/profile/**","/api/login","/api/logout", "/api/users/new","/api/refresh-token","/login/oauth/kakao/**","/error","/api/users-email").permitAll()
+
 
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
