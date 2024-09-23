@@ -30,17 +30,20 @@ public class NoticeController {
         return ResponseEntity.ok(noticeService.getNoticeById(id));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<NoticeResponseDto> createNotice(@RequestBody NoticeRequestDto noticeRequestDto) {
         return ResponseEntity.status(201).body(noticeService.createNotice(noticeRequestDto));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<NoticeResponseDto> updateNotice(
             @PathVariable("id") Long id, @RequestBody NoticeRequestDto noticeRequestDto) {
         return ResponseEntity.ok(noticeService.updateNotice(id, noticeRequestDto));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotice(@PathVariable("id") Long id) {
         noticeService.deleteNotice(id);

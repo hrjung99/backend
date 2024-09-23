@@ -2,6 +2,7 @@ package swyp.swyp6_team7.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,8 +33,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/notices/**").permitAll() // 공지사항 조회는 모든 사용자 가능
-                        .requestMatchers("/api/notices", "/api/notices/**").hasRole("ADMIN") // 관리자만 CUD 가능
+                        .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll() // 모든 사용자 조회 가능
+                        .requestMatchers(HttpMethod.POST, "/api/notices").hasRole("ADMIN") // POST는 관리자만 가능
+                        .requestMatchers(HttpMethod.PUT, "/api/notices/**").hasRole("ADMIN") // PUT은 관리자만 가능
+                        .requestMatchers(HttpMethod.DELETE, "/api/notices/**").hasRole("ADMIN") // DELETE는 관리자만 가능
 
                         .requestMatchers("/api/admins/new","/api/profile/**","/api/login","/api/logout", "/api/users/new","/api/refresh-token","/login/oauth/kakao/**","/error","/api/users-email").permitAll()
 
