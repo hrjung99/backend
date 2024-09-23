@@ -400,5 +400,53 @@ class TravelCustomRepositoryImplTest {
         assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel2.getNumber());
     }
 
+    @DisplayName("search: 주어지는 기간 타입에 알맞은 콘텐츠를 가져올 수 있다")
+    @Test
+    public void searchWithPeriodFilter() {
+        // given
+        Travel travel1 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터1")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.MORE_THAN_MONTH)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터2")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.THREE_WEEKS)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel3 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터3")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.TWO_WEEKS)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .pageRequest(PageRequest.of(0, 5))
+                .periodTypes(new ArrayList<>(List.of(
+                        PeriodType.MORE_THAN_MONTH.toString(),
+                        PeriodType.THREE_WEEKS.toString()))
+                )
+                .build();
+
+        // when
+        Page<TravelSearchDto> result = travelRepository.search(condition);
+
+        // then
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel1.getNumber());
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel2.getNumber());
+    }
+
 
 }

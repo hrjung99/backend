@@ -77,7 +77,7 @@ public class TravelController {
 //                .locationType(locationTypes)
                 .genderTypes(selectedGender)
 //                .personType(personTypes)
-//                .periodType(periodTypes)
+                .periodTypes(selectedPeriod)
                 .tags(tags)
                 .build();
         log.info("search tags: " + condition.getTags());

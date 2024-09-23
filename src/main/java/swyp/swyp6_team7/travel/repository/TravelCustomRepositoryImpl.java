@@ -118,6 +118,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         titleLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
+                        eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 )
                 .groupBy(travel.number)
@@ -155,6 +156,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         titleLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
+                        eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 );
 
@@ -186,6 +188,13 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
             return null;
         }
         return travel.genderType.in(genderCondition);
+    }
+
+    private BooleanExpression eqPeriodType(List<PeriodType> periodCondition) {
+        if (periodCondition.isEmpty() || periodCondition.size() == TravelSearchConstant.PERIOD_TYPE_COUNT) {
+            return null;
+        }
+        return travel.periodType.in(periodCondition);
     }
 
     private BooleanExpression eqTags(List<String> tags) {
