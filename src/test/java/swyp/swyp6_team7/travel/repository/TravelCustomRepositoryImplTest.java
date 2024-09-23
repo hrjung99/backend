@@ -66,8 +66,7 @@ class TravelCustomRepositoryImplTest {
                 .userPw("1234")
                 .userName("모잉")
                 .userGender(Users.Gender.M)
-                .userBirthYear("2000")
-                .userPhone("01012345678")
+                .userAgeGroup(Users.AgeGroup.TEEN)
                 .userRegDate(LocalDateTime.now())
                 .userStatus(Users.MemberStatus.ABLE)
                 .build());
