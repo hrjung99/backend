@@ -73,7 +73,7 @@ public class TravelController {
         TravelSearchCondition condition = TravelSearchCondition.builder()
                 .pageRequest(PageRequest.of(page, size))
                 .keyword(keyword)
-//                .locationType(locationTypes)
+                .locationTypes(selectedLocation)
                 .genderTypes(selectedGender)
                 .personTypes(selectedPerson)
                 .periodTypes(selectedPeriod)

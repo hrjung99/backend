@@ -18,7 +18,7 @@ public class TravelSearchCondition {
 
     private PageRequest pageRequest;
     private String keyword;
-    //private String locationFilter;
+    private List<String> locationFilter;
     private List<GenderType> genderFilter;
     private List<String> personRangeFilter;
     private List<PeriodType> periodFilter;
@@ -30,7 +30,7 @@ public class TravelSearchCondition {
     public TravelSearchCondition(
             PageRequest pageRequest,
             String keyword,
-//            List<String> locationTypes,
+            List<String> locationTypes,
             List<String> genderTypes,
             List<String> personTypes,
             List<String> periodTypes,
@@ -38,11 +38,20 @@ public class TravelSearchCondition {
     ) {
         this.pageRequest = pageRequest;
         this.keyword = keyword;
-        //location
+        this.locationFilter = getLocationFilter(locationTypes);
         this.genderFilter = getGenderFilter(genderTypes);
         this.personRangeFilter = getPersonFilter(personTypes);
         this.periodFilter = getPeriodFilter(periodTypes);
         this.tags = getTags(tags);
+    }
+
+    private List<String> getLocationFilter(List<String> locationTypes) {
+        if (locationTypes == null) {
+            return new ArrayList<>();
+        }
+        return locationTypes.stream()
+                .distinct().limit(TravelSearchConstant.LOCATION_TYPE_COUNT)
+                .toList();
     }
 
     private List<GenderType> getGenderFilter(List<String> genderTypes) {
