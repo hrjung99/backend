@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
+import swyp.swyp6_team7.tag.domain.Tag;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -102,6 +103,28 @@ public class Users {
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of((GrantedAuthority) () -> role.name());  // 권한을 GrantedAuthority로 변환
+    }
+    @ManyToMany
+    @JoinTable(
+            name = "user_tags",
+            joinColumns = @JoinColumn(name = "user_number"),
+            inverseJoinColumns = @JoinColumn(name = "tag_number")
+    )
+    private List<Tag> preferredTags;
+
+    @Builder
+    public Users(String userEmail, String userPw, String userName, Gender userGender, AgeGroup userAgeGroup, List<Tag> preferredTags) {
+        this.userEmail = userEmail;
+        this.userPw = userPw;
+        this.userName = userName;
+        this.userGender = userGender;
+        this.userAgeGroup = userAgeGroup;
+        this.preferredTags = (preferredTags != null) ? preferredTags : List.of(); // 태그가 없으면 빈 리스트
+    }
+
+    // 선호 태그 설정 메서드
+    public void setPreferredTags(List<Tag> preferredTags) {
+        this.preferredTags = preferredTags;
     }
 
     // Setters and Getters

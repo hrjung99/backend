@@ -15,6 +15,7 @@ import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.service.ProfileService;
 
 import org.springframework.security.core.GrantedAuthority;
+import swyp.swyp6_team7.tag.service.TagService;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -30,18 +31,20 @@ public class MemberService {
     private final JwtProvider jwtProvider;
 
     private final ProfileService profileService;
+    private final TagService tagService;
 
     private final String adminSecretKey = "tZ37HBGNyfUZVzgXGiv1OEBHvmgCyVB7";
 
 
     @Autowired
 
-    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider){
+    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider,TagService tagService){
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.profileService = profileService;
+        this.tagService = tagService;
     }
 
     @Transactional(readOnly = true)
@@ -51,6 +54,16 @@ public class MemberService {
     }
 
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
+
+        // 이메일 중복 체크
+        if (userRepository.findByUserEmail(userRequestDto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        // 태그 개수 검증 - 최대 5개까지 허용
+        if (userRequestDto.getPreferredTags().size() > 5) {
+            throw new IllegalArgumentException("태그는 최대 5개까지만 선택할 수 있습니다.");
+        }
 
         // Argon2로 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
@@ -81,6 +94,7 @@ public class MemberService {
                 .userAgeGroup(ageGroup)
                 .role(role) // 기본 역할 설정
                 .userStatus(status)  // 기본 사용자 상태 설정
+                .preferredTags(tagService.createTags(userRequestDto.getPreferredTags())) // 태그 처리
                 .build();
 
 
