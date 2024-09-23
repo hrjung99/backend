@@ -35,13 +35,21 @@ public class MemberService {
 
 
     @Autowired
+
     public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider){
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.profileService = profileService;
     }
-    @Transactional
+
+    @Transactional(readOnly = true)
+    public Users findByEmail(String email) {
+        return userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    }
+
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
 
         // Argon2로 비밀번호 암호화
@@ -65,7 +73,7 @@ public class MemberService {
 
 
         // Users 객체에 암호화된 비밀번호 설정
-        Users newUser =  Users.builder()
+        Users newUser = Users.builder()
                 .userEmail(userRequestDto.getEmail())
                 .userPw(encodedPassword)  // 암호화된 비밀번호 설정
                 .userName(userRequestDto.getName())
@@ -101,6 +109,7 @@ public class MemberService {
 
         return response;
     }
+
     // 관리자 생성 메서드
     @Transactional
     public Map<String, Object> createAdmin(UserRequestDto userRequestDto) {
@@ -158,6 +167,7 @@ public class MemberService {
         response.put("accessToken", token);
 
         return response;
+
     }
 
     // 이메일 중복 확인 로직
