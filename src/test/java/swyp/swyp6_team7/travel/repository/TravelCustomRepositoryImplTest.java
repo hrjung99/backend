@@ -173,6 +173,43 @@ class TravelCustomRepositoryImplTest {
         assertThat(results.getContent().size()).isEqualTo(1);
     }
 
+    @DisplayName("search: 제목과 장소에 keyword가 포함된 데이터를 찾을 수 있다")
+    @Test
+    public void searchWithKeywordThroughTitleAndLocation() {
+        // given
+        Travel travel = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터")
+                .userNumber(1)
+                .viewCount(0)
+                .location("영국")
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("영국 테스트 데이터")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .keyword("영국")
+                .pageRequest(PageRequest.of(0, 5))
+                .build();
+
+        // when
+        Page<TravelSearchDto> results = travelRepository.search(condition);
+
+        // then
+        assertThat(results.getTotalElements()).isEqualTo(2);
+        assertThat(results.getContent().size()).isEqualTo(2);
+    }
+
     @DisplayName("search: 키워드가 주어지지 않을 경우 가능한 모든 콘텐츠를 전달")
     @Test
     public void searchWithoutKeyword() {
@@ -354,5 +391,149 @@ class TravelCustomRepositoryImplTest {
         assertThat(result.getContent().size()).isEqualTo(1);
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("추가 테스트 데이터2");
     }
+
+    @DisplayName("search: 주어지는 젠더 타입에 알맞은 콘텐츠를 가져올 수 있다")
+    @Test
+    public void searchWithGenderFilter() {
+        // given
+        Travel travel1 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터1")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.WOMAN_ONLY)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터2")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.MIXED)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel3 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터3")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.MAN_ONLY)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .pageRequest(PageRequest.of(0, 5))
+                .genderTypes(new ArrayList<>(List.of(GenderType.WOMAN_ONLY.toString(), GenderType.MIXED.toString())))
+                .build();
+
+        // when
+        Page<TravelSearchDto> result = travelRepository.search(condition);
+
+        // then
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel1.getNumber());
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel2.getNumber());
+    }
+
+    @DisplayName("search: 주어지는 기간 타입에 알맞은 콘텐츠를 가져올 수 있다")
+    @Test
+    public void searchWithPeriodFilter() {
+        // given
+        Travel travel1 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터1")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.MORE_THAN_MONTH)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터2")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.THREE_WEEKS)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel3 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터3")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.TWO_WEEKS)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .pageRequest(PageRequest.of(0, 5))
+                .periodTypes(new ArrayList<>(List.of(
+                        PeriodType.MORE_THAN_MONTH.toString(),
+                        PeriodType.THREE_WEEKS.toString()))
+                )
+                .build();
+
+        // when
+        Page<TravelSearchDto> result = travelRepository.search(condition);
+
+        // then
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel1.getNumber());
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel2.getNumber());
+    }
+
+    @DisplayName("search: 주어지는 인원 타입에 알맞은 콘텐츠를 가져올 수 있다")
+    @Test
+    public void searchWithPersonRangeFilter() {
+        // given
+        travelRepository.deleteAll();
+        Travel travel1 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터1")
+                .userNumber(1)
+                .viewCount(0)
+                .maxPerson(1)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터2")
+                .userNumber(1)
+                .viewCount(0)
+                .maxPerson(4)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel3 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터3")
+                .userNumber(1)
+                .viewCount(0)
+                .maxPerson(6)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .pageRequest(PageRequest.of(0, 5))
+                .personTypes(List.of("2명", "5명 이상"))
+                .build();
+
+        // when
+        Page<TravelSearchDto> result = travelRepository.search(condition);
+
+        // then
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel1.getNumber());
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).doesNotContain(travel2.getNumber());
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel3.getNumber());
+    }
+
 
 }

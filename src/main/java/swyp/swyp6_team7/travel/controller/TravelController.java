@@ -16,7 +16,6 @@ import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -64,15 +63,22 @@ public class TravelController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size,
             @RequestParam(name = "keyword", required = false) String keyword,
-            @RequestParam(name = "tags", required = false) List<String> tags
+            @RequestParam(name = "location", required = false) List<String> selectedLocation,
+            @RequestParam(name = "gender", required = false) List<String> selectedGender,
+            @RequestParam(name = "person", required = false) List<String> selectedPerson,
+            @RequestParam(name = "period", required = false) List<String> selectedPeriod,
+            @RequestParam(name = "tags", required = false) List<String> selectedTags
     ) {
 
         TravelSearchCondition condition = TravelSearchCondition.builder()
                 .pageRequest(PageRequest.of(page, size))
                 .keyword(keyword)
-                .tags(tags == null ? new ArrayList<>() : tags)
+                .locationTypes(selectedLocation)
+                .genderTypes(selectedGender)
+                .personTypes(selectedPerson)
+                .periodTypes(selectedPeriod)
+                .tags(selectedTags)
                 .build();
-        log.info("search tags: " + condition.getTags());
 
         Page<TravelSearchDto> travels = travelService.search(condition);
         return ResponseEntity.status(HttpStatus.OK)

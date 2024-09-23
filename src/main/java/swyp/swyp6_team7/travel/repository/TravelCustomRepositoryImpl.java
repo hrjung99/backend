@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
+import swyp.swyp6_team7.travel.domain.GenderType;
+import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
@@ -20,6 +22,7 @@ import swyp.swyp6_team7.travel.dto.response.QTravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
+import swyp.swyp6_team7.travel.util.TravelSearchConstant;
 
 import java.util.List;
 
@@ -111,8 +114,11 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
-                        titleLike(condition.getKeyword()),
+                        titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
+                        eqGenderTypes(condition.getGenderFilter()),
+                        eqPersonRangeType(condition.getPersonRangeFilter()),
+                        eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 )
                 .groupBy(travel.number)
@@ -147,19 +153,26 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
-                        titleLike(condition.getKeyword()),
+                        titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
+                        eqGenderTypes(condition.getGenderFilter()),
+                        eqPersonRangeType(condition.getPersonRangeFilter()),
+                        eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 );
 
         return PageableExecutionUtils.getPage(content, condition.getPageRequest(), countQuery::fetchOne);
     }
 
-    private BooleanExpression titleLike(String keyword) {
+
+    /**
+     * Where절 BooleanExpression
+     */
+    private BooleanExpression titleAndLocationLike(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return null;
         }
-        return travel.title.contains(keyword);
+        return travel.title.contains(keyword).or(travel.location.like(keyword));
     }
 
     private BooleanExpression statusActivated() {
@@ -169,6 +182,44 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
     private BooleanExpression statusInProgress() {
         return travel.status.eq(TravelStatus.IN_PROGRESS);
+    }
+
+    private BooleanExpression eqGenderTypes(List<GenderType> genderCondition) {
+        if (genderCondition.isEmpty() || genderCondition.size() == TravelSearchConstant.GENDER_TYPE_COUNT) {
+            return null;
+        }
+        return travel.genderType.in(genderCondition);
+    }
+
+    public BooleanExpression eqPersonRangeType(List<String> personTypes) {
+        if (personTypes.isEmpty() || personTypes.size() == TravelSearchConstant.PERSON_TYPE_COUNT) {
+            return null;
+        }
+
+        if (personTypes.size() == 1) {
+            return getPersonRangeBooleanExpression(personTypes.get(0));
+        } else {
+            return getPersonRangeBooleanExpression(personTypes.get(0)).or(getPersonRangeBooleanExpression(personTypes.get(1)));
+        }
+    }
+
+    private BooleanExpression getPersonRangeBooleanExpression(String personType) {
+        if (personType.equals(TravelSearchConstant.PERSON_TYPE_SMALL)) {
+            return travel.maxPerson.loe(2);
+        } else if (personType.equals(TravelSearchConstant.PERSON_TYPE_MIDDLE)) {
+            return travel.maxPerson.between(3, 4);
+        } else if (personType.equals(TravelSearchConstant.PERSON_TYPE_LARGE)) {
+            return travel.maxPerson.goe(5);
+        } else {
+            throw new IllegalArgumentException("잘못된 person filtering 조건입니다.");
+        }
+    }
+
+    private BooleanExpression eqPeriodType(List<PeriodType> periodCondition) {
+        if (periodCondition.isEmpty() || periodCondition.size() == TravelSearchConstant.PERIOD_TYPE_COUNT) {
+            return null;
+        }
+        return travel.periodType.in(periodCondition);
     }
 
     private BooleanExpression eqTags(List<String> tags) {
