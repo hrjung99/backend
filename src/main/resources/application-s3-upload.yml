@@ -1,0 +1,30 @@
+# ------- 파일 업로드 시작 ----------
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      #    임시 저장경로 - 파일 확장자 체크
+      max-request-size: 100MB #요청 최대 사이즈
+      max-file-size: 100MB #파일 최대 사이즈
+
+# aws 파일 업로드 설정 및 오류 제거
+  cloud:
+    aws:
+      s3:
+        bucket: moing-hosted-contents #버킷명 입력
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      region:
+        static: ap-northeast-2 #region 입력
+        auto: false
+      stack:
+        auto: false
+
+# ec2 환경이 아닌 local 환경에서 발생하는 aws 오류 제거
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error
