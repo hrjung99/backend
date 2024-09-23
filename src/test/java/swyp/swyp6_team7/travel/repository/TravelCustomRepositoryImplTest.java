@@ -355,4 +355,50 @@ class TravelCustomRepositoryImplTest {
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("추가 테스트 데이터2");
     }
 
+    @DisplayName("search: 주어지는 젠더 타입에 알맞은 콘텐츠를 가져올 수 있다")
+    @Test
+    public void searchWithGenderFilter() {
+        // given
+        Travel travel1 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터1")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.WOMAN_ONLY)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터2")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.MIXED)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel3 = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터3")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.MAN_ONLY)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .pageRequest(PageRequest.of(0, 5))
+                .genderTypes(new ArrayList<>(List.of(GenderType.WOMAN_ONLY.toString(), GenderType.MIXED.toString())))
+                .build();
+
+        // when
+        Page<TravelSearchDto> result = travelRepository.search(condition);
+
+        // then
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel1.getNumber());
+        assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel2.getNumber());
+    }
+
+
 }

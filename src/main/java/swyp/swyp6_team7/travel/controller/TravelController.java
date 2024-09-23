@@ -64,13 +64,21 @@ public class TravelController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size,
             @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "location", required = false) List<String> selectedLocation,
+            @RequestParam(name = "gender", required = false) List<String> selectedGender,
+            @RequestParam(name = "person", required = false) List<String> selectedPerson,
+            @RequestParam(name = "period", required = false) List<String> selectedPeriod,
             @RequestParam(name = "tags", required = false) List<String> tags
     ) {
 
         TravelSearchCondition condition = TravelSearchCondition.builder()
                 .pageRequest(PageRequest.of(page, size))
                 .keyword(keyword)
-                .tags(tags == null ? new ArrayList<>() : tags)
+//                .locationType(locationTypes)
+                .genderTypes(selectedGender)
+//                .personType(personTypes)
+//                .periodType(periodTypes)
+                .tags(tags)
                 .build();
         log.info("search tags: " + condition.getTags());
 

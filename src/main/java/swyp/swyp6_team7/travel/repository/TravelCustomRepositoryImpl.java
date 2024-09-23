@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
+import swyp.swyp6_team7.travel.domain.GenderType;
+import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
@@ -20,7 +22,9 @@ import swyp.swyp6_team7.travel.dto.response.QTravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
+import swyp.swyp6_team7.travel.util.TravelSearchConstant;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
@@ -113,6 +117,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .where(
                         titleLike(condition.getKeyword()),
                         statusActivated(),
+                        eqGenderTypes(condition.getGenderFilter()),
                         eqTags(condition.getTags())
                 )
                 .groupBy(travel.number)
@@ -149,12 +154,17 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .where(
                         titleLike(condition.getKeyword()),
                         statusActivated(),
+                        eqGenderTypes(condition.getGenderFilter()),
                         eqTags(condition.getTags())
                 );
 
         return PageableExecutionUtils.getPage(content, condition.getPageRequest(), countQuery::fetchOne);
     }
 
+
+    /**
+     * Where절 BooleanExpression
+     */
     private BooleanExpression titleLike(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return null;
@@ -169,6 +179,13 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
     private BooleanExpression statusInProgress() {
         return travel.status.eq(TravelStatus.IN_PROGRESS);
+    }
+
+    private BooleanExpression eqGenderTypes(List<GenderType> genderCondition) {
+        if (genderCondition.isEmpty() || genderCondition.size() == TravelSearchConstant.GENDER_TYPE_COUNT) {
+            return null;
+        }
+        return travel.genderType.in(genderCondition);
     }
 
     private BooleanExpression eqTags(List<String> tags) {
