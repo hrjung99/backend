@@ -4,6 +4,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class SwaggerConfig {
@@ -17,6 +19,13 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(info);
+    }
+
+    @Bean
+    public S3Client s3Client() {
+        return S3Client.builder()
+                .region(Region.AP_NORTHEAST_2)  // 사용하려는 AWS 리전 설정
+                .build();
     }
 
 }
