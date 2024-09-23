@@ -198,21 +198,21 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         }
 
         if (personTypes.size() == 1) {
-            if (personTypes.get(0).equals(TravelSearchConstant.PERSON_TYPE_SMALL)) {
-                return travel.maxPerson.loe(2);
-            } else if (personTypes.get(0).equals(TravelSearchConstant.PERSON_TYPE_MIDDLE)) {
-                return travel.maxPerson.between(3, 4);
-            } else {
-                return travel.maxPerson.goe(5);
-            }
+            return getPersonRangeBooleanExpression(personTypes.get(0));
         } else {
-            if (personTypes.containsAll(new ArrayList<>(List.of(TravelSearchConstant.PERSON_TYPE_SMALL, TravelSearchConstant.PERSON_TYPE_MIDDLE)))) {
-                return travel.maxPerson.loe(2).or(travel.maxPerson.between(3, 4));
-            } else if (personTypes.containsAll(new ArrayList<>(List.of(TravelSearchConstant.PERSON_TYPE_SMALL, TravelSearchConstant.PERSON_TYPE_LARGE)))) {
-                return travel.maxPerson.loe(2).or(travel.maxPerson.goe(5));
-            } else {
-                return travel.maxPerson.between(3, 4).or(travel.maxPerson.goe(5));
-            }
+            return getPersonRangeBooleanExpression(personTypes.get(0)).or(getPersonRangeBooleanExpression(personTypes.get(1)));
+        }
+    }
+
+    private BooleanExpression getPersonRangeBooleanExpression(String personType) {
+        if (personType.equals(TravelSearchConstant.PERSON_TYPE_SMALL)) {
+            return travel.maxPerson.loe(2);
+        } else if (personType.equals(TravelSearchConstant.PERSON_TYPE_MIDDLE)) {
+            return travel.maxPerson.between(3, 4);
+        } else if (personType.equals(TravelSearchConstant.PERSON_TYPE_LARGE)) {
+            return travel.maxPerson.goe(5);
+        } else {
+            throw new IllegalArgumentException("잘못된 person filtering 조건입니다.");
         }
     }
 
