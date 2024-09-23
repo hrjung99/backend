@@ -19,7 +19,7 @@ public class TravelSearchCondition {
     private String keyword;
     //private String locationFilter;
     private List<GenderType> genderFilter;
-    //private List<String> personRangeFilter;
+    private List<String> personRangeFilter;
     private List<PeriodType> periodFilter;
     private List<String> tags;
 
@@ -31,7 +31,7 @@ public class TravelSearchCondition {
             String keyword,
 //            List<String> locationTypes,
             List<String> genderTypes,
-//            List<String> personTypes,
+            List<String> personTypes,
             List<String> periodTypes,
             List<String> tags
     ) {
@@ -39,7 +39,7 @@ public class TravelSearchCondition {
         this.keyword = keyword;
         //location
         this.genderFilter = getGenderFilter(genderTypes);
-        //person
+        this.personRangeFilter = personTypes;
         this.periodFilter = getPeriodFilter(periodTypes);
         this.tags = tags == null ? new ArrayList<>() : tags;
     }

@@ -76,11 +76,10 @@ public class TravelController {
                 .keyword(keyword)
 //                .locationType(locationTypes)
                 .genderTypes(selectedGender)
-//                .personType(personTypes)
+                .personTypes(selectedPerson)
                 .periodTypes(selectedPeriod)
                 .tags(tags)
                 .build();
-        log.info("search tags: " + condition.getTags());
 
         Page<TravelSearchDto> travels = travelService.search(condition);
         return ResponseEntity.status(HttpStatus.OK)

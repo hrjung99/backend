@@ -118,6 +118,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         titleLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
+                        eqPersonRangeType(condition.getPersonRangeFilter()),
                         eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 )
@@ -156,6 +157,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         titleLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
+                        eqPersonRangeType(condition.getPersonRangeFilter()),
                         eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 );
@@ -188,6 +190,30 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
             return null;
         }
         return travel.genderType.in(genderCondition);
+    }
+
+    public BooleanExpression eqPersonRangeType(List<String> personTypes) {
+        if (personTypes.isEmpty() || personTypes.size() == TravelSearchConstant.PERSON_TYPE_COUNT) {
+            return null;
+        }
+
+        if (personTypes.size() == 1) {
+            if (personTypes.get(0).equals(TravelSearchConstant.PERSON_TYPE_SMALL)) {
+                return travel.maxPerson.loe(2);
+            } else if (personTypes.get(0).equals(TravelSearchConstant.PERSON_TYPE_MIDDLE)) {
+                return travel.maxPerson.between(3, 4);
+            } else {
+                return travel.maxPerson.goe(5);
+            }
+        } else {
+            if (personTypes.containsAll(new ArrayList<>(List.of(TravelSearchConstant.PERSON_TYPE_SMALL, TravelSearchConstant.PERSON_TYPE_MIDDLE)))) {
+                return travel.maxPerson.loe(2).or(travel.maxPerson.between(3, 4));
+            } else if (personTypes.containsAll(new ArrayList<>(List.of(TravelSearchConstant.PERSON_TYPE_SMALL, TravelSearchConstant.PERSON_TYPE_LARGE)))) {
+                return travel.maxPerson.loe(2).or(travel.maxPerson.goe(5));
+            } else {
+                return travel.maxPerson.between(3, 4).or(travel.maxPerson.goe(5));
+            }
+        }
     }
 
     private BooleanExpression eqPeriodType(List<PeriodType> periodCondition) {
