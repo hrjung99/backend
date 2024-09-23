@@ -16,7 +16,6 @@ import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j

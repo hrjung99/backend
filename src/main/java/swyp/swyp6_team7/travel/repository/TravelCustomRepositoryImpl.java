@@ -24,7 +24,6 @@ import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.util.TravelSearchConstant;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
