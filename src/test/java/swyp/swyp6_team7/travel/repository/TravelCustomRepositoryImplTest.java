@@ -173,6 +173,43 @@ class TravelCustomRepositoryImplTest {
         assertThat(results.getContent().size()).isEqualTo(1);
     }
 
+    @DisplayName("search: 제목과 장소에 keyword가 포함된 데이터를 찾을 수 있다")
+    @Test
+    public void searchWithKeywordThroughTitleAndLocation() {
+        // given
+        Travel travel = travelRepository.save(Travel.builder()
+                .title("추가 테스트 데이터")
+                .userNumber(1)
+                .viewCount(0)
+                .location("영국")
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+        Travel travel2 = travelRepository.save(Travel.builder()
+                .title("영국 테스트 데이터")
+                .userNumber(1)
+                .viewCount(0)
+                .periodType(PeriodType.NONE)
+                .genderType(GenderType.NONE)
+                .createdAt(LocalDateTime.now())
+                .status(TravelStatus.IN_PROGRESS)
+                .build());
+
+        TravelSearchCondition condition = TravelSearchCondition.builder()
+                .keyword("영국")
+                .pageRequest(PageRequest.of(0, 5))
+                .build();
+
+        // when
+        Page<TravelSearchDto> results = travelRepository.search(condition);
+
+        // then
+        assertThat(results.getTotalElements()).isEqualTo(2);
+        assertThat(results.getContent().size()).isEqualTo(2);
+    }
+
     @DisplayName("search: 키워드가 주어지지 않을 경우 가능한 모든 콘텐츠를 전달")
     @Test
     public void searchWithoutKeyword() {

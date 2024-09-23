@@ -114,7 +114,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
-                        titleLike(condition.getKeyword()),
+                        titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
                         eqPersonRangeType(condition.getPersonRangeFilter()),
@@ -153,7 +153,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
-                        titleLike(condition.getKeyword()),
+                        titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
                         eqPersonRangeType(condition.getPersonRangeFilter()),
@@ -168,11 +168,11 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     /**
      * Where절 BooleanExpression
      */
-    private BooleanExpression titleLike(String keyword) {
+    private BooleanExpression titleAndLocationLike(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return null;
         }
-        return travel.title.contains(keyword);
+        return travel.title.contains(keyword).or(travel.location.like(keyword));
     }
 
     private BooleanExpression statusActivated() {
