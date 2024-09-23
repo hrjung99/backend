@@ -38,7 +38,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/notices/**").hasRole("ADMIN") // PUT은 관리자만 가능
                         .requestMatchers(HttpMethod.DELETE, "/api/notices/**").hasRole("ADMIN") // DELETE는 관리자만 가능
 
-                        .requestMatchers("/api/admins/new","/api/profile/**","/api/login","/api/logout", "/api/users/new","/api/refresh-token","/login/oauth/kakao/**","/error","/api/users-email").permitAll()
+                        // 마이페이지 관련 권한 설정
+                        .requestMatchers("/api/profile/**").authenticated() // 마이페이지는 로그인한 사용자만 접근 가능
+
+                        // 기타 경로
+                        .requestMatchers("/api/admins/new", "/api/login", "/api/logout", "/api/users/new", "/api/refresh-token", "/login/oauth/kakao/**", "/error", "/api/users-email").permitAll()
 
 
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
