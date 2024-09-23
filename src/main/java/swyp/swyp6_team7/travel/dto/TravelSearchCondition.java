@@ -42,7 +42,7 @@ public class TravelSearchCondition {
         this.genderFilter = getGenderFilter(genderTypes);
         this.personRangeFilter = getPersonFilter(personTypes);
         this.periodFilter = getPeriodFilter(periodTypes);
-        this.tags = tags == null ? new ArrayList<>() : tags;
+        this.tags = getTags(tags);
     }
 
     private List<GenderType> getGenderFilter(List<String> genderTypes) {
@@ -71,6 +71,15 @@ public class TravelSearchCondition {
         return periodTypes.stream()
                 .distinct().limit(TravelSearchConstant.PERIOD_TYPE_COUNT)
                 .map(PeriodType::of)
+                .toList();
+    }
+
+    private List<String> getTags(List<String> tags) {
+        if (tags == null) {
+            return new ArrayList<>();
+        }
+        return tags.stream()
+                .distinct()
                 .toList();
     }
 

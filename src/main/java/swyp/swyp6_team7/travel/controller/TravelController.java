@@ -67,7 +67,7 @@ public class TravelController {
             @RequestParam(name = "gender", required = false) List<String> selectedGender,
             @RequestParam(name = "person", required = false) List<String> selectedPerson,
             @RequestParam(name = "period", required = false) List<String> selectedPeriod,
-            @RequestParam(name = "tags", required = false) List<String> tags
+            @RequestParam(name = "tags", required = false) List<String> selectedTags
     ) {
 
         TravelSearchCondition condition = TravelSearchCondition.builder()
@@ -77,7 +77,7 @@ public class TravelController {
                 .genderTypes(selectedGender)
                 .personTypes(selectedPerson)
                 .periodTypes(selectedPeriod)
-                .tags(tags)
+                .tags(selectedTags)
                 .build();
 
         Page<TravelSearchDto> travels = travelService.search(condition);
