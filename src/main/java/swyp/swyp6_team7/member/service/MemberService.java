@@ -38,7 +38,7 @@ public class MemberService {
 
     @Autowired
 
-    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider,TagService tagService){
+    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider, TagService tagService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -51,6 +51,20 @@ public class MemberService {
     public Users findByEmail(String email) {
         return userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> findPreferredTagsByEmail(String email) {
+        Users user = userRepository.findByUserEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (user.getPreferredTags().isEmpty()) {
+            throw new IllegalArgumentException("사용자 태그가 설정되어 있지 않습니다.");
+        }
+
+        return user.getPreferredTags().stream()
+                .map(tag -> tag.getName())
+                .toList();
     }
 
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
@@ -74,7 +88,7 @@ public class MemberService {
         // 연령대 ENUM 변환 및 검증
         Users.AgeGroup ageGroup;
         try {
-            ageGroup =  Users.AgeGroup.fromValue(userRequestDto.getAgegroup());
+            ageGroup = Users.AgeGroup.fromValue(userRequestDto.getAgegroup());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid age group provided.");
         }
@@ -191,16 +205,19 @@ public class MemberService {
         }
         return false; // 중복된 이메일이 없을 경우 false반환
     }
+
     @Transactional
     public void updateLoginDate(Users user) {
         user.setUserLoginDate(LocalDateTime.now());  // 현재 시간을 로그인 시간으로 설정
         userRepository.save(user);  // 업데이트된 사용자 정보 저장
     }
+
     @Transactional
     public void updateLogoutDate(Users user) {
         user.setUserLogoutDate(LocalDateTime.now());  // 현재 시간을 로그아웃 시간으로 설정
         userRepository.save(user);  // 업데이트된 사용자 정보 저장
     }
+
     public Users getUserByEmail(String email) {
         return userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 사용자를 찾을 수 없습니다: " + email));
