@@ -1,7 +1,8 @@
 package swyp.swyp6_team7.travel.repository;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -13,15 +14,18 @@ import org.springframework.stereotype.Repository;
 import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
+import swyp.swyp6_team7.travel.domain.GenderType;
+import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
+import swyp.swyp6_team7.travel.dto.TravelRecommendDto;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
-import swyp.swyp6_team7.travel.dto.response.QTravelDetailResponse;
-import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
-import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
-import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
+import swyp.swyp6_team7.travel.dto.response.*;
+import swyp.swyp6_team7.travel.util.TravelSearchConstant;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.group.GroupBy.list;
@@ -102,6 +106,67 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         return PageableExecutionUtils.getPage(content, pageRequest, countQuery::fetchOne);
     }
 
+    @Override
+    public List<TravelRecommendDto> findAllByPreferredTags(List<String> preferredTags) {
+
+        NumberExpression<Long> matchingTagCount = new CaseBuilder()
+                .when(travel.travelTags.isEmpty()).then(Expressions.nullExpression())
+                .when(tag.name.in(preferredTags)).then(Expressions.constant(1L))
+                .otherwise(Expressions.nullExpression()).count();
+
+        List<Tuple> tuples = queryFactory
+                .select(
+                        travel.number,
+                        matchingTagCount
+                )
+                .from(travel)
+                .leftJoin(travel.travelTags, travelTag)
+                .leftJoin(travelTag.tag, tag)
+                .where(
+                        statusInProgress()
+                )
+                .groupBy(travel.number)
+                .orderBy(
+                        matchingTagCount.desc(),
+                        travel.dueDate.asc()
+                ).fetch();
+        //log.info("tuples: " + tuples);
+
+        List<Integer> travels = tuples.stream()
+                .map(t -> t.get(travel.number))
+                .toList();
+        log.info("travelsNumber: " + travels);
+
+        Map<Integer, Integer> travelMap = new HashMap<>();
+        for (Tuple tuple : tuples) {
+            travelMap.put(tuple.get(travel.number), tuple.get(matchingTagCount).intValue());
+        }
+
+
+        List<TravelRecommendDto> content = queryFactory
+                .select(travel)
+                .from(travel)
+                .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
+                .leftJoin(travel.travelTags, travelTag)
+                .leftJoin(travelTag.tag, tag)
+                .where(
+                        travel.number.in(travels)
+                )
+                .transform(groupBy(travel.number).list(
+                        Projections.constructor(TravelRecommendDto.class,
+                                travel,
+                                users.userNumber,
+                                users.userName,
+                                list(tag.name)
+                                ))
+                );
+
+        content.stream()
+                .forEach(dto -> dto.updatePreferredNumber(travelMap.get(dto.getTravelNumber())));
+
+        return content;
+    }
+
 
     @Override
     public Page<TravelSearchDto> search(TravelSearchCondition condition) {
@@ -111,8 +176,11 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
-                        titleLike(condition.getKeyword()),
+                        titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
+                        eqGenderTypes(condition.getGenderFilter()),
+                        eqPersonRangeType(condition.getPersonRangeFilter()),
+                        eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 )
                 .groupBy(travel.number)
@@ -147,19 +215,26 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(
-                        titleLike(condition.getKeyword()),
+                        titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
+                        eqGenderTypes(condition.getGenderFilter()),
+                        eqPersonRangeType(condition.getPersonRangeFilter()),
+                        eqPeriodType(condition.getPeriodFilter()),
                         eqTags(condition.getTags())
                 );
 
         return PageableExecutionUtils.getPage(content, condition.getPageRequest(), countQuery::fetchOne);
     }
 
-    private BooleanExpression titleLike(String keyword) {
+
+    /**
+     * Where절 BooleanExpression
+     */
+    private BooleanExpression titleAndLocationLike(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return null;
         }
-        return travel.title.contains(keyword);
+        return travel.title.contains(keyword).or(travel.location.like(keyword));
     }
 
     private BooleanExpression statusActivated() {
@@ -169,6 +244,44 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
     private BooleanExpression statusInProgress() {
         return travel.status.eq(TravelStatus.IN_PROGRESS);
+    }
+
+    private BooleanExpression eqGenderTypes(List<GenderType> genderCondition) {
+        if (genderCondition.isEmpty() || genderCondition.size() == TravelSearchConstant.GENDER_TYPE_COUNT) {
+            return null;
+        }
+        return travel.genderType.in(genderCondition);
+    }
+
+    public BooleanExpression eqPersonRangeType(List<String> personTypes) {
+        if (personTypes.isEmpty() || personTypes.size() == TravelSearchConstant.PERSON_TYPE_COUNT) {
+            return null;
+        }
+
+        if (personTypes.size() == 1) {
+            return getPersonRangeBooleanExpression(personTypes.get(0));
+        } else {
+            return getPersonRangeBooleanExpression(personTypes.get(0)).or(getPersonRangeBooleanExpression(personTypes.get(1)));
+        }
+    }
+
+    private BooleanExpression getPersonRangeBooleanExpression(String personType) {
+        if (personType.equals(TravelSearchConstant.PERSON_TYPE_SMALL)) {
+            return travel.maxPerson.loe(2);
+        } else if (personType.equals(TravelSearchConstant.PERSON_TYPE_MIDDLE)) {
+            return travel.maxPerson.between(3, 4);
+        } else if (personType.equals(TravelSearchConstant.PERSON_TYPE_LARGE)) {
+            return travel.maxPerson.goe(5);
+        } else {
+            throw new IllegalArgumentException("잘못된 person filtering 조건입니다.");
+        }
+    }
+
+    private BooleanExpression eqPeriodType(List<PeriodType> periodCondition) {
+        if (periodCondition.isEmpty() || periodCondition.size() == TravelSearchConstant.PERIOD_TYPE_COUNT) {
+            return null;
+        }
+        return travel.periodType.in(periodCondition);
     }
 
     private BooleanExpression eqTags(List<String> tags) {
