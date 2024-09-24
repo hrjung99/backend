@@ -46,7 +46,7 @@ public class RefreshController {
                                 .collect(Collectors.toList());
 
                         // 새로운 Access Token 발급
-                        String newAccessToken = jwtProvider.createAccessToken(user.getUserEmail(), roles);
+                        String newAccessToken = jwtProvider.createAccessToken(user.getUserEmail(), user.getUserNumber(),roles);
                         return ResponseEntity.ok("Bearer " + newAccessToken);
                     }
                 }
