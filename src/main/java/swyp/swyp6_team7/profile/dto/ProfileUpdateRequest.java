@@ -1,36 +1,13 @@
 package swyp.swyp6_team7.profile.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ProfileUpdateRequest {
-    private Integer userNumber;
-    private String name;;
+    private String name;
     private String proIntroduce;
     private String[] preferredTags;
 
-    public Integer getUserNumber() {
-        return userNumber;
-    }
-
-    public void setUserNumber(Integer userNumber) {
-        this.userNumber = userNumber;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getProIntroduce() {
-        return proIntroduce;
-    }
-
-    public void setProIntroduce(String proIntroduce) {
-        this.proIntroduce = proIntroduce;
-    }
-
-    public String[] getPreferredTags() { return preferredTags;    }
-
-    public void setPreferredTags(String[] preferredTags) {   this.preferredTags = preferredTags;    }
 }

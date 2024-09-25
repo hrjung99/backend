@@ -1,8 +1,10 @@
 package swyp.swyp6_team7.profile.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.profile.entity.UserProfile;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
@@ -17,17 +19,23 @@ import java.util.Set;
 @RequestMapping("/api/profile")
 public class ProfileController {
     private final ProfileService profileService;
+    private final JwtProvider jwtProvider;
 
-
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService, JwtProvider jwtProvider) {
         this.profileService = profileService;
-
+        this.jwtProvider = jwtProvider;
     }
 
     // 프로필 수정 (이름, 자기소개, 선호 태그)
     @PutMapping("/update")
-    public ResponseEntity<?> updateProfile(@RequestBody ProfileUpdateRequest request) {
-        profileService.updateProfile(request);
+    public ResponseEntity<?> updateProfile(@RequestBody ProfileUpdateRequest request, HttpServletRequest httpServletRequest) {
+        // JWT 토큰에서 userNumber 추출
+        String token = httpServletRequest.getHeader("Authorization").replace("Bearer ", "");
+        Integer userNumber = jwtProvider.getUserNumber(token);
+
+        // 프로필 수정 로직 호출
+        profileService.updateProfile(userNumber, request);  // userNumber는 토큰에서 추출된 값
+
         return ResponseEntity.ok("Profile updated successfully");
     }
 
@@ -38,7 +46,13 @@ public class ProfileController {
     }
     //프로필 조회 (이름, 이메일, 연령대, 성별, 선호 태그, 자기소개)
     @GetMapping("/me")
-    public ResponseEntity<?> viewProfile(@RequestParam("userNumber")  Integer userNumber) {
+    public ResponseEntity<?> viewProfile(HttpServletRequest request) {
+        // Authorization 헤더에서 JWT 토큰을 가져옴
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+
+        // 토큰에서 userNumber 추출
+        Integer userNumber = jwtProvider.getUserNumber(token);
+
         Optional<Users> userOpt = profileService.getUserByUserNumber(userNumber);
         Optional<UserProfile> userProfileOpt = profileService.getProfileByUserNumber(userNumber);
 

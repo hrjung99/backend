@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
 import swyp.swyp6_team7.tag.domain.Tag;
+import swyp.swyp6_team7.tag.domain.UserTagPreference;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -111,6 +112,9 @@ public class Users {
             inverseJoinColumns = @JoinColumn(name = "tag_number")
     )
     private List<Tag> preferredTags;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTagPreference> tagPreferences;  // user_tagpreferences 참조
 
     @Builder
     public Users(String userEmail, String userPw, String userName, Gender userGender, AgeGroup userAgeGroup, List<Tag> preferredTags) {

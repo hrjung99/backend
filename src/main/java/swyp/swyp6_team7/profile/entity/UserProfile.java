@@ -25,9 +25,9 @@ public class UserProfile {
 
     @ManyToMany
     @JoinTable(
-            name = "user_tag_preferences",
+            name = "user_tagpreferences",
             joinColumns = @JoinColumn(name = "user_number"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+            inverseJoinColumns = @JoinColumn(name = "tag_number")
     )
     private Set<Tag> preferredTags;  // 선호 태그
 

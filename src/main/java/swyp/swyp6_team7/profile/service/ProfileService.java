@@ -9,24 +9,27 @@ import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.dto.ProfileUpdateRequest;
 import swyp.swyp6_team7.tag.domain.Tag;
+import swyp.swyp6_team7.tag.domain.UserTagPreference;
 import swyp.swyp6_team7.tag.repository.TagRepository;
+import swyp.swyp6_team7.tag.repository.UserTagPreferenceRepository;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import static swyp.swyp6_team7.member.entity.QUsers.users;
 
 @Service
 public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final TagRepository tagRepository;
+    private final UserTagPreferenceRepository userTagPreferenceRepository;
 
-    public ProfileService(UserProfileRepository userProfileRepository, UserRepository userRepository, TagRepository tagRepository) {
+    public ProfileService(UserProfileRepository userProfileRepository, UserRepository userRepository, TagRepository tagRepository, UserTagPreferenceRepository userTagPreferenceRepository) {
         this.userProfileRepository = userProfileRepository;
         this.userRepository = userRepository;
         this.tagRepository = tagRepository;
+        this.userTagPreferenceRepository = userTagPreferenceRepository;  // 추가
     }
 
     public void createProfile(ProfileCreateRequest profileCreateRequest) {
@@ -39,10 +42,10 @@ public class ProfileService {
     }
 
     @Transactional
-    public void updateProfile(ProfileUpdateRequest request) {
+    public void updateProfile(Integer userNumber,ProfileUpdateRequest request) {
 
         // Users 엔티티 업데이트
-        Optional<Users> userOpt = userRepository.findById(request.getUserNumber());
+        Optional<Users> userOpt = userRepository.findById(userNumber);
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }
@@ -51,7 +54,7 @@ public class ProfileService {
         userRepository.save(user);
 
         // UserProfile 엔티티 업데이트
-        Optional<UserProfile> userProfileOpt = userProfileRepository.findByUserNumber(request.getUserNumber());
+        Optional<UserProfile> userProfileOpt = userProfileRepository.findByUserNumber(userNumber);
         if (userProfileOpt.isEmpty()) {
             throw new IllegalArgumentException("프로필이 존재하지 않습니다. 새 프로필을 생성해주세요.");
         }
@@ -59,18 +62,30 @@ public class ProfileService {
         userProfile.setProIntroduce(request.getProIntroduce());  // 자기소개 수정
 
         // 선호 태그 업데이트
-        Set<Tag> tagSet = new HashSet<>();
-        for (String tagName : request.getPreferredTags()) {
-            Tag tag = tagRepository.findByName(tagName)
-                    .orElseGet(() -> {
-                        // 태그가 없으면 새로 생성
-                        Tag newTag = Tag.of(tagName);
-                        tagRepository.save(newTag);
-                        return newTag;
-                    });
-            tagSet.add(tag);
+        if (request.getPreferredTags() != null && request.getPreferredTags().length > 0) {
+            List<UserTagPreference> tagPreferences = user.getTagPreferences();
+            tagPreferences.clear();  // 기존 태그 삭제
+
+            Set<Tag> preferredTags = new HashSet<>();
+
+            for (String tagName : request.getPreferredTags()) {
+                Tag tag = tagRepository.findByName(tagName)
+                        .orElseGet(() -> {
+                            Tag newTag = Tag.of(tagName);  // 태그가 없으면 새로 생성
+                            tagRepository.save(newTag);
+                            return newTag;
+                        });
+
+                UserTagPreference userTagPreference = new UserTagPreference();
+                userTagPreference.setUser(user);
+                userTagPreference.setTag(tag);
+                tagPreferences.add(userTagPreference);  // 새로운 태그 추가
+                preferredTags.add(tag);
+            }
+            userTagPreferenceRepository.saveAll(tagPreferences);
+            userProfile.setPreferredTags(preferredTags);  // 선호 태그 업데이트
+
         }
-        userProfile.setPreferredTags(tagSet);  // 선호 태그 업데이트
         userProfileRepository.save(userProfile);  // UserProfile 저장
     }
 
