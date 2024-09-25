@@ -1,4 +1,4 @@
-package swyp.swyp6_team7.member.entity;
+package swyp.swyp6_team7.profile.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

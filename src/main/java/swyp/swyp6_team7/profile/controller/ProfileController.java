@@ -3,7 +3,7 @@ package swyp.swyp6_team7.profile.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swyp.swyp6_team7.member.entity.UserProfile;
+import swyp.swyp6_team7.profile.entity.UserProfile;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.dto.ProfileUpdateRequest;
