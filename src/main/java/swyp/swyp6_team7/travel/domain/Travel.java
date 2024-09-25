@@ -116,6 +116,16 @@ public class Travel {
         this.status = TravelStatus.DELETED;
     }
 
+    public boolean availableForEnroll() {
+        if (this.status != TravelStatus.IN_PROGRESS) {
+            return false;
+        }
+        if (this.dueDate.isBefore(LocalDate.now())) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return "Travel{" +
