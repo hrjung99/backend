@@ -8,17 +8,25 @@ import swyp.swyp6_team7.member.entity.UserProfile;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.dto.ProfileUpdateRequest;
+import swyp.swyp6_team7.tag.domain.Tag;
+import swyp.swyp6_team7.tag.repository.TagRepository;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+
+import static swyp.swyp6_team7.member.entity.QUsers.users;
 
 @Service
 public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
+    private final TagRepository tagRepository;
 
-    public ProfileService(UserProfileRepository userProfileRepository,UserRepository userRepository) {
+    public ProfileService(UserProfileRepository userProfileRepository, UserRepository userRepository, TagRepository tagRepository) {
         this.userProfileRepository = userProfileRepository;
         this.userRepository = userRepository;
+        this.tagRepository = tagRepository;
     }
 
     public void createProfile(ProfileCreateRequest profileCreateRequest) {
@@ -32,26 +40,38 @@ public class ProfileService {
 
     @Transactional
     public void updateProfile(ProfileUpdateRequest request) {
-        System.out.println("Request received for user number: " + request.getUserNumber());
+
+        // Users 엔티티 업데이트
+        Optional<Users> userOpt = userRepository.findById(request.getUserNumber());
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+        Users user = userOpt.get();
+        user.setUserName(request.getName());  // 이름 수정 가능
+        userRepository.save(user);
+
+        // UserProfile 엔티티 업데이트
         Optional<UserProfile> userProfileOpt = userProfileRepository.findByUserNumber(request.getUserNumber());
         if (userProfileOpt.isEmpty()) {
             throw new IllegalArgumentException("프로필이 존재하지 않습니다. 새 프로필을 생성해주세요.");
         }
-        UserProfile userProfile = userProfileOpt.get();  // 이미 조회한 값을 가져옵니다.
+        UserProfile userProfile = userProfileOpt.get();
+        userProfile.setProIntroduce(request.getProIntroduce());  // 자기소개 수정
 
-        // 프로필 정보 수정
-        userProfile.setProIntroduce(request.getProIntroduce());
-
-        userProfileRepository.save(userProfile);  // DB에 저장
-        // Users 업데이트
-        Optional<Users> usersOpt = userRepository.findById(request.getUserNumber());
-        if (usersOpt.isPresent()) {
-            Users user = usersOpt.get();
-            user.setUserName(request.getName());       // name 업데이트
-            userRepository.save(user);            // Users 저장
-        } else {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        // 선호 태그 업데이트
+        Set<Tag> tagSet = new HashSet<>();
+        for (String tagName : request.getPreferredTags()) {
+            Tag tag = tagRepository.findByName(tagName)
+                    .orElseGet(() -> {
+                        // 태그가 없으면 새로 생성
+                        Tag newTag = Tag.of(tagName);
+                        tagRepository.save(newTag);
+                        return newTag;
+                    });
+            tagSet.add(tag);
         }
+        userProfile.setPreferredTags(tagSet);  // 선호 태그 업데이트
+        userProfileRepository.save(userProfile);  // UserProfile 저장
     }
 
     public Optional<UserProfile> getProfileByUserNumber(Integer userNumber) {

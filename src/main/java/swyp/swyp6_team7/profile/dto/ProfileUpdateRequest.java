@@ -4,6 +4,7 @@ public class ProfileUpdateRequest {
     private Integer userNumber;
     private String name;;
     private String proIntroduce;
+    private String[] preferredTags;
 
     public Integer getUserNumber() {
         return userNumber;
@@ -28,4 +29,8 @@ public class ProfileUpdateRequest {
     public void setProIntroduce(String proIntroduce) {
         this.proIntroduce = proIntroduce;
     }
+
+    public String[] getPreferredTags() { return preferredTags;    }
+
+    public void setPreferredTags(String[] preferredTags) {   this.preferredTags = preferredTags;    }
 }

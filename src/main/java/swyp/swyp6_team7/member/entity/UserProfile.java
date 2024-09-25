@@ -1,6 +1,13 @@
 package swyp.swyp6_team7.member.entity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import swyp.swyp6_team7.tag.domain.Tag;
 
+import java.util.Set;
+
+@Getter
+@Setter
 @Entity
 @Table(name = "user_profiles")
 public class UserProfile {
@@ -16,36 +23,15 @@ public class UserProfile {
 
     private String profileImageUrl;  // 프로필 이미지 URL
 
-    // Getters and Setters
-    public Integer getProNumber() {
-        return proNumber;
-    }
+    @ManyToMany
+    @JoinTable(
+            name = "user_tag_preferences",
+            joinColumns = @JoinColumn(name = "user_number"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> preferredTags;  // 선호 태그
 
-    public void setProNumber(Integer proNumber) {
-        this.proNumber = proNumber;
-    }
 
-    public Integer getUserNumber() {
-        return userNumber;
-    }
 
-    public void setUserNumber(Integer userNumber) {
-        this.userNumber = userNumber;
-    }
 
-    public String getProIntroduce() {
-        return proIntroduce;
-    }
-
-    public void setProIntroduce(String proIntroduce) {
-        this.proIntroduce = proIntroduce;
-    }
-
-    public String getProfileImageUrl() {
-        return profileImageUrl;
-    }
-
-    public void setProfileImageUrl(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
 }
