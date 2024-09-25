@@ -55,4 +55,28 @@ class TravelRecommendComparatorTest {
         assertThat(result.get(1)).isEqualTo(dto1);
     }
 
+    @DisplayName("compareTo: preferredNumber, RegisterDue가 같으면 제목순으로 오름차순 정렬한다")
+    @Test
+    public void compareToWhenDueDateSame() {
+        // given
+        TravelRecommendDto dto1 = TravelRecommendDto.builder()
+                .title("나")
+                .preferredNumber(5)
+                .registerDue(LocalDate.now().plusDays(5))
+                .build();
+        TravelRecommendDto dto2 = TravelRecommendDto.builder()
+                .title("가다")
+                .preferredNumber(5)
+                .registerDue(LocalDate.now().plusDays(5))
+                .build();
+        List<TravelRecommendDto> result = new ArrayList<>(List.of(dto1, dto2));
+
+        // when
+        Collections.sort(result, new TravelRecommendComparator());
+
+        // then
+        assertThat(result.get(0)).isEqualTo(dto2);
+        assertThat(result.get(1)).isEqualTo(dto1);
+    }
+
 }
