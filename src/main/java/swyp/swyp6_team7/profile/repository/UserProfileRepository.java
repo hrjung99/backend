@@ -1,7 +1,7 @@
-package swyp.swyp6_team7.member.repository;
+package swyp.swyp6_team7.profile.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import swyp.swyp6_team7.member.entity.UserProfile;
+import swyp.swyp6_team7.profile.entity.UserProfile;
 
 import java.util.Optional;
 

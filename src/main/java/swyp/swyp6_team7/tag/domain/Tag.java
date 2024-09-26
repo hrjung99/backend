@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "tags")
@@ -19,6 +21,9 @@ public class Tag {
 
     @Column(name = "tag_name", nullable = false, unique = true, length = 20)
     private String name;
+
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTagPreference> userTagPreferences;  // user_tagpreferences 참조
 
     @Builder
     public Tag(int number, String name) {
