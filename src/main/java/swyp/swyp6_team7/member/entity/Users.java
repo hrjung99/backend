@@ -34,41 +34,11 @@ public class Users {
     @Column(nullable = false, length = 50)
     private String userName;
 
-    // 성별 ENUM으로 관리
-    public enum Gender{
-        M,F
-    }
-
     @Column(nullable = false, length = 2)
     @Enumerated(EnumType.STRING)
     private Gender userGender;
 
-    public enum AgeGroup{
-        TEEN("10대"), // 10대
-        TWENTY("20대"), // 20대
-        THIRTY("30대"), // 30대
-        FORTY("40대"),  // 40대
-        FIFTY_PLUS("50대 이상"); // 50대 이상
 
-        private final String value;
-
-        AgeGroup(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public static AgeGroup fromValue(String value) {
-            for (AgeGroup ageGroup : AgeGroup.values()) {
-                if (ageGroup.getValue().equals(value)) {
-                    return ageGroup;
-                }
-            }
-            throw new IllegalArgumentException("Invalid age group provided.");
-        }
-    }
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AgeGroup userAgeGroup;
@@ -82,21 +52,16 @@ public class Users {
     private LocalDateTime userLogoutDate;
 
 
-    // 회원 상태 enum으로 관리
-    public enum MemberStatus{
-        ABLE, DELETED, SLEEP
-    }
+
     @Column(nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
-    private MemberStatus userStatus;
+    private UserStatus userStatus;
 
     @Builder.Default
     @Column(nullable = false)
     private Boolean userSocialTF = false;
 
-    public enum UserRole {
-        USER, ADMIN
-    }
+
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
