@@ -15,6 +15,9 @@ import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.service.ProfileService;
 
 import org.springframework.security.core.GrantedAuthority;
+import swyp.swyp6_team7.tag.domain.Tag;
+import swyp.swyp6_team7.tag.domain.UserTagPreference;
+import swyp.swyp6_team7.tag.repository.UserTagPreferenceRepository;
 import swyp.swyp6_team7.tag.service.TagService;
 
 import java.time.LocalDateTime;
@@ -32,19 +35,26 @@ public class MemberService {
 
     private final ProfileService profileService;
     private final TagService tagService;
+    private final UserTagPreferenceRepository userTagPreferenceRepository;
 
     private final String adminSecretKey = "tZ37HBGNyfUZVzgXGiv1OEBHvmgCyVB7";
 
 
     @Autowired
 
-    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider,TagService tagService){
+    public MemberService(UserRepository userRepository,
+                         PasswordEncoder passwordEncoder,
+                         ProfileService profileService,
+                         @Lazy JwtProvider jwtProvider,
+                         TagService tagService,
+                         UserTagPreferenceRepository userTagPreferenceRepository){
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.profileService = profileService;
         this.tagService = tagService;
+        this.userTagPreferenceRepository = userTagPreferenceRepository;
     }
 
     @Transactional(readOnly = true)
@@ -106,6 +116,20 @@ public class MemberService {
         ProfileCreateRequest profileCreateRequest = new ProfileCreateRequest();
         profileCreateRequest.setUserNumber(newUser.getUserNumber());
         profileService.createProfile(profileCreateRequest);
+
+        // 선호 태그 연결 로직
+        if (userRequestDto.getPreferredTags() != null && !userRequestDto.getPreferredTags().isEmpty()) {
+            List<UserTagPreference> tagPreferences = userRequestDto.getPreferredTags().stream().map(tagName -> {
+                Tag tag = tagService.findByName(tagName); // 태그가 없으면 생성
+                UserTagPreference userTagPreference = new UserTagPreference();
+                userTagPreference.setUser(newUser);
+                userTagPreference.setTag(tag);
+                return userTagPreference;
+            }).collect(Collectors.toList());
+
+            // 선호 태그 저장
+            userTagPreferenceRepository.saveAll(tagPreferences);
+        }
 
         // 역할을 리스트로 변환하여 JWT 생성 시 전달
         List<String> roles = List.of(newUser.getRole().name());  // ENUM을 String으로 변환하여 List로 만들기

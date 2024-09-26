@@ -14,7 +14,6 @@ import swyp.swyp6_team7.tag.repository.TagRepository;
 import swyp.swyp6_team7.tag.repository.UserTagPreferenceRepository;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -45,11 +44,10 @@ public class ProfileService {
     public void updateProfile(Integer userNumber,ProfileUpdateRequest request) {
 
         // Users 엔티티 업데이트
-        Optional<Users> userOpt = userRepository.findById(userNumber);
-        if (userOpt.isEmpty()) {
+        Users user = userRepository.findUserWithTags(userNumber);
+        if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }
-        Users user = userOpt.get();
         user.setUserName(request.getName());  // 이름 수정 가능
         userRepository.save(user);
 
@@ -60,10 +58,11 @@ public class ProfileService {
         }
         UserProfile userProfile = userProfileOpt.get();
         userProfile.setProIntroduce(request.getProIntroduce());  // 자기소개 수정
+        userProfileRepository.save(userProfile);  // UserProfile 저장
 
         // 선호 태그 업데이트
         if (request.getPreferredTags() != null && request.getPreferredTags().length > 0) {
-            List<UserTagPreference> tagPreferences = user.getTagPreferences();
+            Set<UserTagPreference> tagPreferences = user.getTagPreferences();
             tagPreferences.clear();  // 기존 태그 삭제
 
             Set<Tag> preferredTags = new HashSet<>();
@@ -83,18 +82,19 @@ public class ProfileService {
                 preferredTags.add(tag);
             }
             userTagPreferenceRepository.saveAll(tagPreferences);
-            userProfile.setPreferredTags(preferredTags);  // 선호 태그 업데이트
-
         }
-        userProfileRepository.save(userProfile);  // UserProfile 저장
+        // 영속성 컨텍스트를 강제로 flush하여 DB에 반영
+        userRepository.flush();
+        userTagPreferenceRepository.flush();
     }
 
     public Optional<UserProfile> getProfileByUserNumber(Integer userNumber) {
         return userProfileRepository.findByUserNumber(userNumber);
     }
 
-    public Optional<Users> getUserByUserNumber(Integer userNumber) {
-        return userRepository.findById(userNumber);
+    public Optional<Users> getUserByUserNumberWithTags(Integer userNumber) {
+        return Optional.ofNullable(userRepository.findUserWithTags(userNumber));
     }
+
 
 }

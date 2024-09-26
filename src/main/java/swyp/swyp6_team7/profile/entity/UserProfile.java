@@ -23,15 +23,4 @@ public class UserProfile {
 
     private String profileImageUrl;  // 프로필 이미지 URL
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_tagpreferences",
-            joinColumns = @JoinColumn(name = "user_number"),
-            inverseJoinColumns = @JoinColumn(name = "tag_number")
-    )
-    private Set<Tag> preferredTags;  // 선호 태그
-
-
-
-
 }

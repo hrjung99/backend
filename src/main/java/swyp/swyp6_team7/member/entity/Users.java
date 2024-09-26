@@ -11,6 +11,7 @@ import swyp.swyp6_team7.tag.domain.UserTagPreference;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -111,23 +112,23 @@ public class Users {
             joinColumns = @JoinColumn(name = "user_number"),
             inverseJoinColumns = @JoinColumn(name = "tag_number")
     )
-    private List<Tag> preferredTags;
+    private Set<Tag> preferredTags;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserTagPreference> tagPreferences;  // user_tagpreferences 참조
+    private Set<UserTagPreference> tagPreferences;  // user_tagpreferences 참조
 
     @Builder
-    public Users(String userEmail, String userPw, String userName, Gender userGender, AgeGroup userAgeGroup, List<Tag> preferredTags) {
+    public Users(String userEmail, String userPw, String userName, Gender userGender, AgeGroup userAgeGroup, Set<Tag> preferredTags) {
         this.userEmail = userEmail;
         this.userPw = userPw;
         this.userName = userName;
         this.userGender = userGender;
         this.userAgeGroup = userAgeGroup;
-        this.preferredTags = (preferredTags != null) ? preferredTags : List.of(); // 태그가 없으면 빈 리스트
+        this.preferredTags = (preferredTags != null) ? preferredTags : Set.of(); // 태그가 없으면 빈 리스트
     }
 
     // 선호 태그 설정 메서드
-    public void setPreferredTags(List<Tag> preferredTags) {
+    public void setPreferredTags(Set<Tag> preferredTags) {
         this.preferredTags = preferredTags;
     }
 
