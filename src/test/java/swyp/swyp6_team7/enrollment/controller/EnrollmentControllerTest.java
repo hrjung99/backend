@@ -10,8 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -22,6 +24,7 @@ import swyp.swyp6_team7.enrollment.dto.EnrollmentCreateRequest;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -34,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,6 +52,8 @@ class EnrollmentControllerTest {
     protected ObjectMapper objectMapper;
     @Autowired
     private WebApplicationContext context;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Autowired
     EnrollmentRepository enrollmentRepository;
@@ -79,8 +85,9 @@ class EnrollmentControllerTest {
                 .userStatus(Users.MemberStatus.ABLE)
                 .build());
 
+        var userDetails = userDetailsService.loadUserByUsername(user.getUserEmail());
         SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities()));
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     }
 
 
@@ -167,6 +174,64 @@ class EnrollmentControllerTest {
         resultActions
                 .andExpect(status().is5xxServerError())
                 .andExpect(content().string("서버 에러: " + "참가 신청 할 수 없는 상태의 콘텐츠 입니다."));
+    }
+
+    @DisplayName("delete: 신청자는 참가 신청을 삭제할 수 있다")
+    @Test
+    public void deleteWhenOwner() throws Exception {
+        // given
+        String url = "/api/enrollment/{enrollmentNumber}";
+        createTestTravel(2, LocalDate.now().plusDays(1), TravelStatus.IN_PROGRESS);
+        Enrollment enrollment = enrollmentRepository.save(Enrollment.builder()
+                .userNumber(user.getUserNumber())
+                .travelNumber(travel.getNumber())
+                .message("참가 신청합니다.")
+                .status(EnrollmentStatus.PENDING)
+                .build()
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(delete(url, enrollment.getNumber()));
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent());
+
+        List<Enrollment> enrollments = enrollmentRepository.findAll();
+        assertThat(enrollments).isEmpty();
+    }
+
+    @DisplayName("delete: 신청자가 아닐 경우 참가 신청을 삭제할 수 없다")
+    @Test
+    public void deleteWhenNotOwner() throws Exception {
+        // given
+        String url = "/api/enrollment/{enrollmentNumber}";
+        createTestTravel(2, LocalDate.now().plusDays(1), TravelStatus.IN_PROGRESS);
+        Users owner = userRepository.save(Users.builder()
+                .userEmail("owner@test.com")
+                .userPw("1234")
+                .userName("host")
+                .userGender(Users.Gender.M)
+                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userRegDate(LocalDateTime.now())
+                .userStatus(Users.MemberStatus.ABLE)
+                .build()
+        );
+        Enrollment enrollment = enrollmentRepository.save(Enrollment.builder()
+                .userNumber(owner.getUserNumber())
+                .travelNumber(travel.getNumber())
+                .message("참가 신청합니다.")
+                .status(EnrollmentStatus.PENDING)
+                .build()
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(delete(url, enrollment.getNumber()));
+
+        // then
+        resultActions
+                .andExpect(status().is5xxServerError())
+                .andExpect(content().string("서버 에러: " + "접근 권한이 없는 신청서입니다."));
     }
 
 
