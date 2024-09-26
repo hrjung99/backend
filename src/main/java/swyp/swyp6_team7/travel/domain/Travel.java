@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 
@@ -121,6 +122,13 @@ public class Travel {
             return false;
         }
         if (this.dueDate.isBefore(LocalDate.now())) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isUserTravelHost(Users users) {
+        if (this.userNumber != users.getUserNumber()) {
             return false;
         }
         return true;

@@ -7,11 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentCreateRequest;
+import swyp.swyp6_team7.enrollment.dto.EnrollmentResponse;
+import swyp.swyp6_team7.travel.dto.response.TravelEnrollmentsResponse;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -47,12 +51,28 @@ public class EnrollmentService {
         enrollmentRepository.delete(enrollment);
     }
 
+    public TravelEnrollmentsResponse findEnrollmentsByTravelNumber(int travelNumber) {
+        Travel targetTravel = travelRepository.findByNumber(travelNumber)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 콘텐츠입니다."));
+        authorizeTravelHost(targetTravel);
+
+        List<EnrollmentResponse> enrollments = enrollmentRepository.findEnrollmentsByTravelNumber(travelNumber);
+        return TravelEnrollmentsResponse.from(enrollments);
+    }
 
     private void authorizeEnrollmentOwner(Enrollment enrollment) {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         Users user = memberService.findByEmail(userName);
         if (enrollment.getUserNumber() != user.getUserNumber()) {
             throw new IllegalArgumentException("접근 권한이 없는 신청서입니다.");
+        }
+    }
+
+    private void authorizeTravelHost(Travel targetTravel) {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users user = memberService.findByEmail(userName);
+        if (!targetTravel.isUserTravelHost(user)) {
+            throw new IllegalArgumentException("여행 주최자의 권한이 필요한 작업입니다.");
         }
     }
 
