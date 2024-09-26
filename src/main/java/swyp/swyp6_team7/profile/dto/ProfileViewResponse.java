@@ -28,14 +28,15 @@ public class ProfileViewResponse {
         this.proIntroduce = userProfile.getProIntroduce();
 
         // 태그 목록을 가져와서 배열로 변환
-        Set<Tag> tagSet = user.getPreferredTags();
-        if (tagSet != null && !tagSet.isEmpty()) {
-            this.preferredTags = tagSet.stream()
-                    .map(Tag::getName)
+        Set<UserTagPreference> tagPreferences = user.getTagPreferences();
+        if (tagPreferences != null && !tagPreferences.isEmpty()) {
+            this.preferredTags = tagPreferences.stream()
+                    .map(preference -> preference.getTag().getName())
                     .toArray(String[]::new);
         } else {
             this.preferredTags = new String[0]; // 태그가 없을 경우 빈 배열
         }
+
     }
 
 

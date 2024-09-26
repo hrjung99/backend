@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findByUserEmail(String email);
-    @Query("SELECT u FROM Users u LEFT JOIN FETCH u.preferredTags WHERE u.userNumber = :userNumber")
-    Users findUserWithTags(@Param("userNumber") Integer userNumber);
+    @Query("SELECT u FROM Users u LEFT JOIN FETCH u.tagPreferences WHERE u.userNumber = :userNumber")
+    Optional<Users> findUserWithTags(@Param("userNumber") Integer userNumber);
+
 }

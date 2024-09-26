@@ -114,7 +114,7 @@ public class Users {
     )
     private Set<Tag> preferredTags;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private Set<UserTagPreference> tagPreferences;  // user_tagpreferences 참조
 
     @Builder

@@ -54,7 +54,7 @@ public class ProfileController {
         // 토큰에서 userNumber 추출
         Integer userNumber = jwtProvider.getUserNumber(token);
 
-        Optional<Users> userOpt = profileService.getUserByUserNumberWithTags(userNumber);
+        Optional<Users> userOpt = profileService.getUserByUserNumber(userNumber);
         Optional<UserProfile> userProfileOpt = profileService.getProfileByUserNumber(userNumber);
 
         if (userOpt.isEmpty()) {

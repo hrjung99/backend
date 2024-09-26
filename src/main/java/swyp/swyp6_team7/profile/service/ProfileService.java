@@ -44,10 +44,9 @@ public class ProfileService {
     public void updateProfile(Integer userNumber,ProfileUpdateRequest request) {
 
         // Users 엔티티 업데이트
-        Users user = userRepository.findUserWithTags(userNumber);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        }
+        Users user = userRepository.findUserWithTags(userNumber)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
         user.setUserName(request.getName());  // 이름 수정 가능
         userRepository.save(user);
 
@@ -86,14 +85,15 @@ public class ProfileService {
         // 영속성 컨텍스트를 강제로 flush하여 DB에 반영
         userRepository.flush();
         userTagPreferenceRepository.flush();
+
     }
 
     public Optional<UserProfile> getProfileByUserNumber(Integer userNumber) {
         return userProfileRepository.findByUserNumber(userNumber);
     }
 
-    public Optional<Users> getUserByUserNumberWithTags(Integer userNumber) {
-        return Optional.ofNullable(userRepository.findUserWithTags(userNumber));
+    public Optional<Users> getUserByUserNumber(Integer userNumber) {
+        return userRepository.findUserWithTags(userNumber);
     }
 
 
