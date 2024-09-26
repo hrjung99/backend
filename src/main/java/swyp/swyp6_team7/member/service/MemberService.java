@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
-import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.entity.*;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,20 +79,20 @@ public class MemberService {
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
 
         // 성별 ENUM 변환
-        Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+        Gender gender = Gender.valueOf(userRequestDto.getGender().toUpperCase());
 
         // 연령대 ENUM 변환 및 검증
-        Users.AgeGroup ageGroup;
+        AgeGroup ageGroup;
         try {
-            ageGroup =  Users.AgeGroup.fromValue(userRequestDto.getAgegroup());
+            ageGroup =  AgeGroup.fromValue(userRequestDto.getAgegroup());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid age group provided.");
         }
 
         // 기본 상태를 ABLE로 설정 (회원 상태 ENUM 사용)
-        Users.MemberStatus status = Users.MemberStatus.ABLE;
+        UserStatus status = UserStatus.ABLE;
 
-        Users.UserRole role = Users.UserRole.USER;
+        UserRole role = UserRole.USER;
 
 
         // Users 객체에 암호화된 비밀번호 설정
@@ -161,18 +161,18 @@ public class MemberService {
 
 
         // 성별 ENUM 변환
-        Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+        Gender gender = Gender.valueOf(userRequestDto.getGender().toUpperCase());
 
         // 연령대 ENUM 변환 및 검증
-        Users.AgeGroup ageGroup;
+        AgeGroup ageGroup;
         try {
-            ageGroup = Users.AgeGroup.valueOf(userRequestDto.getAgegroup().toUpperCase());
+            ageGroup = AgeGroup.valueOf(userRequestDto.getAgegroup().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid age group provided.");
         }
 
         // 관리자 상태 및 역할 설정
-        Users.MemberStatus status = Users.MemberStatus.ABLE;
+        UserStatus status = UserStatus.ABLE;
 
 
         // 새로운 관리자 생성
@@ -182,7 +182,7 @@ public class MemberService {
                 .userName(userRequestDto.getName())
                 .userGender(gender)
                 .userAgeGroup(ageGroup)
-                .role(Users.UserRole.ADMIN)
+                .role(UserRole.ADMIN)
                 .userStatus(status)
                 .build();
 
