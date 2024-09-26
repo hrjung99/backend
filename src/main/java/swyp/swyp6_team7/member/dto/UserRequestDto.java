@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -14,7 +15,7 @@ public class UserRequestDto {
     private String name;   // user_name
     private String gender;      // user_gender (M/F)
     private String agegroup;   // user_age_group
-    private List<String> preferredTags; // 사용자 선호 태그 리스트
+    private Set<String> preferredTags; // 사용자 선호 태그 리스트
 
     // 관리자로 가입할 떄 사용하는 키
     @Value("${custom.admin-secret-key}")
@@ -24,7 +25,7 @@ public class UserRequestDto {
     public UserRequestDto() {
     }
 
-    public UserRequestDto(String email, String password, String name, String gender, String agegroup, List<String> preferredTags) {
+    public UserRequestDto(String email, String password, String name, String gender, String agegroup, Set<String> preferredTags) {
         this.email = email;
         this.password = password;
         this.name = name;
