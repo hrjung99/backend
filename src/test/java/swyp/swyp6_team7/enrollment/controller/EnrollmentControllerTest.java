@@ -148,7 +148,7 @@ class EnrollmentControllerTest {
     public void createWhenTravelDueDateIsOver() throws Exception {
         // given
         String url = "/api/enrollment";
-        createTestTravel(2, LocalDate.now().minusDays(1), TravelStatus.CLOSED);
+        createTestTravel(2, LocalDate.now().minusDays(1), TravelStatus.IN_PROGRESS);
         EnrollmentCreateRequest request = EnrollmentCreateRequest.builder()
                 .travelNumber(travel.getNumber())
                 .message("여행 참가 희망합니다.")
