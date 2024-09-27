@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import swyp.swyp6_team7.config.DataConfig;
+import swyp.swyp6_team7.member.entity.AgeGroup;
+import swyp.swyp6_team7.member.entity.Gender;
+import swyp.swyp6_team7.member.entity.UserStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.tag.domain.Tag;
@@ -68,10 +71,10 @@ class TravelCustomRepositoryImplTest {
                 .userEmail("test@naver.com")
                 .userPw("1234")
                 .userName("모잉")
-                .userGender(Users.Gender.M)
-                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TWENTY)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build());
         Tag tag1 = tagRepository.save(Tag.of("한국"));
         Tag tag2 = tagRepository.save(Tag.of("투어"));

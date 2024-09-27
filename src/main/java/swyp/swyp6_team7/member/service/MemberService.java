@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
-import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.entity.*;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,9 @@ import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.service.ProfileService;
 
 import org.springframework.security.core.GrantedAuthority;
+import swyp.swyp6_team7.tag.domain.Tag;
+import swyp.swyp6_team7.tag.domain.UserTagPreference;
+import swyp.swyp6_team7.tag.repository.UserTagPreferenceRepository;
 import swyp.swyp6_team7.tag.service.TagService;
 
 import java.time.LocalDateTime;
@@ -32,19 +35,28 @@ public class MemberService {
 
     private final ProfileService profileService;
     private final TagService tagService;
+    private final UserTagPreferenceRepository userTagPreferenceRepository;
 
     private final String adminSecretKey = "tZ37HBGNyfUZVzgXGiv1OEBHvmgCyVB7";
 
 
     @Autowired
 
-    public MemberService(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileService profileService, @Lazy JwtProvider jwtProvider, TagService tagService) {
+
+    public MemberService(UserRepository userRepository,
+                         PasswordEncoder passwordEncoder,
+                         ProfileService profileService,
+                         @Lazy JwtProvider jwtProvider,
+                         TagService tagService,
+                         UserTagPreferenceRepository userTagPreferenceRepository){
+
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.profileService = profileService;
         this.tagService = tagService;
+        this.userTagPreferenceRepository = userTagPreferenceRepository;
     }
 
     @Transactional(readOnly = true)
@@ -83,20 +95,22 @@ public class MemberService {
         String encodedPassword = passwordEncoder.encode(userRequestDto.getPassword());
 
         // 성별 ENUM 변환
-        Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+        Gender gender = Gender.valueOf(userRequestDto.getGender().toUpperCase());
 
         // 연령대 ENUM 변환 및 검증
-        Users.AgeGroup ageGroup;
+        AgeGroup ageGroup;
         try {
-            ageGroup = Users.AgeGroup.fromValue(userRequestDto.getAgegroup());
+
+            ageGroup =  AgeGroup.fromValue(userRequestDto.getAgegroup());
+
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid age group provided.");
         }
 
         // 기본 상태를 ABLE로 설정 (회원 상태 ENUM 사용)
-        Users.MemberStatus status = Users.MemberStatus.ABLE;
+        UserStatus status = UserStatus.ABLE;
 
-        Users.UserRole role = Users.UserRole.USER;
+        UserRole role = UserRole.USER;
 
 
         // Users 객체에 암호화된 비밀번호 설정
@@ -121,13 +135,27 @@ public class MemberService {
         profileCreateRequest.setUserNumber(newUser.getUserNumber());
         profileService.createProfile(profileCreateRequest);
 
+        // 선호 태그 연결 로직
+        if (userRequestDto.getPreferredTags() != null && !userRequestDto.getPreferredTags().isEmpty()) {
+            List<UserTagPreference> tagPreferences = userRequestDto.getPreferredTags().stream().map(tagName -> {
+                Tag tag = tagService.findByName(tagName); // 태그가 없으면 생성
+                UserTagPreference userTagPreference = new UserTagPreference();
+                userTagPreference.setUser(newUser);
+                userTagPreference.setTag(tag);
+                return userTagPreference;
+            }).collect(Collectors.toList());
+
+            // 선호 태그 저장
+            userTagPreferenceRepository.saveAll(tagPreferences);
+        }
+
         // 역할을 리스트로 변환하여 JWT 생성 시 전달
         List<String> roles = List.of(newUser.getRole().name());  // ENUM을 String으로 변환하여 List로 만들기
 
 
         // JWT 발급
         long tokenExpirationTime = 3600000; // 토큰 만료 시간 추가(1시간)
-        String token = jwtProvider.createToken(newUser.getEmail(), roles, tokenExpirationTime);
+        String token = jwtProvider.createToken(newUser.getEmail(), newUser.getUserNumber(),roles, tokenExpirationTime);
 
         // 응답 데이터에 userId와 accessToken 포함
         Map<String, Object> response = new HashMap<>();
@@ -151,18 +179,18 @@ public class MemberService {
 
 
         // 성별 ENUM 변환
-        Users.Gender gender = Users.Gender.valueOf(userRequestDto.getGender().toUpperCase());
+        Gender gender = Gender.valueOf(userRequestDto.getGender().toUpperCase());
 
         // 연령대 ENUM 변환 및 검증
-        Users.AgeGroup ageGroup;
+        AgeGroup ageGroup;
         try {
-            ageGroup = Users.AgeGroup.valueOf(userRequestDto.getAgegroup().toUpperCase());
+            ageGroup = AgeGroup.valueOf(userRequestDto.getAgegroup().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid age group provided.");
         }
 
         // 관리자 상태 및 역할 설정
-        Users.MemberStatus status = Users.MemberStatus.ABLE;
+        UserStatus status = UserStatus.ABLE;
 
 
         // 새로운 관리자 생성
@@ -172,7 +200,7 @@ public class MemberService {
                 .userName(userRequestDto.getName())
                 .userGender(gender)
                 .userAgeGroup(ageGroup)
-                .role(Users.UserRole.ADMIN)
+                .role(UserRole.ADMIN)
                 .userStatus(status)
                 .build();
 
@@ -186,7 +214,7 @@ public class MemberService {
 
         // JWT 발급
         long tokenExpirationTime = 3600000; // 토큰 만료 시간 1시간
-        String token = jwtProvider.createToken(newAdmin.getUserEmail(), roles, tokenExpirationTime);
+        String token = jwtProvider.createToken(newAdmin.getUserEmail(),newAdmin.getUserNumber(), roles, tokenExpirationTime);
 
         // 응답 데이터
         Map<String, Object> response = new HashMap<>();

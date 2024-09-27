@@ -39,10 +39,10 @@ public class LoginService {
         }
 
         // Access Token 생성
-        String accessToken = jwtProvider.createAccessToken(user.getUserEmail(), List.of(user.getRole().name()));
+        String accessToken = jwtProvider.createAccessToken(user.getUserEmail(),user.getUserNumber(), List.of(user.getRole().name()));
 
         // Refresh Token 생성 및 httpOnly 쿠키로 설정
-        String refreshToken = jwtProvider.createRefreshToken(user.getUserEmail());
+        String refreshToken = jwtProvider.createRefreshToken(user.getUserEmail(),user.getUserNumber());
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/");
