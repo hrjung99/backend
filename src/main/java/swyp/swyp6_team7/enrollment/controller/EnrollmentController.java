@@ -33,4 +33,18 @@ public class EnrollmentController {
                 .body("여행 참가 신청이 취소되었습니다.");
     }
 
+    @PutMapping("/api/enrollment/{enrollmentNumber}/acceptance")
+    public ResponseEntity accept(@PathVariable(name = "enrollmentNumber") long enrollmentNumber) {
+        enrollmentService.accept(enrollmentNumber);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("신청을 수락했습니다.");
+    }
+
+    @PutMapping("/api/enrollment/{enrollmentNumber}/rejection")
+    public ResponseEntity reject(@PathVariable(name = "enrollmentNumber") long enrollmentNumber) {
+        enrollmentService.reject(enrollmentNumber);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("신청을 거부했습니다.");
+    }
+
 }

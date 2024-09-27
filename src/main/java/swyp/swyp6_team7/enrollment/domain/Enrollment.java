@@ -53,5 +53,13 @@ public class Enrollment {
         this.message = message;
         this.status = status;
     }
-    
+
+    public void accepted() {
+        this.status = EnrollmentStatus.ACCEPTED;
+    }
+
+    public void rejected() {
+        this.status = EnrollmentStatus.REJECTED;
+    }
+
 }
