@@ -22,6 +22,9 @@ import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentCreateRequest;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.member.entity.AgeGroup;
+import swyp.swyp6_team7.member.entity.Gender;
+import swyp.swyp6_team7.member.entity.UserStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.member.service.MemberService;
@@ -75,19 +78,24 @@ class EnrollmentControllerTest {
     void setSecurityContext() {
         userRepository.deleteAll();
         user = userRepository.save(Users.builder()
-                .userNumber(1)
                 .userEmail("abc@test.com")
                 .userPw("1234")
                 .userName("username")
-                .userGender(Users.Gender.M)
-                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TEEN)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build());
 
         var userDetails = userDetailsService.loadUserByUsername(user.getUserEmail());
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    }
+
+    @BeforeEach
+    void setUp(){
+        enrollmentRepository.deleteAll();
+        travelRepository.deleteAll();
     }
 
 
@@ -211,10 +219,10 @@ class EnrollmentControllerTest {
                 .userEmail("owner@test.com")
                 .userPw("1234")
                 .userName("host")
-                .userGender(Users.Gender.M)
-                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TEEN)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build()
         );
         Enrollment enrollment = enrollmentRepository.save(Enrollment.builder()
@@ -240,10 +248,10 @@ class EnrollmentControllerTest {
                 .userEmail("host@test.com")
                 .userPw("1234")
                 .userName("host")
-                .userGender(Users.Gender.M)
-                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TEEN)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build()
         );
         travel = travelRepository.save(Travel.builder()

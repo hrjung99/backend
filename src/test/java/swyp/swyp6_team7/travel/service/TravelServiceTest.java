@@ -29,8 +29,8 @@ class TravelServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = Users.builder()
-                .userNumber(1)
+        userRepository.deleteAll();
+        user = userRepository.save(Users.builder()
                 .userEmail("test@naver.com")
                 .userPw("1234")
                 .userName("username")
@@ -38,14 +38,13 @@ class TravelServiceTest {
                 .userAgeGroup(AgeGroup.TWENTY)
                 .userRegDate(LocalDateTime.now())
                 .userStatus(UserStatus.ABLE)
-                .build();
+                .build());
     }
 
     @DisplayName("create: 이메일로 유저를 가져와 여행 콘텐츠를 만들 수 있다")
     @Test
     public void createTravelWithUser() {
         // given
-        userRepository.save(user);
         TravelCreateRequest request = TravelCreateRequest.builder()
                 .title("test travel post")
                 .completionStatus(true)

@@ -18,6 +18,9 @@ import org.springframework.web.context.WebApplicationContext;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.member.entity.AgeGroup;
+import swyp.swyp6_team7.member.entity.Gender;
+import swyp.swyp6_team7.member.entity.UserStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.GenderType;
@@ -68,10 +71,10 @@ class TravelEnrollmentControllerTest {
                 .userEmail("host@test.com")
                 .userPw("1234")
                 .userName("host")
-                .userGender(Users.Gender.M)
-                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TEEN)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build()
         );
     }
@@ -100,10 +103,10 @@ class TravelEnrollmentControllerTest {
                 .userEmail("abc@test.com")
                 .userPw("1234")
                 .userName("username")
-                .userGender(Users.Gender.M)
-                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TEEN)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build());
         createEnrollment(user);
 
@@ -130,10 +133,10 @@ class TravelEnrollmentControllerTest {
                 .userEmail("abc@test.com")
                 .userPw("1234")
                 .userName("username")
-                .userGender(Users.Gender.M)
-                .userAgeGroup(Users.AgeGroup.TEEN)
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TEEN)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build());
         createEnrollment(user);
 

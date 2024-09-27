@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
+import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Users;
 
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class EnrollmentResponse {
     @QueryProjection
     public EnrollmentResponse(
             long enrollmentNumber, String userName,
-            Users.AgeGroup ageGroup, LocalDateTime enrolledAt,
+            AgeGroup ageGroup, LocalDateTime enrolledAt,
             String message, EnrollmentStatus status
     ) {
         this.enrollmentNumber = enrollmentNumber;
