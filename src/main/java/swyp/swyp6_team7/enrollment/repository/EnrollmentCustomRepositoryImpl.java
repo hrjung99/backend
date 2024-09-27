@@ -37,6 +37,7 @@ public class EnrollmentCustomRepositoryImpl implements EnrollmentCustomRepositor
                 .from(enrollment)
                 .leftJoin(users).on(enrollment.userNumber.eq(users.userNumber))
                 .where(enrollment.travelNumber.eq(travelNumber))
+                .orderBy(enrollment.createdAt.desc())
                 .fetch();
     }
 
