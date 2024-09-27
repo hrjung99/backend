@@ -80,6 +80,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     // 인증 실패 시 처리
                     // 로그를 남기거나 예외를 처리
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token or User not found");
+                    return;
                 }
             }
         }
