@@ -24,6 +24,10 @@ public class TokenController {
     // Refresh Token으로 새로운 Access Token 발급
     @PostMapping("/refresh")
     public ResponseEntity<String> refreshAccessToken(HttpServletRequest request) {
+        // 쿠키가 없는 경우 처리
+        if (request.getCookies() == null) {
+            return ResponseEntity.badRequest().body("Refresh Token이 존재하지 않습니다.");
+        }
         // 쿠키에서 Refresh Token을 추출
         String refreshToken = null;
         for (Cookie cookie : request.getCookies()) {
