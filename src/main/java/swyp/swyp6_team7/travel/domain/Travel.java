@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import swyp.swyp6_team7.companion.domain.Companion;
+import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
 
@@ -79,6 +81,9 @@ public class Travel {
     @OneToMany(mappedBy = "travel")
     private List<TravelTag> travelTags = new ArrayList<>();
 
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Companion> companions = new ArrayList<>();
+
     @Builder
     public Travel(
             int number, int userNumber, LocalDateTime createdAt,
@@ -114,6 +119,31 @@ public class Travel {
 
     public void delete() {
         this.status = TravelStatus.DELETED;
+    }
+
+    public boolean availableForEnroll() {
+        if (this.status != TravelStatus.IN_PROGRESS) {
+            return false;
+        }
+        if (this.dueDate.isBefore(LocalDate.now())) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean availableForAddCompanion() {
+        if (companions.size() >= maxPerson) {
+            return false;
+        }
+        return true;
+    }
+
+
+    public boolean isUserTravelHost(Users users) {
+        if (this.userNumber != users.getUserNumber()) {
+            return false;
+        }
+        return true;
     }
 
     @Override
