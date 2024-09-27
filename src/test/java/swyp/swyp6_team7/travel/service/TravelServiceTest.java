@@ -5,6 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import swyp.swyp6_team7.member.entity.AgeGroup;
+import swyp.swyp6_team7.member.entity.Gender;
+import swyp.swyp6_team7.member.entity.UserStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
@@ -31,11 +34,10 @@ class TravelServiceTest {
                 .userEmail("test@naver.com")
                 .userPw("1234")
                 .userName("username")
-                .userGender(Users.Gender.M)
-                .userBirthYear("2000")
-                .userPhone("01012345678")
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TWENTY)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build();
     }
 

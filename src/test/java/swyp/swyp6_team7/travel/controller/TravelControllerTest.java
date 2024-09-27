@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.entity.*;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
@@ -69,17 +69,18 @@ class TravelControllerTest {
                 .userEmail("abc@test.com")
                 .userPw("1234")
                 .userName("username")
-                .userGender(Users.Gender.M)
-                .userAgeGroup("20대")
-                .userRole("user")
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TWENTY)
+                .role(UserRole.USER)
                 .userRegDate(LocalDateTime.now())
-                .userStatus(Users.MemberStatus.ABLE)
+                .userStatus(UserStatus.ABLE)
                 .build());
-        List<String> roles = new ArrayList<>();
-        roles.add("ROLE_USER");
-        user.setRoles(roles);
+
 
         SecurityContext context = SecurityContextHolder.getContext();
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities());
+
         context.setAuthentication(new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities()));
     }
 
