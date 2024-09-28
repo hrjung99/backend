@@ -45,17 +45,25 @@ public class TravelListService {
                     .map(travelTag -> travelTag.getTag().getName())
                     .collect(Collectors.toList());
 
+            // 세부내용 조회, 수정, 삭제 URL 생성
+            String detailUrl = "/api/travel/detail" + travel.getNumber();
+            String updateUrl = "/api/travel/" + travel.getNumber();
+            String deleteUrl = "/api/travel/" + travel.getNumber();
+
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
                     travel.getLocation(),
-                    username,    // 작성자 이름 (사용자 이름 조회가 필요)
-                    dDay,      // D-Day 형식으로 마감 기한 설정
-                    postedAgo,    // 작성일로부터 경과 시간
-                    currentApplicants,    // 현재 신청 인원 수
+                    username,
+                    dDay,
+                    postedAgo,
+                    currentApplicants,
                     travel.getMaxPerson(),
-                    travel.getStatus() == TravelStatus.CLOSED, // 완료 여부
-                    tags    // 태그 목록
+                    travel.getStatus() == TravelStatus.CLOSED,
+                    tags,
+                    detailUrl,
+                    updateUrl,
+                    deleteUrl
             );
         }).collect(Collectors.toList());
     }

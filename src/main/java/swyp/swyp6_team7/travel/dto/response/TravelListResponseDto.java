@@ -21,6 +21,9 @@ public class TravelListResponseDto {
     private int maxPerson; //최대 인원 수
     private boolean completionStatus;
     private List<String> tags;
+    private String detailUrl; // 세부내용 조회 URL
+    private String updateUrl; // 게시글 수정 URL
+    private String deleteUrl; // 게시글 삭제 URL
 
     // 디데이 포맷 설정
     public static String formatDDay(LocalDate dueDate){
