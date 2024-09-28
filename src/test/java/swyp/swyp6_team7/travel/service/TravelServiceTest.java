@@ -38,7 +38,9 @@ class TravelServiceTest {
                 .userAgeGroup(AgeGroup.TWENTY)
                 .userRegDate(LocalDateTime.now())
                 .userStatus(UserStatus.ABLE)
+
                 .build());
+
     }
 
     @DisplayName("create: 이메일로 유저를 가져와 여행 콘텐츠를 만들 수 있다")

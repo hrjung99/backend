@@ -12,11 +12,13 @@ public class BookmarkResponse {
     private Integer contentId;
     private String contentType;
     private LocalDateTime bookmarkDate;
+    private String contentUrl;
 
-    public BookmarkResponse(Integer bookmarkId, Integer contentId, String contentType, LocalDateTime bookmarkDate) {
+    public BookmarkResponse(Integer bookmarkId, Integer contentId, String contentType, LocalDateTime bookmarkDate,String contentUrl) {
         this.bookmarkId = bookmarkId;
         this.contentId = contentId;
         this.contentType = contentType;
         this.bookmarkDate = bookmarkDate;
+        this.contentUrl = contentUrl;
     }
 }
