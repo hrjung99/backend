@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TravelRepository extends JpaRepository<Travel, Integer>, TravelCustomRepository {
     Optional<Travel> findByNumber(Integer integer);
+    List<Travel> findByUserNumber(int userNumber);
 
 }
