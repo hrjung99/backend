@@ -16,3 +16,10 @@ custom:
     expirationMs: 3600000 # 토큰 만료 시간 (1시간 = 3600000ms)
 
   admin-secret-key: tZ37HBGNyfUZVzgXGiv1OEBHvmgCyVB7
+
+  #https
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health  # /actuator/health 엔드포인트만 노출
