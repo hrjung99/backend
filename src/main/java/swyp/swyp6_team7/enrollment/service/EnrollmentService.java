@@ -10,11 +10,14 @@ import swyp.swyp6_team7.companion.repository.CompanionRepository;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentCreateRequest;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentResponse;
-import swyp.swyp6_team7.travel.dto.response.TravelEnrollmentsResponse;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
+import swyp.swyp6_team7.notification.entity.Notification;
+import swyp.swyp6_team7.notification.repository.NotificationRepository;
+import swyp.swyp6_team7.notification.util.NotificationMaker;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.dto.response.TravelEnrollmentsResponse;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.util.List;
@@ -28,6 +31,7 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final TravelRepository travelRepository;
     private final CompanionRepository companionRepository;
+    private final NotificationRepository notificationRepository;
     private final MemberService memberService;
 
 
@@ -43,6 +47,11 @@ public class EnrollmentService {
         }
         Enrollment created = request.toEntity(user.getUserNumber());
         enrollmentRepository.save(created);
+
+        //알림
+        Notification newNotification = NotificationMaker.travelEnrollmentMessage(targetTravel, user);
+        newNotification = notificationRepository.save(newNotification);
+        log.info("참가 신청 알림 생성: " + newNotification.toString());
     }
 
     @Transactional
@@ -83,16 +92,26 @@ public class EnrollmentService {
                 .build();
         companionRepository.save(newCompanion);
 
-        //TODO: 알림
+        //알림
+        Notification newNotification = NotificationMaker.travelAcceptMessage(targetTravel, enrollment);
+        newNotification = notificationRepository.save(newNotification);
+        log.info("신청 수락 알림 생성: " + newNotification.toString());
     }
 
     @Transactional
     public void reject(long enrollmentNumber) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 신청서입니다."));
+        Travel targetTravel = travelRepository.findByNumber(enrollment.getTravelNumber())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 콘텐츠입니다."));
+        authorizeTravelHost(targetTravel);
+        
         enrollment.rejected();
 
-        //TODO: 알림
+        //알림
+        Notification newNotification = NotificationMaker.travelRejectMessage(targetTravel, enrollment);
+        newNotification = notificationRepository.save(newNotification);
+        log.info("신청 거절 알림 생성: " + newNotification.toString());
     }
 
     private void authorizeEnrollmentOwner(Enrollment enrollment) {
