@@ -49,13 +49,13 @@ public class TravelListControllerTest {
 
         TravelListResponseDto travel1 = new TravelListResponseDto(
                 1, "Title 1", "Location 1", "Username 1", "마감 D-3", "2일 전",
-                2, 5, false, List.of("Tag1", "Tag2"),
-                "/api/travel/1", "/api/travel/1/edit", "/api/travel/1/delete"
+                2, 5, false, true, List.of("Tag1", "Tag2"),
+                "/api/travel/detail/1", "/api/travel/1", "/api/travel/1","/api/bookmarks","/api/bookmarks/1"
         );
         TravelListResponseDto travel2 = new TravelListResponseDto(
                 2, "Title 2", "Location 2", "Username 2", "종료됨", "6일 전",
-                3, 10, true, List.of("Tag3", "Tag4"),
-                "/api/travel/2", "/api/travel/2/edit", "/api/travel/2/delete"
+                3, 10, true, false,List.of("Tag3", "Tag4"),
+                "/api/travel/detail/2", "/api/travel/2", "/api/travel/2","/api/bookmarks","/api/bookmarks/2"
         );
         List<TravelListResponseDto> travelList = List.of(travel1, travel2);
 
