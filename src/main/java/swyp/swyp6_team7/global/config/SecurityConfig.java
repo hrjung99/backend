@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors().and() // CORS 허용
+        http
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
@@ -65,20 +65,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 전역 CORS 설정
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")  // CORS 허용할 API 경로
-                        .allowedOrigins("http://localhost:9999")  // 허용할 프론트엔드 도메인
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")  // 허용할 HTTP 메서드
-                        .allowedHeaders("*")  // 모든 헤더 허용
-                        .allowCredentials(true);  // 인증 정보 허용
-            }
-        };
-    }
+
 
 
 }
