@@ -19,7 +19,7 @@ public class EnrollmentResponse {
     private long enrollmentNumber;
     private String userName;
     private String userAgeGroup;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime enrolledAt;
     private String message;
     private String status;
