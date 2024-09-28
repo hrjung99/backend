@@ -1,7 +1,9 @@
 package swyp.swyp6_team7.bookmark.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -34,5 +36,15 @@ public class Bookmark {
         this.userNumber = userNumber;
         this.contentId = contentId;
         this.contentType = contentType;
+        this.bookmarkDate = LocalDateTime.now();
+    }
+
+    // 모든 필드를 초기화하는 생성자 추가
+    public Bookmark(Integer bookmarkId, Integer userNumber, Integer contentId, ContentType contentType, LocalDateTime bookmarkDate) {
+        this.bookmarkId = bookmarkId;
+        this.userNumber = userNumber;
+        this.contentId = contentId;
+        this.contentType = contentType;
+        this.bookmarkDate = bookmarkDate;
     }
 }

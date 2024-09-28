@@ -30,7 +30,7 @@ public class BookmarkController {
 
     // 북마크 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeBookmark(@PathVariable Integer id) {
+    public ResponseEntity<?> removeBookmark(@PathVariable("id") Integer id) {
         bookmarkService.removeBookmark(id);
         return ResponseEntity.noContent().build();
     }
