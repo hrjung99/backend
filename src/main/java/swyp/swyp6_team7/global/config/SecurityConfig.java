@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/api/refresh-token",
                                 "/login/oauth/kakao/**",
                                 "/error",
-                                "/api/users-email"
+                                "/api/users-email",
+                                "/actuator/health" // Health check endpoint permission
                         ).permitAll()
 
 
