@@ -13,8 +13,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: health  # health 엔드포인트만 노출
-  health:
-    # Health Check 관련 세부 설정을 여기에 추가 가능 (필요시)
-    db:
-      enabled: true     # 예시: DB 상태 체크 활성화 (커스텀 추가 가능)
+        include: health  # /actuator/health 엔드포인트만 노출
