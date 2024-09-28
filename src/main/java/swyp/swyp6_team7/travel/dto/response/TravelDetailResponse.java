@@ -19,7 +19,7 @@ public class TravelDetailResponse {
     private int travelNumber;
     private int userNumber;
     private String userName;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
     private String location;
     private String title;
@@ -33,7 +33,8 @@ public class TravelDetailResponse {
     private String periodType;
     private List<String> tags;
     private String postStatus;
-    //TODO: 조회수, 현재 모집 확정된 인원수 처리
+    //TODO: 조회수, 신청수, 관심수, 현재 모집 확정된 인원수
+    //TODO: 주최자여부, 신청가능여부
 
     @Builder
     public TravelDetailResponse(
