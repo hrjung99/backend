@@ -3,6 +3,9 @@ package swyp.swyp6_team7.travel.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swyp.swyp6_team7.bookmark.entity.Bookmark;
+import swyp.swyp6_team7.bookmark.entity.ContentType;
+import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -21,16 +24,14 @@ public class TravelListService {
 
     private final TravelRepository travelRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional(readOnly = true)
     public List<TravelListResponseDto> getTravelListByUser(Integer userNumber) {
-        // 사용자 번호를 통해 여행 게시글 조회
-        List<Travel> travels = travelRepository.findByUserNumber(userNumber);
-
-        // 사용자의 이름을 미리 조회하여 맵으로 저장
-        String username = userRepository.findByUserNumber(userNumber)
-                .map(users -> users.getUserName())
-                .orElse("Unknown");
+        // 사용자 번호를 통해 여행 게시글 조회 (최신 등록순으로 정렬)
+        List<Travel> travels = travelRepository.findByUserNumber(userNumber).stream()
+                .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt())) // 최신순으로 정렬
+                .collect(Collectors.toList());
 
         // 여행 엔티티를 DTO로 변환하여 반환
         return travels.stream().map(travel -> {
@@ -40,15 +41,18 @@ public class TravelListService {
             // 동반자 수 계산
             int currentApplicants = travel.getCompanions().size();
 
+            // 사용자의 이름을 가져오기 위해 userNumber로 사용자 조회
+            String username = userRepository.findByUserNumber(travel.getUserNumber())
+                    .map(users -> users.getUserName())
+                    .orElse("Unknown"); // 해당 사용자를 찾지 못할 경우 기본값
+
             // 태그 리스트 추출
             List<String> tags = travel.getTravelTags().stream()
                     .map(travelTag -> travelTag.getTag().getName())
                     .collect(Collectors.toList());
 
-            // 세부내용 조회, 수정, 삭제 URL 생성
-            String detailUrl = "/api/travel/detail" + travel.getNumber();
-            String updateUrl = "/api/travel/" + travel.getNumber();
-            String deleteUrl = "/api/travel/" + travel.getNumber();
+            // 북마크 여부 확인
+            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travel.getNumber(), ContentType.TRAVEL);
 
             return new TravelListResponseDto(
                     travel.getNumber(),
@@ -60,11 +64,25 @@ public class TravelListService {
                     currentApplicants,
                     travel.getMaxPerson(),
                     travel.getStatus() == TravelStatus.CLOSED,
+                    isBookmarked,
                     tags,
-                    detailUrl,
-                    updateUrl,
-                    deleteUrl
+                    "/api/travel/" + travel.getNumber(),
+                    "/api/travel/" + travel.getNumber() + "/edit",
+                    "/api/travel/" + travel.getNumber() + "/delete",
+                    "/api/bookmarks", // 북마크 추가 URL
+                    "/api/bookmarks/" + travel.getNumber() // 북마크 제거 URL
             );
         }).collect(Collectors.toList());
+    }
+    @Transactional
+    public void addBookmark(Integer userNumber, int travelNumber) {
+        if (!bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travelNumber, ContentType.TRAVEL)) {
+            bookmarkRepository.save(new Bookmark(userNumber, travelNumber, ContentType.TRAVEL));
+        }
+    }
+
+    @Transactional
+    public void removeBookmark(Integer userNumber, int travelNumber) {
+        bookmarkRepository.deleteByUserNumberAndContentIdAndContentType(userNumber, travelNumber, ContentType.TRAVEL);
     }
 }

@@ -37,7 +37,7 @@ public class TravelListControllerTest {
 
     @Test
     @DisplayName("내가 만든 여행 게시글 목록 조회 테스트")
-    @WithMockUser 
+    @WithMockUser
     public void testGetMyCreatedTravels() throws Exception {
         // Given
         String token = "Bearer validToken";

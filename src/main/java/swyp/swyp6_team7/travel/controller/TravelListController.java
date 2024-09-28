@@ -2,10 +2,7 @@ package swyp.swyp6_team7.travel.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.service.TravelListService;
@@ -34,5 +31,22 @@ public class TravelListController {
 
         return ResponseEntity.ok(travelList);
 
+    }
+    @PostMapping("/bookmark/{travelNumber}")
+    public ResponseEntity<Void> addBookmark(@RequestHeader("Authorization") String token, @PathVariable int travelNumber) {
+        String jwtToken = token.replace("Bearer ", "");
+        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
+
+        travelListService.addBookmark(userNumber, travelNumber);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/bookmark/{travelNumber}")
+    public ResponseEntity<Void> removeBookmark(@RequestHeader("Authorization") String token, @PathVariable int travelNumber) {
+        String jwtToken = token.replace("Bearer ", "");
+        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
+
+        travelListService.removeBookmark(userNumber, travelNumber);
+        return ResponseEntity.noContent().build();
     }
 }
