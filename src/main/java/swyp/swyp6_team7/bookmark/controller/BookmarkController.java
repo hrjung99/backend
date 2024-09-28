@@ -23,7 +23,13 @@ public class BookmarkController {
 
     // 북마크 추가
     @PostMapping
-    public ResponseEntity<?> addBookmark(@RequestBody BookmarkRequest request) {
+    public ResponseEntity<?> addBookmark(@RequestHeader("Authorization") String token,@RequestBody BookmarkRequest request) {
+        // 토큰에서 userNumber 추출
+        String jwtToken = token.replace("Bearer ", "");
+        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
+
+        // userNumber를 요청에 추가
+        request.setUserNumber(userNumber);
         bookmarkService.addBookmark(request);
         return ResponseEntity.ok().build();
     }
