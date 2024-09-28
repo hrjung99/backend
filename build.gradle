@@ -37,6 +37,9 @@ dependencies {
     implementation 'org.springframework.security:spring-security-crypto' //Argon2
     implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
 
+    //actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
@@ -52,9 +55,6 @@ dependencies {
     annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
-
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
 }
 
 tasks.named('test') {
