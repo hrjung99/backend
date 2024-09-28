@@ -69,10 +69,15 @@ public class BookmarkService {
                         bookmark.getBookmarkId(),
                         bookmark.getContentId(),
                         bookmark.getContentType().name(),
-                        bookmark.getBookmarkDate()
+                        bookmark.getBookmarkDate(),
+                        generateContentUrl(bookmark) // URL 생성 메서드를 통해 URL 설정
                 ))
                 .collect(Collectors.toList());
 
         return sortedBookmarks;
+    }
+    // 콘텐츠의 URL을 생성하는 메서드
+    private String generateContentUrl(Bookmark bookmark) {
+        return "/" + bookmark.getContentType().name().toLowerCase() + "/detail/" + bookmark.getContentId();
     }
 }

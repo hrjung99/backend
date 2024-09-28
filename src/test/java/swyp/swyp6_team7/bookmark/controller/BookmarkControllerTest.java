@@ -44,16 +44,18 @@ public class BookmarkControllerTest {
     public void testAddBookmark() throws Exception {
         // Given
         BookmarkRequest request = new BookmarkRequest();
-        request.setUserNumber(1);
         request.setContentId(100);
+        request.setContentType("TRAVEL");
 
         // When
         doNothing().when(bookmarkService).addBookmark(any(BookmarkRequest.class));
+        when(jwtProvider.getUserNumber(anyString())).thenReturn(1); // JWT에서 사용자 번호를 추출하는 부분 추가
 
         // Then
         mockMvc.perform(post("/api/bookmarks")
+                        .header("Authorization", "Bearer validToken") // Authorization 헤더 추가
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"userNumber\": 1, \"itemId\": 100}"))
+                        .content("{\"contentId\": 100, \"contentType\": \"TRAVEL\"}"))
                 .andExpect(status().isOk());
 
         verify(bookmarkService, times(1)).addBookmark(any(BookmarkRequest.class));
@@ -83,8 +85,8 @@ public class BookmarkControllerTest {
         // Given
         String token = "Bearer validToken";
         Integer userNumber = 1;
-        BookmarkResponse response1 = new BookmarkResponse(1, 100, "Content Type 1", LocalDateTime.now());
-        BookmarkResponse response2 = new BookmarkResponse(2, 101, "Content Type 2", LocalDateTime.now());
+        BookmarkResponse response1 = new BookmarkResponse(1, 100, "TRAVEL", LocalDateTime.now(), "http://localhost:8080/travel/100");
+        BookmarkResponse response2 = new BookmarkResponse(2, 101, "COMMUNITY", LocalDateTime.now(), "http://localhost:8080/community/101");
 
         when(jwtProvider.getUserNumber(anyString())).thenReturn(userNumber);
         when(bookmarkService.getBookmarksByUser(userNumber)).thenReturn(List.of(response1, response2));
@@ -96,8 +98,10 @@ public class BookmarkControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].contentId").value(100))
                 .andExpect(jsonPath("$[1].contentId").value(101))
-                .andExpect(jsonPath("$[0].contentType").value("Content Type 1"))
-                .andExpect(jsonPath("$[1].contentType").value("Content Type 2"));
+                .andExpect(jsonPath("$[0].contentType").value("TRAVEL"))
+                .andExpect(jsonPath("$[1].contentType").value("COMMUNITY"))
+                .andExpect(jsonPath("$[0].contentUrl").value("http://localhost:8080/travel/100"))  // 수정된 필드명
+                .andExpect(jsonPath("$[1].contentUrl").value("http://localhost:8080/community/101"));  // 수정된 필드명
 
         verify(jwtProvider, times(1)).getUserNumber(anyString());
         verify(bookmarkService, times(1)).getBookmarksByUser(userNumber);
