@@ -3,6 +3,7 @@ package swyp.swyp6_team7;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -11,6 +12,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 @EnableJpaAuditing
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 @EnableAsync
+@EnableJpaRepositories(basePackages = "swyp.swyp6_team7.repository")
 @SpringBootApplication
 public class Swyp6Team7Application {
 
