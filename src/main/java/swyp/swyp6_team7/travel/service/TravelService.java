@@ -6,6 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.bookmark.entity.ContentType;
+import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.tag.service.TravelTagService;
@@ -28,11 +32,13 @@ import java.util.List;
 public class TravelService {
 
     private final TravelRepository travelRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final TravelTagService travelTagService;
     private final MemberService memberService;
 
     @Transactional
-    public TravelDetailResponse create(TravelCreateRequest request, String email) {
+    public Travel create(TravelCreateRequest request, String email) {
 
         Users user = memberService.findByEmail(email);
 
@@ -41,7 +47,7 @@ public class TravelService {
                 .map(tag -> tag.getName())
                 .toList();
 
-        return TravelDetailResponse.from(savedTravel, tags, user.getUserNumber(), user.getUserName());
+        return savedTravel;
     }
 
     public TravelDetailResponse getDetailsByNumber(int travelNumber) {
@@ -56,11 +62,24 @@ public class TravelService {
 
         TravelDetailDto travelDetail = travelRepository.getDetailsByNumber(travelNumber);
         //enrollment 개수
+        int enrollmentCount = enrollmentRepository.countByTravelNumber(travelNumber);
+        log.info("enrollmentCount: " + enrollmentCount);
         //bookmark 개수
-        //주최자여부
-        //신청가능 여부
+        int bookmarkCount = bookmarkRepository.countByContentIdAndContentType(travelNumber, ContentType.TRAVEL);
+        log.info("bookmarkCount: " + bookmarkCount);
+        TravelDetailResponse detailResponse = new TravelDetailResponse(travelDetail, enrollmentCount, bookmarkCount);
 
-        return new TravelDetailResponse(travelDetail);
+        String requestUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        int requestUserNumber = memberService.findByEmail(requestUserName).getUserNumber();
+        if (travelDetail.getHostNumber() == requestUserNumber) {
+            detailResponse.setHostUserCheckTrue();
+        } else {
+            boolean existEnrollment = enrollmentRepository
+                    .existsByUserNumberAndTravelNumber(requestUserNumber, travelNumber);
+            detailResponse.setEnrollAvailable(existEnrollment);
+        }
+
+        return detailResponse;
     }
 
     @Transactional

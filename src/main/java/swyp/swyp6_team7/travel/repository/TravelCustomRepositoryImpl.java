@@ -65,6 +65,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         travel,
                         users.userNumber,
                         users.userName,
+                        travel.companions.size(),
                         list(tag.name)
                 ))).get(travelNumber);
     }

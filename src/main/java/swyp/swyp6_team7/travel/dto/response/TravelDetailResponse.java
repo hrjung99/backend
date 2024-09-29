@@ -1,12 +1,10 @@
 package swyp.swyp6_team7.travel.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.querydsl.core.annotations.QueryProjection;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.TravelDetailDto;
 
 import java.time.LocalDate;
@@ -36,7 +34,7 @@ public class TravelDetailResponse {
     private String periodType;
     private List<String> tags;
     private String postStatus;
-    private boolean hostUser;        //주최자 여부
+    private boolean hostUserCheck;        //주최자 여부
     private boolean enrollAvailable; //신청 가능 여부
 
     @Builder
@@ -44,7 +42,7 @@ public class TravelDetailResponse {
             int travelNumber, int userNumber, String userName, LocalDateTime createdAt, String location,
             String title, String details, int viewCount, int enrollCount, int bookmarkCount,
             int nowPerson, int maxPerson, String genderType, LocalDate dueDate, String periodType,
-            List<String> tags, String postStatus, boolean hostUser, boolean enrollAvailable
+            List<String> tags, String postStatus, boolean hostUserCheck, boolean enrollAvailable
     ) {
         this.travelNumber = travelNumber;
         this.userNumber = userNumber;
@@ -63,11 +61,14 @@ public class TravelDetailResponse {
         this.periodType = periodType;
         this.tags = tags;
         this.postStatus = postStatus;
-        this.hostUser = hostUser;
+        this.hostUserCheck = hostUserCheck;
         this.enrollAvailable = enrollAvailable;
     }
 
-    public TravelDetailResponse(TravelDetailDto travelDetail) {
+    public TravelDetailResponse(
+            TravelDetailDto travelDetail,
+            int enrollCount, int bookmarkCount
+    ) {
         this.travelNumber = travelDetail.getTravel().getNumber();
         this.userNumber = travelDetail.getHostNumber();
         this.userName = travelDetail.getHostName();
@@ -76,7 +77,9 @@ public class TravelDetailResponse {
         this.title = travelDetail.getTravel().getTitle();
         this.details = travelDetail.getTravel().getDetails();
         this.viewCount = getViewCount();
-        this.nowPerson = travelDetail.getTravel().getCompanions().size();
+        this.enrollCount = enrollCount;
+        this.bookmarkCount = bookmarkCount;
+        this.nowPerson = travelDetail.getCompanionCount();
         this.maxPerson = travelDetail.getTravel().getMaxPerson();
         this.genderType = travelDetail.getTravel().getGenderType().toString();
         this.dueDate = travelDetail.getTravel().getDueDate();
@@ -85,28 +88,17 @@ public class TravelDetailResponse {
         this.postStatus = travelDetail.getTravel().getStatus().toString();
     }
 
-    public static TravelDetailResponse from(
-            Travel travel,
-            List<String> tags,
-            int userNumber, String userName
-    ) {
-        return TravelDetailResponse.builder()
-                .travelNumber(travel.getNumber())
-                .userNumber(userNumber)
-                .userName(userName)
-                .createdAt(travel.getCreatedAt())
-                .location(travel.getLocation())
-                .title(travel.getTitle())
-                .details(travel.getDetails())
-                .viewCount(travel.getViewCount())
-                .nowPerson(travel.getCompanions().size())
-                .maxPerson(travel.getMaxPerson())
-                .genderType(travel.getGenderType().toString())
-                .dueDate(travel.getDueDate())
-                .periodType(travel.getPeriodType().toString())
-                .tags(tags)
-                .postStatus(travel.getStatus().toString())
-                .build();
+
+    public void setHostUserCheckTrue() {
+        this.hostUserCheck = true;
+    }
+
+    public void setEnrollAvailable(boolean existEnrollment) {
+        if (existEnrollment) {
+            this.enrollAvailable = false;
+        } else {
+            this.enrollAvailable = true;
+        }
     }
 
     @Override
@@ -129,7 +121,7 @@ public class TravelDetailResponse {
                 ", periodType='" + periodType + '\'' +
                 ", tags=" + tags +
                 ", postStatus='" + postStatus + '\'' +
-                ", hostUser=" + hostUser +
+                ", hostUserCheck=" + hostUserCheck +
                 ", enrollAvailable=" + enrollAvailable +
                 '}';
     }

@@ -5,4 +5,8 @@ import swyp.swyp6_team7.enrollment.domain.Enrollment;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long>, EnrollmentCustomRepository {
 
+    int countByTravelNumber(int travelNumber);
+
+    boolean existsByUserNumberAndTravelNumber(int userNumber, int travelNumber);
+
 }
