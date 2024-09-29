@@ -10,6 +10,7 @@ import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 
@@ -53,12 +54,11 @@ class TravelServiceTest {
                 .build();
 
         // when
-        TravelDetailResponse detailTravel = travelService.create(request, "test@naver.com");
+        Travel createdTravel = travelService.create(request, "test@naver.com");
 
         // then
-        assertThat(detailTravel.getTitle()).isEqualTo(request.getTitle());
-        assertThat(detailTravel.getUserNumber()).isEqualTo(user.getUserNumber());
-        assertThat(detailTravel.getUserName()).isEqualTo(user.getUserName());
+        assertThat(createdTravel.getTitle()).isEqualTo(request.getTitle());
+        assertThat(createdTravel.getUserNumber()).isEqualTo(user.getUserNumber());
     }
 
 }

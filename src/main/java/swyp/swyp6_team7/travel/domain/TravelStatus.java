@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TravelStatus {
     DRAFT("임시 저장"),
-    IN_PROGRESS("모집 중"),
+    IN_PROGRESS("진행중"),
     CLOSED("모집 종료"),
     DELETED("삭제");
 

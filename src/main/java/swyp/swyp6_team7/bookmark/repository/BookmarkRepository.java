@@ -13,6 +13,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Integer> {
 
     int countByUserNumber(Integer userNumber);
 
+    int countByContentIdAndContentType(int travelNumber, ContentType type);
+
     // 가장 오래된 북마크 조회
     @Query("SELECT b FROM Bookmark b WHERE b.userNumber = :userNumber ORDER BY b.bookmarkDate ASC")
     List<Bookmark> findOldestByUserNumber(@Param("userNumber") Integer userNumber);

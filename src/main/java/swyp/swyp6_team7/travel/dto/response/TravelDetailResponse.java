@@ -1,12 +1,11 @@
 package swyp.swyp6_team7.travel.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.querydsl.core.annotations.QueryProjection;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.dto.TravelDetailDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,32 +16,33 @@ import java.util.List;
 public class TravelDetailResponse {
 
     private int travelNumber;
-    private int userNumber;
-    private String userName;
+    private int userNumber;     //주최자 번호
+    private String userName;    //주최자 이름
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
     private String location;
     private String title;
     private String details;
-    //private int viewCount;
-    //private int nowPerson;
-    private int maxPerson;
+    private int viewCount;      //조회수
+    private int enrollCount;    //신청수
+    private int bookmarkCount;  //관심수(북마크수)
+    private int nowPerson;      //현재 모집 인원
+    private int maxPerson;      //최대 모집 인원
     private String genderType;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
     private String periodType;
     private List<String> tags;
     private String postStatus;
-    //TODO: 조회수, 신청수, 관심수, 현재 모집 확정된 인원수
-    //TODO: 주최자여부, 신청가능여부
+    private boolean hostUserCheck;        //주최자 여부
+    private boolean enrollAvailable; //신청 가능 여부
 
     @Builder
     public TravelDetailResponse(
-            int travelNumber, int userNumber, String userName,
-            LocalDateTime createdAt, String location, String title,
-            String details, int maxPerson, String genderType,
-            LocalDate dueDate, String periodType, List<String> tags,
-            String postStatus
+            int travelNumber, int userNumber, String userName, LocalDateTime createdAt, String location,
+            String title, String details, int viewCount, int enrollCount, int bookmarkCount,
+            int nowPerson, int maxPerson, String genderType, LocalDate dueDate, String periodType,
+            List<String> tags, String postStatus, boolean hostUserCheck, boolean enrollAvailable
     ) {
         this.travelNumber = travelNumber;
         this.userNumber = userNumber;
@@ -51,54 +51,54 @@ public class TravelDetailResponse {
         this.location = location;
         this.title = title;
         this.details = details;
+        this.viewCount = viewCount;
+        this.enrollCount = enrollCount;
+        this.bookmarkCount = bookmarkCount;
+        this.nowPerson = nowPerson;
         this.maxPerson = maxPerson;
         this.genderType = genderType;
         this.dueDate = dueDate;
         this.periodType = periodType;
         this.tags = tags;
         this.postStatus = postStatus;
+        this.hostUserCheck = hostUserCheck;
+        this.enrollAvailable = enrollAvailable;
     }
 
-    @QueryProjection
     public TravelDetailResponse(
-            Travel travel, int userNumber, String userName,
-            List<String> tags
+            TravelDetailDto travelDetail,
+            int enrollCount, int bookmarkCount
     ) {
-        this.travelNumber = travel.getNumber();
-        this.userNumber = userNumber;
-        this.userName = userName;
-        this.createdAt = travel.getCreatedAt();
-        this.location = travel.getLocation();
-        this.title = travel.getTitle();
-        this.details = travel.getDetails();
-        this.maxPerson = travel.getMaxPerson();
-        this.genderType = travel.getGenderType().toString();
-        this.dueDate = travel.getDueDate();
-        this.periodType = travel.getPeriodType().toString();
-        this.tags = tags;
-        this.postStatus = travel.getStatus().toString();
+        this.travelNumber = travelDetail.getTravel().getNumber();
+        this.userNumber = travelDetail.getHostNumber();
+        this.userName = travelDetail.getHostName();
+        this.createdAt = travelDetail.getTravel().getCreatedAt();
+        this.location = travelDetail.getTravel().getLocation();
+        this.title = travelDetail.getTravel().getTitle();
+        this.details = travelDetail.getTravel().getDetails();
+        this.viewCount = getViewCount();
+        this.enrollCount = enrollCount;
+        this.bookmarkCount = bookmarkCount;
+        this.nowPerson = travelDetail.getCompanionCount();
+        this.maxPerson = travelDetail.getTravel().getMaxPerson();
+        this.genderType = travelDetail.getTravel().getGenderType().toString();
+        this.dueDate = travelDetail.getTravel().getDueDate();
+        this.periodType = travelDetail.getTravel().getPeriodType().toString();
+        this.tags = travelDetail.getTags();
+        this.postStatus = travelDetail.getTravel().getStatus().toString();
     }
 
-    public static TravelDetailResponse from(
-            Travel travel,
-            List<String> tags,
-            int userNumber, String userName
-    ) {
-        return TravelDetailResponse.builder()
-                .travelNumber(travel.getNumber())
-                .userNumber(userNumber)
-                .userName(userName)
-                .createdAt(travel.getCreatedAt())
-                .location(travel.getLocation())
-                .title(travel.getTitle())
-                .details(travel.getDetails())
-                .maxPerson(travel.getMaxPerson())
-                .genderType(travel.getGenderType().toString())
-                .dueDate(travel.getDueDate())
-                .periodType(travel.getPeriodType().toString())
-                .tags(tags)
-                .postStatus(travel.getStatus().toString())
-                .build();
+
+    public void setHostUserCheckTrue() {
+        this.hostUserCheck = true;
+    }
+
+    public void setEnrollAvailable(boolean existEnrollment) {
+        if (existEnrollment) {
+            this.enrollAvailable = false;
+        } else {
+            this.enrollAvailable = true;
+        }
     }
 
     @Override
@@ -111,12 +111,18 @@ public class TravelDetailResponse {
                 ", location='" + location + '\'' +
                 ", title='" + title + '\'' +
                 ", details='" + details + '\'' +
+                ", viewCount=" + viewCount +
+                ", enrollCount=" + enrollCount +
+                ", bookmarkCount=" + bookmarkCount +
+                ", nowPerson=" + nowPerson +
                 ", maxPerson=" + maxPerson +
                 ", genderType='" + genderType + '\'' +
                 ", dueDate=" + dueDate +
                 ", periodType='" + periodType + '\'' +
                 ", tags=" + tags +
                 ", postStatus='" + postStatus + '\'' +
+                ", hostUserCheck=" + hostUserCheck +
+                ", enrollAvailable=" + enrollAvailable +
                 '}';
     }
 }

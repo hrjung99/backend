@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
@@ -29,8 +30,9 @@ public class TravelController {
     public ResponseEntity<TravelDetailResponse> create(
             @RequestBody @Validated TravelCreateRequest request, Principal principal
     ) {
+        Travel createdTravel = travelService.create(request, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(travelService.create(request, principal.getName()));
+                .body(travelService.getDetailsByNumber(createdTravel.getNumber()));
     }
 
     @GetMapping("/api/travel/detail/{travelNumber}")
