@@ -11,6 +11,7 @@ import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.tag.service.TravelTagService;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
+import swyp.swyp6_team7.travel.dto.TravelDetailDto;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
@@ -53,7 +54,13 @@ public class TravelService {
             throw new IllegalArgumentException("Deleted Travel.");
         }
 
-        return travelRepository.getDetailsByNumber(travelNumber);
+        TravelDetailDto travelDetail = travelRepository.getDetailsByNumber(travelNumber);
+        //enrollment 개수
+        //bookmark 개수
+        //주최자여부
+        //신청가능 여부
+
+        return new TravelDetailResponse(travelDetail);
     }
 
     @Transactional

@@ -2,7 +2,10 @@ package swyp.swyp6_team7.travel.repository;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.util.StringUtils;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -18,9 +21,12 @@ import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
+import swyp.swyp6_team7.travel.dto.QTravelDetailDto;
+import swyp.swyp6_team7.travel.dto.TravelDetailDto;
 import swyp.swyp6_team7.travel.dto.TravelRecommendDto;
 import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
-import swyp.swyp6_team7.travel.dto.response.*;
+import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
+import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.util.TravelSearchConstant;
 
 import java.util.HashMap;
@@ -47,7 +53,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
 
     @Override
-    public TravelDetailResponse getDetailsByNumber(int travelNumber) {
+    public TravelDetailDto getDetailsByNumber(int travelNumber) {
         return queryFactory
                 .select(travel)
                 .from(travel)
@@ -55,7 +61,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .where(travel.number.eq(travelNumber))
-                .transform(groupBy(travel.number).as(new QTravelDetailResponse(
+                .transform(groupBy(travel.number).as(new QTravelDetailDto(
                         travel,
                         users.userNumber,
                         users.userName,
