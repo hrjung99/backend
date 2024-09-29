@@ -11,9 +11,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import swyp.swyp6_team7.auth.dto.LoginRequestDto;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.member.entity.UserRole;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,17 +54,22 @@ class LoginServiceTest {
 
         Users mockUser = Users.builder()
                 .userEmail(email)
-                .userPw(password)  // 실제로는 암호화된 비밀번호로 저장되어 있어야 합니다.
+                .userPw(passwordEncoder.encode(password))  // 실제로는 암호화된 비밀번호로 저장되어 있어야 합니다.
                 .userSocialTF(false)  // 소셜 로그인이 아님
+                .role(UserRole.USER)
                 .build();
 
         LoginRequestDto loginRequestDto = new LoginRequestDto();
         loginRequestDto.setEmail(email);
         loginRequestDto.setPassword(password);
 
+        List<String> roles = List.of(mockUser.getRole().name());
+
         when(userRepository.findByUserEmail(anyString())).thenReturn(Optional.of(mockUser));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true); // 비밀번호 일치
-        when(jwtProvider.createAccessToken(anyString(), anyInt(), anyList())).thenReturn(mockedAccessToken);
+        when(passwordEncoder.matches(password, mockUser.getUserPw())).thenReturn(true); // 비밀번호 일치
+        when(jwtProvider.createAccessToken(email, mockUser.getUserNumber(), roles))
+                .thenReturn(mockedAccessToken);
+
 
         // When
         String accessToken = loginService.login(loginRequestDto, response);
