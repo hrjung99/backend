@@ -24,8 +24,8 @@ public class TravelDetailResponse {
     private String location;
     private String title;
     private String details;
-    //private int viewCount;
-    //private int nowPerson;
+    private int viewCount;
+    private int nowPerson;
     private int maxPerson;
     private String genderType;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -33,14 +33,14 @@ public class TravelDetailResponse {
     private String periodType;
     private List<String> tags;
     private String postStatus;
-    //TODO: 조회수, 신청수, 관심수, 현재 모집 확정된 인원수
+    //TODO: 신청수, 관심수
     //TODO: 주최자여부, 신청가능여부
 
     @Builder
     public TravelDetailResponse(
             int travelNumber, int userNumber, String userName,
             LocalDateTime createdAt, String location, String title,
-            String details, int maxPerson, String genderType,
+            String details, int viewCount, int nowPerson, int maxPerson, String genderType,
             LocalDate dueDate, String periodType, List<String> tags,
             String postStatus
     ) {
@@ -51,6 +51,8 @@ public class TravelDetailResponse {
         this.location = location;
         this.title = title;
         this.details = details;
+        this.viewCount = viewCount;
+        this.nowPerson = nowPerson;
         this.maxPerson = maxPerson;
         this.genderType = genderType;
         this.dueDate = dueDate;
@@ -71,6 +73,8 @@ public class TravelDetailResponse {
         this.location = travel.getLocation();
         this.title = travel.getTitle();
         this.details = travel.getDetails();
+        this.viewCount = getViewCount();
+        this.nowPerson = travel.getCompanions().size();
         this.maxPerson = travel.getMaxPerson();
         this.genderType = travel.getGenderType().toString();
         this.dueDate = travel.getDueDate();
@@ -92,6 +96,8 @@ public class TravelDetailResponse {
                 .location(travel.getLocation())
                 .title(travel.getTitle())
                 .details(travel.getDetails())
+                .viewCount(travel.getViewCount())
+                .nowPerson(travel.getCompanions().size())
                 .maxPerson(travel.getMaxPerson())
                 .genderType(travel.getGenderType().toString())
                 .dueDate(travel.getDueDate())
@@ -111,6 +117,8 @@ public class TravelDetailResponse {
                 ", location='" + location + '\'' +
                 ", title='" + title + '\'' +
                 ", details='" + details + '\'' +
+                ", viewCount=" + viewCount +
+                ", nowPerson=" + nowPerson +
                 ", maxPerson=" + maxPerson +
                 ", genderType='" + genderType + '\'' +
                 ", dueDate=" + dueDate +

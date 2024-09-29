@@ -60,7 +60,7 @@ public class TravelRecentDto {
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();
-        this.nowPerson = 1; //todo
+        this.nowPerson = travel.getCompanions().size();
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();

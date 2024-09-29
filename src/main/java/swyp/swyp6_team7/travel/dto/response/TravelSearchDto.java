@@ -57,7 +57,7 @@ public class TravelSearchDto {
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags;
-        this.nowPerson = 1; //TODO
+        this.nowPerson = travel.getCompanions().size();
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();

@@ -59,7 +59,7 @@ public class TravelRecommendDto {
         this.userName = userName;
         this.tags = tags.stream()
                 .limit(RECOMMEND_TAG_MAX_NUMBER).toList();
-        this.nowPerson = 1; //TODO: 현재 신청 완료 인원수
+        this.nowPerson = travel.getCompanions().size();
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
