@@ -11,5 +11,7 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findByUserEmail(String email);
     @Query("SELECT u FROM Users u LEFT JOIN FETCH u.tagPreferences WHERE u.userNumber = :userNumber")
     Optional<Users> findUserWithTags(@Param("userNumber") Integer userNumber);
+    Optional<Users> findByUserNumber(int userNumber);
+
 
 }
