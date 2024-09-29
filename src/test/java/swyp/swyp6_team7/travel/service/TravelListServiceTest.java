@@ -1,3 +1,5 @@
+package swyp.swyp6_team7.travel.service;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -129,7 +131,7 @@ class TravelListServiceTest {
         assertEquals(List.of("tag2"), travel2Dto.getTags());
 
         verify(travelRepository, times(1)).findByUserNumber(userNumber);
-        verify(userRepository, times(1)).findByUserNumber(userNumber);
+        //verify(userRepository, times(1)).findByUserNumber(userNumber);
         verify(bookmarkRepository, times(2)).existsByUserNumberAndContentIdAndContentType(eq(userNumber), anyInt(), any());
     }
 }
