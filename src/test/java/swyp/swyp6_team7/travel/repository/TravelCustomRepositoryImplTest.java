@@ -22,10 +22,10 @@ import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
-import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
-import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
-import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
+import swyp.swyp6_team7.travel.dto.TravelDetailDto;
 import swyp.swyp6_team7.travel.dto.TravelRecommendDto;
+import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
+import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 
 import java.time.LocalDate;
@@ -91,13 +91,13 @@ class TravelCustomRepositoryImplTest {
         travelTagRepository.save(TravelTag.of(travel, tag2));
 
         // when
-        TravelDetailResponse details = travelRepository.getDetailsByNumber(travel.getNumber());
+        TravelDetailDto details = travelRepository.getDetailsByNumber(travel.getNumber());
 
         // then
         System.out.println(details.toString());
-        assertThat(details.getTitle()).isEqualTo("추가 테스트 데이터1");
-        assertThat(details.getUserNumber()).isEqualTo(user.getUserNumber());
-        assertThat(details.getUserName()).isEqualTo("모잉");
+        assertThat(details.getTravel().getTitle()).isEqualTo("추가 테스트 데이터1");
+        assertThat(details.getHostNumber()).isEqualTo(user.getUserNumber());
+        assertThat(details.getHostName()).isEqualTo("모잉");
         assertThat(details.getTags().size()).isEqualTo(2);
     }
 

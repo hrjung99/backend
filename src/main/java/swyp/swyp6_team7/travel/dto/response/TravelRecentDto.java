@@ -53,14 +53,14 @@ public class TravelRecentDto {
     @QueryProjection
     public TravelRecentDto(
             Travel travel, int userNumber, String userName,
-            List<String> tags
+            int companionCount, List<String> tags
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();
-        this.nowPerson = 1; //todo
+        this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();

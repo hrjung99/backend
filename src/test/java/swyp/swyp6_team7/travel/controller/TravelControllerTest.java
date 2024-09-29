@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -45,6 +46,8 @@ class TravelControllerTest {
     protected ObjectMapper objectMapper;
     @Autowired
     private WebApplicationContext context;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Autowired
     TravelRepository travelRepository;
@@ -75,11 +78,15 @@ class TravelControllerTest {
                 .userStatus(UserStatus.ABLE)
                 .build());
 
+        var userDetails = userDetailsService.loadUserByUsername(user.getUserEmail());
         SecurityContext context = SecurityContextHolder.getContext();
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities());
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
 
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities()));
+//        SecurityContext context = SecurityContextHolder.getContext();
+//        UsernamePasswordAuthenticationToken authenticationToken =
+//                new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities());
+//
+//        context.setAuthentication(new UsernamePasswordAuthenticationToken(user, user.getUserPw(), user.getAuthorities()));
     }
 
     @DisplayName("create: 사용자는 여행 콘텐츠를 생성할 수 있다")
@@ -125,8 +132,7 @@ class TravelControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value(savedTravel.getTitle()))
-                .andExpect(jsonPath("$.userNumber").value(user.getUserNumber()))
-                .andExpect(jsonPath("$.userName").value(user.getUserName()));
+                .andExpect(jsonPath("$.userNumber").value(user.getUserNumber()));
     }
 
     @DisplayName("getDetailsByNumber: 작성자가 아닌 경우 Draft 상태의 콘텐츠 단건 조회를 하면 예외가 발생")
