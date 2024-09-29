@@ -100,6 +100,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 travel,
                                 users.userNumber,
                                 users.userName,
+                                travel.companions.size(),
                                 list(tag.name)))
                 );
 
@@ -142,7 +143,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         List<Integer> travels = tuples.stream()
                 .map(t -> t.get(travel.number))
                 .toList();
-        log.info("travelsNumber: " + travels);
+        //log.info("travelsNumber: " + travels);
 
         Map<Integer, Integer> travelMap = new HashMap<>();
         for (Tuple tuple : tuples) {
@@ -164,6 +165,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 travel,
                                 users.userNumber,
                                 users.userName,
+                                travel.companions.size(),
                                 list(tag.name)
                                 ))
                 );
@@ -212,6 +214,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 travel,
                                 users.userNumber,
                                 users.userName,
+                                travel.companions.size(),
                                 list(tag.name)))
                 );
 

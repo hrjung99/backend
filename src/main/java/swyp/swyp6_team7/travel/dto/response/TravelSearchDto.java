@@ -50,14 +50,14 @@ public class TravelSearchDto {
     @QueryProjection
     public TravelSearchDto(
             Travel travel, int userNumber, String userName,
-            List<String> tags
+            int companionCount, List<String> tags
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags;
-        this.nowPerson = travel.getCompanions().size();
+        this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();

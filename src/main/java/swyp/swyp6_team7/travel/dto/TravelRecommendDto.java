@@ -51,7 +51,7 @@ public class TravelRecommendDto {
     @QueryProjection
     public TravelRecommendDto(
             Travel travel, int userNumber, String userName,
-            List<String> tags
+            int companionCount, List<String> tags
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
@@ -59,7 +59,7 @@ public class TravelRecommendDto {
         this.userName = userName;
         this.tags = tags.stream()
                 .limit(RECOMMEND_TAG_MAX_NUMBER).toList();
-        this.nowPerson = travel.getCompanions().size();
+        this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
