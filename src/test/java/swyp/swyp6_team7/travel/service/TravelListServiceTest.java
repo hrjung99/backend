@@ -1,5 +1,3 @@
-package swyp.swyp6_team7.travel.service;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,8 @@ import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.tag.domain.TravelTag;
+import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.travel.service.TravelListService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,6 +33,9 @@ class TravelListServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private BookmarkRepository bookmarkRepository;  // 추가된 부분
 
     @InjectMocks
     private TravelListService travelListService;
@@ -82,8 +85,8 @@ class TravelListServiceTest {
         Tag tag1 = Tag.of("tag1");
         Tag tag2 = Tag.of("tag2");
 
-        TravelTag travelTag1 = new TravelTag(null,travel1, tag1);
-        TravelTag travelTag2 = new TravelTag(null,travel2, tag2);
+        TravelTag travelTag1 = new TravelTag(null, travel1, tag1);
+        TravelTag travelTag2 = new TravelTag(null, travel2, tag2);
 
         travel1.getTravelTags().add(travelTag1);
         travel2.getTravelTags().add(travelTag2);
@@ -96,6 +99,7 @@ class TravelListServiceTest {
         // When
         when(travelRepository.findByUserNumber(userNumber)).thenReturn(travels);
         when(userRepository.findByUserNumber(userNumber)).thenReturn(Optional.of(user));
+        when(bookmarkRepository.existsByUserNumberAndContentIdAndContentType(eq(userNumber), anyInt(), any())).thenReturn(true);
 
         // Then
         List<TravelListResponseDto> result = travelListService.getTravelListByUser(userNumber);
@@ -126,5 +130,6 @@ class TravelListServiceTest {
 
         verify(travelRepository, times(1)).findByUserNumber(userNumber);
         verify(userRepository, times(1)).findByUserNumber(userNumber);
+        verify(bookmarkRepository, times(2)).existsByUserNumberAndContentIdAndContentType(eq(userNumber), anyInt(), any());
     }
 }

@@ -14,6 +14,7 @@ import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.service.TravelListService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -48,15 +49,43 @@ public class TravelListControllerTest {
 
 
         TravelListResponseDto travel1 = new TravelListResponseDto(
-                1, "Title 1", "Location 1", "Username 1", "마감 D-3", "2일 전",
-                2, 5, false, true, List.of("Tag1", "Tag2"),
-                "/api/travel/detail/1", "/api/travel/1", "/api/travel/1","/api/bookmarks","/api/bookmarks/1"
+                1,
+                "Title 1",
+                "Location 1",
+                "Username 1",
+                TravelListResponseDto.formatDDay(LocalDate.now().plusDays(3)), // 마감 D-3
+                TravelListResponseDto.formatPostedAgo(LocalDate.now().minusDays(2)), // 2일 전
+                2,
+                5,
+                false,
+                true,
+                List.of("Tag1", "Tag2"),
+                "/api/travel/detail/1",
+                "/api/travel/1",
+                "/api/travel/1",
+                "/api/bookmarks",
+                "/api/bookmarks/1"
         );
+
         TravelListResponseDto travel2 = new TravelListResponseDto(
-                2, "Title 2", "Location 2", "Username 2", "종료됨", "6일 전",
-                3, 10, true, false,List.of("Tag3", "Tag4"),
-                "/api/travel/detail/2", "/api/travel/2", "/api/travel/2","/api/bookmarks","/api/bookmarks/2"
+                2,
+                "Title 2",
+                "Location 2",
+                "Username 2",
+                TravelListResponseDto.formatDDay(LocalDate.now().minusDays(1)), // 종료됨
+                TravelListResponseDto.formatPostedAgo(LocalDate.now().minusDays(6)), // 6일 전
+                3,
+                10,
+                true,
+                false,
+                List.of("Tag3", "Tag4"),
+                "/api/travel/detail/2",
+                "/api/travel/2",
+                "/api/travel/2",
+                "/api/bookmarks",
+                "/api/bookmarks/2"
         );
+
         List<TravelListResponseDto> travelList = List.of(travel1, travel2);
 
         // When
@@ -72,7 +101,7 @@ public class TravelListControllerTest {
                 .andExpect(jsonPath("$[0].title").value("Title 1"))
                 .andExpect(jsonPath("$[0].location").value("Location 1"))
                 .andExpect(jsonPath("$[0].username").value("Username 1"))
-                .andExpect(jsonPath("$[0].dDay").value("마감 D-3"))
+                .andExpect(jsonPath("$[0].dday").value("마감 D-3"))
                 .andExpect(jsonPath("$[0].postedAgo").value("2일 전"))
                 .andExpect(jsonPath("$[0].currentApplicants").value(2))
                 .andExpect(jsonPath("$[0].maxPerson").value(5))
@@ -80,14 +109,14 @@ public class TravelListControllerTest {
                 .andExpect(jsonPath("$[0].tags.length()").value(2))
                 .andExpect(jsonPath("$[0].tags[0]").value("Tag1"))
                 .andExpect(jsonPath("$[0].tags[1]").value("Tag2"))
-                .andExpect(jsonPath("$[0].detailUrl").value("/api/travel/1"))
-                .andExpect(jsonPath("$[0].updateUrl").value("/api/travel/1/edit"))
-                .andExpect(jsonPath("$[0].deleteUrl").value("/api/travel/1/delete"))
+                .andExpect(jsonPath("$[0].detailUrl").value("/api/travel/detail/1"))
+                .andExpect(jsonPath("$[0].updateUrl").value("/api/travel/1"))
+                .andExpect(jsonPath("$[0].deleteUrl").value("/api/travel/1"))
                 // 두 번째 여행 게시글 정보 확인
                 .andExpect(jsonPath("$[1].title").value("Title 2"))
                 .andExpect(jsonPath("$[1].location").value("Location 2"))
                 .andExpect(jsonPath("$[1].username").value("Username 2"))
-                .andExpect(jsonPath("$[1].dDay").value("종료됨"))
+                .andExpect(jsonPath("$[1].dday").value("종료됨"))
                 .andExpect(jsonPath("$[1].postedAgo").value("6일 전"))
                 .andExpect(jsonPath("$[1].currentApplicants").value(3))
                 .andExpect(jsonPath("$[1].maxPerson").value(10))
@@ -95,8 +124,8 @@ public class TravelListControllerTest {
                 .andExpect(jsonPath("$[1].tags.length()").value(2))
                 .andExpect(jsonPath("$[1].tags[0]").value("Tag3"))
                 .andExpect(jsonPath("$[1].tags[1]").value("Tag4"))
-                .andExpect(jsonPath("$[1].detailUrl").value("/api/travel/2"))
-                .andExpect(jsonPath("$[1].updateUrl").value("/api/travel/2/edit"))
-                .andExpect(jsonPath("$[1].deleteUrl").value("/api/travel/2/delete"));
+                .andExpect(jsonPath("$[1].detailUrl").value("/api/travel/detail/2"))
+                .andExpect(jsonPath("$[1].updateUrl").value("/api/travel/2"))
+                .andExpect(jsonPath("$[1].deleteUrl").value("/api/travel/2"));
     }
 }
