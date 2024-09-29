@@ -1,6 +1,12 @@
 spring:
   profiles:
-    include: local-db
+    active: secret # 작업할 때는 local-db로 변경
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local-db
   jpa:
     hibernate:
       ddl-auto: update
@@ -8,14 +14,32 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
   server:
     port: 8080
-custom:
-  jwt:
-    secretKey: oRzn5UpJmgRXxtOLMBG+jNhz2aAjPXHESKdjz4hFea5GNLnB9bVeVXKxKcZtxU+DlGZ4nHGO7xrXYhTkEhe2Zg==
-    expirationMs: 3600000 # 토큰 만료 시간 (1시간 = 3600000ms)
+  #https
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health  # /actuator/health 엔드포인트만 노출
 
-  admin-secret-key: tZ37HBGNyfUZVzgXGiv1OEBHvmgCyVB7
+---
+
+spring:
+  config:
+    activate:
+      on-profile: secret
+  jpa:
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+          dialect: org.hibernate.dialect.MariaDBDialect
+  server:
+    port: 8080
 
   #https
   management:
