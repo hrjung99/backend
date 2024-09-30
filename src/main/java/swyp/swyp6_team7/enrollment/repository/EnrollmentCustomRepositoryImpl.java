@@ -40,5 +40,21 @@ public class EnrollmentCustomRepositoryImpl implements EnrollmentCustomRepositor
                 .orderBy(enrollment.createdAt.desc())
                 .fetch();
     }
-
+    @Override
+    public List<EnrollmentResponse> findEnrollmentsByUserNumber(int userNumber) {
+        return queryFactory
+                .select(new QEnrollmentResponse(
+                        enrollment.number,
+                        users.userName,
+                        users.userAgeGroup,
+                        enrollment.createdAt,
+                        enrollment.message,
+                        enrollment.status
+                ))
+                .from(enrollment)
+                .leftJoin(users).on(enrollment.userNumber.eq(users.userNumber))
+                .where(enrollment.userNumber.eq(userNumber))
+                .orderBy(enrollment.createdAt.desc())
+                .fetch();
+    }
 }

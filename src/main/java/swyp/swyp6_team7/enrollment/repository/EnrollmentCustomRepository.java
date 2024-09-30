@@ -8,4 +8,6 @@ public interface EnrollmentCustomRepository {
 
     List<EnrollmentResponse> findEnrollmentsByTravelNumber(int travelNumber);
 
+    List<EnrollmentResponse> findEnrollmentsByUserNumber(int userNumber);
+
 }
