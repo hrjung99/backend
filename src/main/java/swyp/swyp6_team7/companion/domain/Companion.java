@@ -9,9 +9,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import swyp.swyp6_team7.travel.domain.Travel;
 
 @Getter
-@Table(name = "travel_companion", uniqueConstraints = {
+@Table(name = "companions", uniqueConstraints = {
         @UniqueConstraint(
-                name = "travel_companion_unique", columnNames = {"travel_number", "user_number"}
+                name = "companions_unique", columnNames = {"travel_number", "user_number"}
         )}
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,6 +21,7 @@ public class Companion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "companion_number")
     private Long number;
 
     @ManyToOne(fetch = FetchType.LAZY)
