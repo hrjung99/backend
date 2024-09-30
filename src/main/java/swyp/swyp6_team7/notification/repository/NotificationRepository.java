@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    List<Notification> getNotificationsByReceiverNumberOrderByCreatedAtDesc(int userNumber);
-
-    Page<Notification> getNotificationsByReceiverNumberOrderByCreatedAtDesc(int userNumber, Pageable pageable);
+    Page<Notification> getNotificationsByReceiverNumberOrderByIsReadAscCreatedAtDesc(int userNumber, Pageable pageable);
 
 }

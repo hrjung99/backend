@@ -58,7 +58,7 @@ public class NotificationService {
         Users user = memberService.findByEmail(userName);
 
         Page<Notification> notifications = notificationRepository
-                .getNotificationsByReceiverNumberOrderByCreatedAtDesc(user.getUserNumber(), pageRequest);
+                .getNotificationsByReceiverNumberOrderByIsReadAscCreatedAtDesc(user.getUserNumber(), pageRequest);
 
         return notifications.map(notification -> makeDto(notification));
     }
