@@ -20,7 +20,7 @@ public class TravelNotification extends Notification {
     @Column(name = "travel_number", nullable = false)
     private Integer travelNumber;
 
-    @Column(name = "travel_title")
+    @Column(name = "travel_title", length = 20)
     private String travelTitle;
 
     @Column(name = "travel_due_date")

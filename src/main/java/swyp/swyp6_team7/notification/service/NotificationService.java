@@ -19,8 +19,6 @@ import swyp.swyp6_team7.notification.repository.NotificationRepository;
 import swyp.swyp6_team7.notification.util.NotificationMaker;
 import swyp.swyp6_team7.travel.domain.Travel;
 
-import java.util.List;
-
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
@@ -32,24 +30,31 @@ public class NotificationService {
 
 
     @Async
-    public void createEnrollNotificaton(Travel targetTravel, Users user) {
+    public void createEnrollNotificatonToHost(Travel targetTravel) {
+        Notification newNotification = NotificationMaker.travelEnrollmentMessageToHost(targetTravel);
+        newNotification = notificationRepository.save(newNotification);
+        log.info("[알림]여행신청 =" + newNotification.toString());
+    }
+
+    @Async
+    public void createEnrollNotification(Travel targetTravel, Users user) {
         Notification newNotification = NotificationMaker.travelEnrollmentMessage(targetTravel, user);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림] 참가신청 =" + newNotification.toString());
+        log.info("[알림]참가신청 =" + newNotification.toString());
     }
 
     @Async
     public void createAcceptNotification(Travel targetTravel, Enrollment enrollment) {
         Notification newNotification = NotificationMaker.travelAcceptMessage(targetTravel, enrollment);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림] 신청수락 = " + newNotification.toString());
+        log.info("[알림]참가확정 = " + newNotification.toString());
     }
 
     @Async
     public void createRejectNotification(Travel targetTravel, Enrollment enrollment) {
         Notification newNotification = NotificationMaker.travelRejectMessage(targetTravel, enrollment);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림] 신청거절 = " + newNotification.toString());
+        log.info("[알림]참가거절 = " + newNotification.toString());
     }
 
 

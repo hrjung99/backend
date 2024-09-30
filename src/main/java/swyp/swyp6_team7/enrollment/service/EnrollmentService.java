@@ -48,7 +48,8 @@ public class EnrollmentService {
         enrollmentRepository.save(created);
 
         //알림
-        notificationService.createEnrollNotificaton(targetTravel, user);
+        notificationService.createEnrollNotificatonToHost(targetTravel); //주최자
+        notificationService.createEnrollNotification(targetTravel, user); //신청자
     }
 
     @Transactional

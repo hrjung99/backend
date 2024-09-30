@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Getter
-@Table(name = "travel_enrollment")
+@Table(name = "enrollments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Entity
@@ -20,20 +20,20 @@ public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "enrollment_number")
-    private long number;
+    private Long number;
 
     @Column(name = "user_number", nullable = false)
-    private int userNumber;
+    private Integer userNumber;
 
     @Column(name = "travel_number", nullable = false)
-    private int travelNumber;
+    private Integer travelNumber;
 
     @CreatedDate
     @Column(name = "enrollment_datetime", nullable = false)
     private LocalDateTime createdAt;
 
     @Lob
-    @Column(name = "enrollment_message")
+    @Column(name = "enrollment_message", length = 1000)
     private String message;
 
     @Enumerated(EnumType.STRING)
