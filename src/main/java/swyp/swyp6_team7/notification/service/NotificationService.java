@@ -32,8 +32,8 @@ public class NotificationService {
 
 
     @Async
-    public void createEnrollNotificaton(Travel targetTravel, Users user) {
-        Notification newNotification = NotificationMaker.travelEnrollmentMessage(targetTravel, user);
+    public void createEnrollNotificaton(Travel targetTravel) {
+        Notification newNotification = NotificationMaker.travelEnrollmentMessage(targetTravel);
         newNotification = notificationRepository.save(newNotification);
         log.info("[알림] 참가신청 =" + newNotification.toString());
     }

@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum NotificationType {
+public enum NotificationMessageType {
 
-    TRAVEL_ENROLL("여행 참가 신청"),
-    TRAVEL_ACCEPT("여행 참가 신청"),
-    TRAVEL_REJECT("여행 참가 신청");
+    TRAVEL_ENROLL("여행 신청 알림"),
+    TRAVEL_ACCEPT("참가 확정 알림"),
+    TRAVEL_REJECT("참가 거절 알림");
 
     private final String title;
 
