@@ -12,7 +12,6 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 @EnableJpaAuditing
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 @EnableAsync
-@EnableJpaRepositories(basePackages = "swyp.swyp6_team7.repository")
 @SpringBootApplication
 public class Swyp6Team7Application {
 
