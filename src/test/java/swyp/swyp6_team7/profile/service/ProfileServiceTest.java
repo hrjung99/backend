@@ -7,8 +7,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.profile.dto.PasswordChangeRequest;
 import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.dto.ProfileUpdateRequest;
 import swyp.swyp6_team7.profile.entity.UserProfile;
@@ -30,23 +34,27 @@ class ProfileServiceTest {
 
     @Mock
     private UserProfileRepository userProfileRepository;
-
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private TagRepository tagRepository;
-
     @Mock
     private UserTagPreferenceRepository userTagPreferenceRepository;
-
+    @Mock
+    private JwtProvider jwtProvider;
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private ProfileService profileService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        // PasswordEncoder를 모킹합니다.
+        passwordEncoder = mock(PasswordEncoder.class);
+        profileService = new ProfileService(userProfileRepository, userRepository, tagRepository, userTagPreferenceRepository, jwtProvider, passwordEncoder);
     }
+
 
     @Test
     @DisplayName("프로필 생성 테스트")
@@ -178,4 +186,79 @@ class ProfileServiceTest {
         assertThat(result).isPresent();
         assertThat(result.get().getUserNumber()).isEqualTo(1);
     }
+    @Test
+    @DisplayName("비밀번호 변경 - 성공 케이스")
+    void testChangePassword_Success() {
+        // given
+        Integer userNumber = 1;
+        String currentPassword = "correctCurrentPassword";
+        String newPassword = "newPassword123";
+        String newPasswordConfirm = "newPassword123";
+
+        Users user = new Users();
+        user.setUserNumber(userNumber);
+        user.setUserPw("encodedCurrentPassword");
+
+        // userRepository에서 사용자 찾기와 비밀번호 검증 설정
+        when(userRepository.findById(userNumber)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(currentPassword, user.getUserPw())).thenReturn(true);
+        when(passwordEncoder.encode(newPassword)).thenReturn("encodedNewPassword");
+
+        // when
+        profileService.verifyCurrentPassword(userNumber, currentPassword);
+        profileService.changePassword(userNumber, newPassword, newPasswordConfirm);
+
+        // then
+        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+
+        Users updatedUser = userCaptor.getValue();
+        assertThat(updatedUser.getUserPw()).isEqualTo("encodedNewPassword");
+    }
+
+
+    @Test
+    @DisplayName("현재 비밀번호 검증 - 현재 비밀번호 불일치")
+    void testVerifyCurrentPassword_InvalidCurrentPassword() {
+        // given
+        Integer userNumber = 1;
+        String currentPassword = "wrongPassword";
+
+        Users user = new Users();
+        user.setUserNumber(userNumber);
+        user.setUserPw("encodedCurrentPassword");
+
+        when(userRepository.findById(userNumber)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(currentPassword, user.getUserPw())).thenReturn(false);
+
+        // when & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            profileService.verifyCurrentPassword(userNumber, currentPassword);
+        });
+
+        assertThat(exception.getMessage()).isEqualTo("현재 비밀번호가 올바르지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 - 새 비밀번호와 확인 비밀번호 불일치")
+    void testChangePassword_NewPasswordsDoNotMatch() {
+        // given
+        Integer userNumber = 1;
+        String newPassword = "newPassword123";
+        String newPasswordConfirm = "differentNewPassword123";
+
+        Users user = new Users();
+        user.setUserNumber(userNumber);
+        user.setUserPw("encodedCurrentPassword");
+
+        when(userRepository.findById(userNumber)).thenReturn(Optional.of(user));
+
+        // when & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            profileService.changePassword(userNumber, newPassword, newPasswordConfirm);
+        });
+
+        assertThat(exception.getMessage()).isEqualTo("새 비밀번호가 일치하지 않습니다.");
+    }
+
 }

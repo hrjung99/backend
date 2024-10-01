@@ -1,8 +1,11 @@
 package swyp.swyp6_team7.profile.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.profile.dto.PasswordChangeRequest;
 import swyp.swyp6_team7.profile.repository.UserProfileRepository;
 import swyp.swyp6_team7.profile.entity.UserProfile;
 import swyp.swyp6_team7.member.repository.UserRepository;
@@ -16,20 +19,18 @@ import swyp.swyp6_team7.tag.repository.UserTagPreferenceRepository;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final TagRepository tagRepository;
     private final UserTagPreferenceRepository userTagPreferenceRepository;
+    private final JwtProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
 
-    public ProfileService(UserProfileRepository userProfileRepository, UserRepository userRepository, TagRepository tagRepository, UserTagPreferenceRepository userTagPreferenceRepository) {
-        this.userProfileRepository = userProfileRepository;
-        this.userRepository = userRepository;
-        this.tagRepository = tagRepository;
-        this.userTagPreferenceRepository = userTagPreferenceRepository;  // 추가
-    }
 
     public void createProfile(ProfileCreateRequest profileCreateRequest) {
         // 프로필 엔티티 생성
@@ -96,5 +97,33 @@ public class ProfileService {
         return userRepository.findUserWithTags(userNumber);
     }
 
+    // 현재 비밀번호 검증 로직
+    @Transactional(readOnly = true)
+    public void verifyCurrentPassword(Integer userNumber, String currentPassword) {
+        // 사용자 조회
+        Users user = userRepository.findById(userNumber)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(currentPassword, user.getUserPw())) {
+            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        }
+    }
+
+    // 비밀번호 변경 로직
+    @Transactional
+    public void changePassword(Integer userNumber, String newPassword, String newPasswordConfirm) {
+        // 사용자 조회
+        Users user = userRepository.findById(userNumber)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 새 비밀번호와 확인 비밀번호가 일치하는지 확인
+        if (!newPassword.equals(newPasswordConfirm)) {
+            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호 암호화 후 저장 (Argon2 사용)
+        user.setUserPw(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 }
