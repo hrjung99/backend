@@ -32,21 +32,4 @@ public class TravelListController {
         return ResponseEntity.ok(travelList);
 
     }
-    @PostMapping("/bookmark/{travelNumber}")
-    public ResponseEntity<Void> addBookmark(@RequestHeader("Authorization") String token, @PathVariable int travelNumber) {
-        String jwtToken = token.replace("Bearer ", "");
-        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
-
-        travelListService.addBookmark(userNumber, travelNumber);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/bookmark/{travelNumber}")
-    public ResponseEntity<Void> removeBookmark(@RequestHeader("Authorization") String token, @PathVariable int travelNumber) {
-        String jwtToken = token.replace("Bearer ", "");
-        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
-
-        travelListService.removeBookmark(userNumber, travelNumber);
-        return ResponseEntity.noContent().build();
-    }
 }

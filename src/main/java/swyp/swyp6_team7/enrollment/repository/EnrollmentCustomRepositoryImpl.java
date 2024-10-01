@@ -48,7 +48,7 @@ public class EnrollmentCustomRepositoryImpl implements EnrollmentCustomRepositor
     @Override
     public List<Tuple> findEnrollmentsByUserNumber(int userNumber) {
         return queryFactory
-                .select(enrollment.number, travel.number)
+                .select(enrollment.number, travel.number,enrollment.status)
                 .from(enrollment)
                 .leftJoin(users).on(enrollment.userNumber.eq(users.userNumber))
                 .leftJoin(travel).on(enrollment.travelNumber.eq(travel.number))

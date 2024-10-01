@@ -10,7 +10,7 @@ import swyp.swyp6_team7.travel.service.TravelAppliedService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/my-applied-trips")
+@RequestMapping("/api/my-applied-travels")
 @RequiredArgsConstructor
 public class TravelAppliedController {
 
@@ -32,33 +32,13 @@ public class TravelAppliedController {
 
     // 사용자가 특정 여행에 대한 참가 취소
     @DeleteMapping("/{travelNumber}/cancel")
-    public ResponseEntity<Void> cancelTripApplication(@RequestHeader("Authorization") String token, @PathVariable int travelNumber) {
+    public ResponseEntity<Void> cancelTripApplication(@RequestHeader("Authorization") String token, @PathVariable("travelNumber") int travelNumber) {
         // JWT 토큰에서 사용자 ID 추출
         String jwtToken = token.replace("Bearer ", "");
         Integer userNumber = jwtProvider.getUserNumber(jwtToken);
 
         // 참가 취소 처리
         travelAppliedService.cancelApplication(userNumber, travelNumber);
-        return ResponseEntity.noContent().build();
-    }
-
-    // 여행 북마크 추가
-    @PostMapping("/bookmark/{travelNumber}")
-    public ResponseEntity<Void> addBookmark(@RequestHeader("Authorization") String token, @PathVariable int travelNumber) {
-        String jwtToken = token.replace("Bearer ", "");
-        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
-
-        travelAppliedService.addBookmark(userNumber, travelNumber);
-        return ResponseEntity.ok().build();
-    }
-
-    // 여행 북마크 제거
-    @DeleteMapping("/bookmark/{travelNumber}")
-    public ResponseEntity<Void> removeBookmark(@RequestHeader("Authorization") String token, @PathVariable int travelNumber) {
-        String jwtToken = token.replace("Bearer ", "");
-        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
-
-        travelAppliedService.removeBookmark(userNumber, travelNumber);
         return ResponseEntity.noContent().build();
     }
 }
