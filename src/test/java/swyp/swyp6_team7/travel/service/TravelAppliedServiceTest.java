@@ -95,7 +95,7 @@ public class TravelAppliedServiceTest {
                 .thenReturn(Optional.of(user));
 
         // 북마크 여부 확인
-        when(bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travel.getNumber(), ContentType.TRAVEL))
+        when(bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber()))
                 .thenReturn(true);
 
         // when
@@ -111,7 +111,7 @@ public class TravelAppliedServiceTest {
         verify(companionRepository, times(1)).findByUserNumber(userNumber);
         verify(enrollmentRepository, times(1)).findEnrollmentsByUserNumber(userNumber);
         verify(userRepository, times(1)).findById(userNumber);
-        verify(bookmarkRepository, times(1)).existsByUserNumberAndContentIdAndContentType(userNumber, travel.getNumber(), ContentType.TRAVEL);
+        verify(bookmarkRepository, times(1)).existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
     }
 
     @Test

@@ -1,9 +1,12 @@
 package swyp.swyp6_team7.bookmark.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,28 +40,30 @@ public class BookmarkControllerTest {
 
     @MockBean
     private JwtProvider jwtProvider;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private String jwtToken;
+    @BeforeEach
+    void setUp() {
+        jwtToken = "Bearer test-token";
+        Mockito.when(jwtProvider.getUserNumber(any())).thenReturn(1);
+    }
 
     @Test
     @DisplayName("북마크 추가 테스트")
     @WithMockUser
     public void testAddBookmark() throws Exception {
-        // Given
         BookmarkRequest request = new BookmarkRequest();
-        request.setContentId(100);
-        request.setContentType("TRAVEL");
+        request.setTravelNumber(1);
 
-        // When
-        doNothing().when(bookmarkService).addBookmark(any(BookmarkRequest.class));
-        when(jwtProvider.getUserNumber(anyString())).thenReturn(1); // JWT에서 사용자 번호를 추출하는 부분 추가
-
-        // Then
         mockMvc.perform(post("/api/bookmarks")
-                        .header("Authorization", "Bearer validToken") // Authorization 헤더 추가
+                        .header("Authorization", jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"contentId\": 100, \"contentType\": \"TRAVEL\"}"))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        verify(bookmarkService, times(1)).addBookmark(any(BookmarkRequest.class));
+        Mockito.verify(bookmarkService).addBookmark(any(BookmarkRequest.class));
     }
 
     @Test
@@ -66,45 +71,34 @@ public class BookmarkControllerTest {
     @WithMockUser
     public void testRemoveBookmark() throws Exception {
         // Given
-        Integer bookmarkId = 1;
+        int travelNumber = 1;
 
-        // When
-        doNothing().when(bookmarkService).removeBookmark(bookmarkId);
-
-        // Then
-        mockMvc.perform(delete("/api/bookmarks/{id}", bookmarkId))
+        mockMvc.perform(delete("/api/bookmarks/{travelNumber}", travelNumber)
+                        .header("Authorization", jwtToken))
                 .andExpect(status().isNoContent());
 
-        verify(bookmarkService, times(1)).removeBookmark(bookmarkId);
+        Mockito.verify(bookmarkService).removeBookmark(travelNumber, 1);
     }
 
     @Test
     @DisplayName("사용자 북마크 목록 조회 테스트")
     @WithMockUser
-    public void testGetBookmarks() throws Exception {
-        // Given
-        String token = "Bearer validToken";
-        Integer userNumber = 1;
-        BookmarkResponse response1 = new BookmarkResponse(1, 100, "TRAVEL", LocalDateTime.now(), "http://localhost:8080/travel/100");
-        BookmarkResponse response2 = new BookmarkResponse(2, 101, "COMMUNITY", LocalDateTime.now(), "http://localhost:8080/community/101");
+    void testGetBookmarks() throws Exception {
+        BookmarkResponse response = new BookmarkResponse(1, true, 1,"제목", "위치", "작성자", "오늘", "마감 D-5", 1, 4, false, List.of("가성비", "핫플"), "/api/travel/1", "/api/bookmarks/1");
+        List<BookmarkResponse> responses = List.of(response);
 
-        when(jwtProvider.getUserNumber(anyString())).thenReturn(userNumber);
-        when(bookmarkService.getBookmarksByUser(userNumber)).thenReturn(List.of(response1, response2));
+        Mockito.when(bookmarkService.getBookmarksByUser(anyInt())).thenReturn(responses);
 
-        // Then
         mockMvc.perform(get("/api/bookmarks")
-                        .header("Authorization", token))
+                        .header("Authorization", jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].contentId").value(100))
-                .andExpect(jsonPath("$[1].contentId").value(101))
-                .andExpect(jsonPath("$[0].contentType").value("TRAVEL"))
-                .andExpect(jsonPath("$[1].contentType").value("COMMUNITY"))
-                .andExpect(jsonPath("$[0].contentUrl").value("http://localhost:8080/travel/100"))  // 수정된 필드명
-                .andExpect(jsonPath("$[1].contentUrl").value("http://localhost:8080/community/101"));  // 수정된 필드명
+                .andExpect(jsonPath("$[0].travelNumber").value(1))
+                .andExpect(jsonPath("$[0].title").value("제목"))
+                .andExpect(jsonPath("$[0].location").value("위치"))
+                .andExpect(jsonPath("$[0].username").value("작성자"))
+                .andExpect(jsonPath("$[0].bookmarked").value(true));
 
-        verify(jwtProvider, times(1)).getUserNumber(anyString());
-        verify(bookmarkService, times(1)).getBookmarksByUser(userNumber);
+        Mockito.verify(bookmarkService).getBookmarksByUser(1);
     }
 }
 

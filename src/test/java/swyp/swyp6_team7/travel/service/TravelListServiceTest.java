@@ -101,7 +101,7 @@ class TravelListServiceTest {
         // When
         when(travelRepository.findByUserNumber(userNumber)).thenReturn(travels);
         when(userRepository.findByUserNumber(userNumber)).thenReturn(Optional.of(user));
-        when(bookmarkRepository.existsByUserNumberAndContentIdAndContentType(eq(userNumber), anyInt(), any())).thenReturn(true);
+        when(bookmarkRepository.existsByUserNumberAndTravelNumber(eq(userNumber), anyInt())).thenReturn(true);
 
         // Then
         List<TravelListResponseDto> result = travelListService.getTravelListByUser(userNumber);
@@ -132,6 +132,6 @@ class TravelListServiceTest {
 
         verify(travelRepository, times(1)).findByUserNumber(userNumber);
         //verify(userRepository, times(1)).findByUserNumber(userNumber);
-        verify(bookmarkRepository, times(2)).existsByUserNumberAndContentIdAndContentType(eq(userNumber), anyInt(), any());
+        verify(bookmarkRepository, times(2)).existsByUserNumberAndTravelNumber(eq(userNumber), anyInt());
     }
 }
