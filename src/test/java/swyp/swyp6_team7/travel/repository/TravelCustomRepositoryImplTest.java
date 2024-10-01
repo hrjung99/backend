@@ -1,14 +1,19 @@
 package swyp.swyp6_team7.travel.repository;
 
+import com.querydsl.core.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import swyp.swyp6_team7.config.DataConfig;
+import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
+import swyp.swyp6_team7.enrollment.repository.EnrollmentCustomRepository;
+import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
@@ -36,6 +41,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import swyp.swyp6_team7.enrollment.domain.Enrollment;
+import swyp.swyp6_team7.enrollment.dto.EnrollmentResponse;
 
 @Import(DataConfig.class)
 @DataJpaTest
@@ -49,10 +56,15 @@ class TravelCustomRepositoryImplTest {
     private TagRepository tagRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    @Qualifier("enrollmentCustomRepositoryImpl")
+    private EnrollmentCustomRepository enrollmentCustomRepository;
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @BeforeEach
     void setUp() {
-        travelRepository.save(Travel.builder()
+        Travel savedTravel = travelRepository.save(Travel.builder()
                 .title("기본 테스트 데이터")
                 .userNumber(1)
                 .viewCount(0)
@@ -60,6 +72,26 @@ class TravelCustomRepositoryImplTest {
                 .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now())
                 .status(TravelStatus.IN_PROGRESS)
+                .build());
+
+        Users user = userRepository.save(Users.builder()
+                .userEmail("testuser@naver.com")
+                .userPw("password")
+                .userName("테스트 사용자")
+                .userGender(Gender.M)
+                .userAgeGroup(AgeGroup.TWENTY)
+                .userRegDate(LocalDateTime.now())
+                .userStatus(UserStatus.ABLE)
+                .build());
+
+        int travelNumber = savedTravel.getNumber();
+
+        enrollmentRepository.save(Enrollment.builder()
+                .userNumber(user.getUserNumber())
+                .travelNumber(travelNumber)
+                .createdAt(LocalDateTime.now())
+                .message("참가 신청 메시지")
+                .status(EnrollmentStatus.ACCEPTED)
                 .build());
     }
 
@@ -616,5 +648,23 @@ class TravelCustomRepositoryImplTest {
         assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel3.getNumber());
     }
 
+    @DisplayName("findEnrollmentsByUserNumber: 사용자의 신청한 여행 목록 조회")
+    @Test
+    public void findEnrollmentsByUserNumber_ShouldReturnListOfEnrollments() {
+        // given
+        int userNumber = 1;
 
+        // when
+        List<Tuple> results = enrollmentCustomRepository.findEnrollmentsByUserNumber(userNumber);
+
+        // then
+        assertThat(results).isNotNull();
+        assertThat(results.size()).isGreaterThan(0);
+        Tuple tuple = results.get(0);
+        assertThat(tuple.get(0, Long.class)).isNotNull(); // Enrollment number
+        assertThat(tuple.get(1, Integer.class)).isNotNull(); // Travel number
+
+        System.out.println("Enrollment Number: " + tuple.get(0, Long.class));
+        System.out.println("Travel Number: " + tuple.get(1, Integer.class));
+    }
 }
