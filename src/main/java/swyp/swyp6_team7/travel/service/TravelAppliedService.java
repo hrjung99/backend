@@ -25,6 +25,7 @@ import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,7 @@ public class TravelAppliedService {
                     .collect(Collectors.toList());
 
             // 북마크 여부 확인
-            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travel.getNumber(), ContentType.TRAVEL);
+            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
 
             return new TravelAppliedListResponseDto(
                     travel.getNumber(),

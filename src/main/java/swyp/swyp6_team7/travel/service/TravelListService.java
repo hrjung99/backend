@@ -14,6 +14,7 @@ import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class TravelListService {
                     .collect(Collectors.toList());
 
             // 북마크 여부 확인
-            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travel.getNumber(), ContentType.TRAVEL);
+            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
 
             return new TravelListResponseDto(
                     travel.getNumber(),
@@ -73,16 +74,5 @@ public class TravelListService {
                     "/api/bookmarks/" + travel.getNumber() // 북마크 제거 URL
             );
         }).collect(Collectors.toList());
-    }
-    @Transactional
-    public void addBookmark(Integer userNumber, int travelNumber) {
-        if (!bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travelNumber, ContentType.TRAVEL)) {
-            bookmarkRepository.save(new Bookmark(userNumber, travelNumber, ContentType.TRAVEL));
-        }
-    }
-
-    @Transactional
-    public void removeBookmark(Integer userNumber, int travelNumber) {
-        bookmarkRepository.deleteByUserNumberAndContentIdAndContentType(userNumber, travelNumber, ContentType.TRAVEL);
     }
 }

@@ -21,6 +21,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Integer> {
 
 
     boolean existsByUserNumberAndTravelNumber(Integer userNumber, Integer travelNumber);
-    boolean deleteByUserNumberAndTravelNumber(Integer userNumber, Integer travelNumber);
+    int deleteByUserNumberAndTravelNumber(Integer userNumber, Integer travelNumber);
 
 }

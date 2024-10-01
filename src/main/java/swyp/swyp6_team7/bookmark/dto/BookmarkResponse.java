@@ -15,6 +15,7 @@ import java.util.List;
 public class BookmarkResponse {
     private Integer bookmarkId;
     private boolean bookmarked;
+    private Integer travelNumber;
     private String title;
     private String location;
     private String username;
