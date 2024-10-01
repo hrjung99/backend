@@ -35,9 +35,14 @@ public class BookmarkController {
     }
 
     // 북마크 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeBookmark(@PathVariable("id") Integer id) {
-        bookmarkService.removeBookmark(id);
+    @DeleteMapping("/{travelNumber}")
+    public ResponseEntity<?> removeBookmark(@PathVariable("travelNumber") Integer travelNumber, @RequestHeader("Authorization") String token) {
+        // 토큰에서 userNumber 추출
+        String jwtToken = token.replace("Bearer ", "");
+        Integer userNumber = jwtProvider.getUserNumber(jwtToken);
+
+        // 여행 번호와 사용자 번호로 북마크 삭제
+        bookmarkService.removeBookmark(travelNumber, userNumber);
         return ResponseEntity.noContent().build();
     }
 
