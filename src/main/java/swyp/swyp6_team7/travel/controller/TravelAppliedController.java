@@ -2,6 +2,7 @@ package swyp.swyp6_team7.travel.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,11 @@ public class TravelAppliedController {
     @GetMapping("")
     public ResponseEntity<Page<TravelListResponseDto>> getAppliedTrips(
             @RequestHeader("Authorization") String token,
-            Pageable pageable
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size
+
     ) {
+        Pageable pageable = PageRequest.of(page, size);
         // JWT 토큰에서 사용자 ID 추출
         String jwtToken = token.replace("Bearer ", "");
         Integer userNumber = jwtProvider.getUserNumber(jwtToken);
