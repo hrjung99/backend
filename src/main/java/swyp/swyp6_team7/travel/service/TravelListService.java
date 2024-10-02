@@ -1,6 +1,9 @@
 package swyp.swyp6_team7.travel.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
@@ -23,14 +26,14 @@ public class TravelListService {
     private final BookmarkRepository bookmarkRepository;
 
     @Transactional(readOnly = true)
-    public List<TravelListResponseDto> getTravelListByUser(Integer userNumber) {
+    public Page<TravelListResponseDto> getTravelListByUser(Integer userNumber, Pageable pageable) {
         // 사용자 번호를 통해 여행 게시글 조회 (최신 등록순으로 정렬)
         List<Travel> travels = travelRepository.findByUserNumber(userNumber).stream()
                 .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt())) // 최신순으로 정렬
                 .collect(Collectors.toList());
 
         // 여행 엔티티를 DTO로 변환하여 반환
-        return travels.stream().map(travel -> {
+        List<TravelListResponseDto> dtos = travels.stream().map(travel -> {
 
             // 동반자 수 계산
             int currentApplicants = travel.getCompanions().size();
@@ -61,5 +64,9 @@ public class TravelListService {
                     isBookmarked
             );
         }).collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), dtos.size());
+        return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 }

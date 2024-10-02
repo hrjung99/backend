@@ -1,6 +1,5 @@
 package swyp.swyp6_team7.travel.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -8,22 +7,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
-import swyp.swyp6_team7.travel.dto.response.TravelAppliedListResponseDto;
+import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.service.TravelAppliedService;
 
 import java.util.Collections;
-import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,54 +47,42 @@ public class TravelAppliedControllerTest {
     @Test
     void getAppliedTrips_ShouldReturnListOfAppliedTrips() throws Exception {
         // given
-        int userNumber = 1;
-        List<TravelAppliedListResponseDto> mockAppliedTrips = List.of(
-                new TravelAppliedListResponseDto(
-                        2,
-                        "강릉 갈사람",
-                        "강릉",
-                        "username",
-                        "마감 D-28",
-                        "오늘",
-                        0,
-                        2,
-                        false,
-                        true,
-                        List.of("가성비", "핫플"),
-                        "/api/travel/2",
-                        "/api/my-applied-travels/2/cancel",
-                        "/api/bookmarks",
-                        "/api/bookmarks/2"
-                )
-        );
+        String token = "Bearer test-token";
+        Integer userNumber = 1;
+        Pageable pageable = PageRequest.of(0, 5);
+        TravelListResponseDto responseDto = TravelListResponseDto.builder()
+                .travelNumber(25)
+                .title("호주 여행 같이 갈 사람 구해요")
+                .userNumber(3)
+                .userName("김모잉")
+                .tags(Collections.singletonList("즉흥"))
+                .nowPerson(1)
+                .maxPerson(5)
+                .createdAt("2024년 09월 21일")
+                .registerDue("2025년 05월 15일")
+                .isBookmarked(false)
+                .build();
+        Page<TravelListResponseDto> page = new PageImpl<>(Collections.singletonList(responseDto), pageable, 1);
 
-        // Mock the JwtProvider to return the userNumber from the token
+        // when
         when(jwtProvider.getUserNumber("test-token")).thenReturn(userNumber);
+        when(travelAppliedService.getAppliedTripsByUser(userNumber, pageable)).thenReturn(page);
 
-        // Mock the TravelAppliedService to return a list of applied travels
-        when(travelAppliedService.getAppliedTripsByUser(userNumber)).thenReturn(mockAppliedTrips);
-
-        // when & then
+        // then
         mockMvc.perform(get("/api/my-applied-travels")
-                        .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .param("page", "0")
+                        .param("size", "5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].travelNumber").value(2))
-                .andExpect(jsonPath("$[0].title").value("강릉 갈사람"))
-                .andExpect(jsonPath("$[0].location").value("강릉"))
-                .andExpect(jsonPath("$[0].username").value("username"))
-                .andExpect(jsonPath("$[0].dday").value("마감 D-28"))
-                .andExpect(jsonPath("$[0].postedAgo").value("오늘"))
-                .andExpect(jsonPath("$[0].currentApplicants").value(0))
-                .andExpect(jsonPath("$[0].maxPerson").value(2))
-                .andExpect(jsonPath("$[0].completionStatus").value(false))
-                .andExpect(jsonPath("$[0].bookmarked").value(true))
-                .andExpect(jsonPath("$[0].tags[0]").value("가성비"))
-                .andExpect(jsonPath("$[0].tags[1]").value("핫플"))
-                .andExpect(jsonPath("$[0].detailUrl").value("/api/travel/2"))
-                .andExpect(jsonPath("$[0].cancelApplicationUrl").value("/api/my-applied-travels/2/cancel"))
-                .andExpect(jsonPath("$[0].addBookmarkUrl").value("/api/bookmarks"))
-                .andExpect(jsonPath("$[0].removeBookmarkUrl").value("/api/bookmarks/2"));
+                .andExpect(jsonPath("$.content[0].travelNumber").value(25))
+                .andExpect(jsonPath("$.content[0].title").value("호주 여행 같이 갈 사람 구해요"))
+                .andExpect(jsonPath("$.content[0].userName").value("김모잉"))
+                .andExpect(jsonPath("$.content[0].tags[0]").value("즉흥"))
+                .andExpect(jsonPath("$.page.size").value(5))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
+
     }
 
     @DisplayName("사용자가 특정 여행에 대한 참가 신청을 취소한다")

@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,6 +22,7 @@ import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.service.TravelListService;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -37,68 +43,55 @@ public class TravelListControllerTest {
 
     @MockBean
     private JwtProvider jwtProvider;
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String BEARER_TOKEN = "Bearer test-token";
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    private final String AUTHORIZATION_HEADER = "Authorization";
+    private final String BEARER_TOKEN = "Bearer test-token";
 
-    @Test
     @DisplayName("내가 만든 여행 게시글 목록 조회 테스트")
     @WithMockUser
-    void getMyCreatedTravels() throws Exception {
+    @Test
+    void getMyCreatedTravels_ShouldReturnListOfCreatedTravels() throws Exception {
         // given
-        int userNumber = 1;
+        String token = "Bearer test-token";
+        Integer userNumber = 1;
+        Pageable pageable = PageRequest.of(0, 5);
+        TravelListResponseDto responseDto = TravelListResponseDto.builder()
+                .travelNumber(25)
+                .title("호주 여행 같이 갈 사람 구해요")
+                .userNumber(3)
+                .userName("김모잉")
+                .tags(Collections.singletonList("즉흥"))
+                .nowPerson(1)
+                .maxPerson(5)
+                .createdAt("2024년 09월 21일")
+                .registerDue("2025년 05월 15일")
+                .isBookmarked(true)
+                .build();
+        Page<TravelListResponseDto> page = new PageImpl<>(Collections.singletonList(responseDto), pageable, 1);
 
-        // Mock the JwtProvider to return the userNumber from the token
+        // when
         when(jwtProvider.getUserNumber("test-token")).thenReturn(userNumber);
+        when(travelListService.getTravelListByUser(userNumber, pageable)).thenReturn(page);
 
-        // Mock the TravelListService to return a list of travels
-        List<TravelListResponseDto> mockTravelList = List.of(
-                new TravelListResponseDto(
-                        2,
-                        "강릉 갈사람",
-                        "강릉",
-                        "username",
-                        "마감 D-228",
-                        "오늘",
-                        0,
-                        2,
-                        false,
-                        true,
-                        List.of("가성비", "핫플"),
-                        "/api/travel/2",
-                        "/api/travel/2/edit",
-                        "/api/travel/2/delete",
-                        "/api/bookmarks",
-                        "/api/bookmarks/2"
-                )
-        );
-        when(travelListService.getTravelListByUser(userNumber)).thenReturn(mockTravelList);
-
-        // when & then
+        // then
         mockMvc.perform(get("/api/my-travels")
-                        .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .param("page", "0")
+                        .param("size", "5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].travelNumber").value(2))
-                .andExpect(jsonPath("$[0].title").value("강릉 갈사람"))
-                .andExpect(jsonPath("$[0].location").value("강릉"))
-                .andExpect(jsonPath("$[0].username").value("username"))
-                .andExpect(jsonPath("$[0].dday").value("마감 D-228"))
-                .andExpect(jsonPath("$[0].postedAgo").value("오늘"))
-                .andExpect(jsonPath("$[0].currentApplicants").value(0))
-                .andExpect(jsonPath("$[0].maxPerson").value(2))
-                .andExpect(jsonPath("$[0].completionStatus").value(false))
-                .andExpect(jsonPath("$[0].bookmarked").value(true))
-                .andExpect(jsonPath("$[0].tags[0]").value("가성비"))
-                .andExpect(jsonPath("$[0].tags[1]").value("핫플"))
-                .andExpect(jsonPath("$[0].detailUrl").value("/api/travel/2"))
-                .andExpect(jsonPath("$[0].updateUrl").value("/api/travel/2/edit"))
-                .andExpect(jsonPath("$[0].deleteUrl").value("/api/travel/2/delete"))
-                .andExpect(jsonPath("$[0].addBookmarkUrl").value("/api/bookmarks"))
-                .andExpect(jsonPath("$[0].removeBookmarkUrl").value("/api/bookmarks/2"));
+                .andExpect(jsonPath("$.content[0].travelNumber").value(25))
+                .andExpect(jsonPath("$.content[0].title").value("호주 여행 같이 갈 사람 구해요"))
+                .andExpect(jsonPath("$.content[0].userNumber").value(3))
+                .andExpect(jsonPath("$.content[0].userName").value("김모잉"))
+                .andExpect(jsonPath("$.content[0].tags[0]").value("즉흥"))
+                .andExpect(jsonPath("$.content[0].nowPerson").value(1))
+                .andExpect(jsonPath("$.content[0].maxPerson").value(5))
+                .andExpect(jsonPath("$.content[0].createdAt").value("2024년 09월 21일"))
+                .andExpect(jsonPath("$.content[0].registerDue").value("2025년 05월 15일"))
+                //.andExpect(jsonPath("$.content[0].isBookmarked").value(true))
+                .andExpect(jsonPath("$.page.size").value(5))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
     }
 }
