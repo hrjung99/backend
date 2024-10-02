@@ -1,36 +1,30 @@
 package swyp.swyp6_team7.auth.controller;
 
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
-
-import jakarta.servlet.http.Cookie;
-import swyp.swyp6_team7.member.entity.UserRole;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class TokenControllerTest {
+public class TokenControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,50 +36,71 @@ class TokenControllerTest {
     private UserRepository userRepository;
 
     @Test
-    @WithMockUser
-    public void testRefreshTokenSuccess() throws Exception {
-        // given
-        String refreshToken = "validRefreshToken";
+    public void testRefreshAccessTokenSuccess() throws Exception {
+        // Given
+        String validRefreshToken = "valid-refresh-token";
+        String newAccessToken = "new-access-token";
         String userEmail = "test@example.com";
-        Integer userNumber = 1;
-        String newAccessToken = "newAccessToken";
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+
+        Cookie refreshTokenCookie = new Cookie("refreshToken", validRefreshToken);
 
         Users user = new Users();
         user.setUserEmail(userEmail);
-        user.setUserNumber(userNumber);
-        List<String> roles = List.of("ROLE_USER");
+        user.setUserNumber(123);
 
-        when(jwtProvider.validateToken(refreshToken)).thenReturn(true);
-        when(jwtProvider.getUserEmail(refreshToken)).thenReturn(userEmail);
+        when(jwtProvider.validateToken(validRefreshToken)).thenReturn(true);
+        when(jwtProvider.getUserEmail(validRefreshToken)).thenReturn(userEmail);
         when(userRepository.findByUserEmail(userEmail)).thenReturn(Optional.of(user));
-        when(jwtProvider.createAccessToken(eq(userEmail), eq(userNumber), any(List.class))).thenReturn(newAccessToken);
+        when(jwtProvider.createAccessToken(user.getUserEmail(), user.getUserNumber(), List.of(user.getRole().name())))
+                .thenReturn(newAccessToken);
 
-        // when & then
+        // When & Then
         mockMvc.perform(post("/api/token/refresh")
                         .cookie(refreshTokenCookie)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Bearer " + newAccessToken));
+                .andExpect(jsonPath("$.accessToken").value(newAccessToken));
     }
 
     @Test
-    void testRefreshTokenInvalid() throws Exception {
+    public void testRefreshAccessTokenFailureDueToMissingRefreshToken() throws Exception {
+        // When & Then
+        mockMvc.perform(post("/api/token/refresh")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Refresh Token이 존재하지 않습니다."));
+    }
+
+    @Test
+    public void testRefreshAccessTokenFailureDueToInvalidToken() throws Exception {
+        // Given
         String invalidRefreshToken = "invalid-refresh-token";
 
-        when(jwtProvider.refreshAccessToken(invalidRefreshToken)).thenThrow(new JwtException("Invalid token"));
+        Cookie refreshTokenCookie = new Cookie("refreshToken", invalidRefreshToken);
 
+        when(jwtProvider.validateToken(invalidRefreshToken)).thenReturn(false);
+
+        // When & Then
         mockMvc.perform(post("/api/token/refresh")
-                        .cookie(new Cookie("refreshToken", invalidRefreshToken)))
-                .andExpect(status().isForbidden());
+                        .cookie(refreshTokenCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Refresh Token이 만료되었습니다. 다시 로그인 해주세요."));
     }
 
     @Test
-    @WithMockUser
-    void testRefreshTokenMissing() throws Exception {
-        // 쿠키 없이 요청을 보냄
-        mockMvc.perform(post("/api/token/refresh"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Refresh Token이 존재하지 않습니다."));
+    public void testRefreshAccessTokenFailureDueToJwtException() throws Exception {
+        // Given
+        String refreshToken = "refresh-token";
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+
+        when(jwtProvider.validateToken(refreshToken)).thenThrow(new JwtException("Invalid JWT token"));
+
+        // When & Then
+        mockMvc.perform(post("/api/token/refresh")
+                        .cookie(refreshTokenCookie)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Refresh Token이 유효하지 않습니다."));
     }
 }

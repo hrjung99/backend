@@ -73,6 +73,7 @@ class LoginServiceTest {
 
 
         // When
+
         Map<String, String> tokenMap = loginService.login(loginRequestDto, response);
         String accessToken = tokenMap.get("accessToken");
 

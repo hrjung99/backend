@@ -51,6 +51,7 @@ public class LoginControllerTest {
 
         Map<String, String> mockedTokenMap = new HashMap<>();
         mockedTokenMap.put("accessToken", "mocked-access-token");
+        mockedTokenMap.put("userId", "123");
 
         Mockito.when(loginService.login(any(LoginRequestDto.class), any()))
                 .thenReturn(mockedTokenMap);
@@ -63,7 +64,8 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"test@example.com\", \"password\": \"password\" }"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Bearer mocked-access-token"));
+                .andExpect(jsonPath("$.accessToken").value("mocked-access-token"))
+                .andExpect(jsonPath("$.userId").value("123"));
     }
 
     @Test
@@ -81,7 +83,7 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"test@example.com\", \"password\": \"wrongpassword\" }"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("비밀번호가 일치하지 않습니다."));
+                .andExpect(jsonPath("$.error").value("비밀번호가 일치하지 않습니다."));
     }
 
     @Test
@@ -99,6 +101,6 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"nonexistent@example.com\", \"password\": \"password\" }"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("사용자 이메일을 찾을 수 없습니다."));
+                .andExpect(jsonPath("$.error").value("사용자 이메일을 찾을 수 없습니다."));
     }
 }
