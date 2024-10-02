@@ -245,10 +245,11 @@ class TravelCustomRepositoryImplTest {
         travelTagRepository.save(TravelTag.of(travel5, tag3));
 
         // when
-        List<TravelRecommendDto> result = travelRepository.findAllByPreferredTags(preferredTags);
+        Page<TravelRecommendDto> result = travelRepository
+                .findAllByPreferredTags(PageRequest.of(0, 5), preferredTags);
 
         // then
-        assertThat(result.size()).isEqualTo(5); //0, 1, 2, 1, 3
+        assertThat(result.getContent().size()).isEqualTo(5); //0, 1, 2, 1, 3
         List<Integer> preferredNum = result.stream()
                 .map(dto -> dto.getPreferredNumber())
                 .toList();

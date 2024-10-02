@@ -14,7 +14,7 @@ public interface TravelCustomRepository {
 
     Page<TravelRecentDto> findAllSortedByCreatedAt(PageRequest pageRequest);
 
-    List<TravelRecommendDto> findAllByPreferredTags(List<String> preferredTags);
+    Page<TravelRecommendDto> findAllByPreferredTags(PageRequest pageRequest, List<String> preferredTags);
 
     Page<TravelSearchDto> search(TravelSearchCondition condition);
 

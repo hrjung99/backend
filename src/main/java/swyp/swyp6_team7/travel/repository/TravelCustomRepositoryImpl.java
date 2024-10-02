@@ -115,7 +115,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     }
 
     @Override
-    public List<TravelRecommendDto> findAllByPreferredTags(List<String> preferredTags) {
+    public Page<TravelRecommendDto> findAllByPreferredTags(PageRequest pageRequest, List<String> preferredTags) {
 
         NumberExpression<Long> matchingTagCount = new CaseBuilder()
                 .when(travel.travelTags.isEmpty()).then(Expressions.nullExpression())
@@ -137,7 +137,10 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .orderBy(
                         matchingTagCount.desc(),
                         travel.dueDate.asc()
-                ).fetch();
+                )
+                .offset(pageRequest.getOffset())
+                .limit(pageRequest.getPageSize())
+                .fetch();
         //log.info("tuples: " + tuples);
 
         List<Integer> travels = tuples.stream()
@@ -169,11 +172,17 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 list(tag.name)
                                 ))
                 );
-
         content.stream()
                 .forEach(dto -> dto.updatePreferredNumber(travelMap.get(dto.getTravelNumber())));
 
-        return content;
+        JPAQuery<Long> countQuery = queryFactory
+                .select(travel.count())
+                .from(travel)
+                .where(
+                        statusActivated()
+                );
+
+        return PageableExecutionUtils.getPage(content, pageRequest, countQuery::fetchOne);
     }
 
 
