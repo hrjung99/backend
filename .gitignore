@@ -5,6 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 application-local-db.yml
+application-dev.yml
 data.sql
 **/generated
 
