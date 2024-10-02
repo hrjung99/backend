@@ -3,18 +3,13 @@ package swyp.swyp6_team7.travel.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
-import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +31,6 @@ public class TravelListService {
 
         // 여행 엔티티를 DTO로 변환하여 반환
         return travels.stream().map(travel -> {
-            String dDay = TravelListResponseDto.formatDDay(travel.getDueDate()); // 디데이 형식으로 마감기한 포맷팅
-            String postedAgo = TravelListResponseDto.formatPostedAgo(travel.getCreatedAt().toLocalDate()); // 작성일로부터 경과한 시간 포맷팅
 
             // 동반자 수 계산
             int currentApplicants = travel.getCompanions().size();
@@ -58,20 +51,14 @@ public class TravelListService {
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
-                    travel.getLocation(),
+                    travel.getUserNumber(),
                     username,
-                    dDay,
-                    postedAgo,
+                    tags,
                     currentApplicants,
                     travel.getMaxPerson(),
-                    travel.getStatus() == TravelStatus.CLOSED,
-                    isBookmarked,
-                    tags,
-                    "/api/travel/" + travel.getNumber(),
-                    "/api/travel/" + travel.getNumber() + "/edit",
-                    "/api/travel/" + travel.getNumber() + "/delete",
-                    "/api/bookmarks", // 북마크 추가 URL
-                    "/api/bookmarks/" + travel.getNumber() // 북마크 제거 URL
+                    travel.getCreatedAt().toString(),
+                    travel.getDueDate().toString(),
+                    isBookmarked
             );
         }).collect(Collectors.toList());
     }
