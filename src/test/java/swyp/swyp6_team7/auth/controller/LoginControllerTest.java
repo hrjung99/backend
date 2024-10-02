@@ -18,10 +18,10 @@ import swyp.swyp6_team7.member.service.MemberService;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,7 +63,7 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"test@example.com\", \"password\": \"password\" }"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Bearer mocked-access-token"));
+                .andExpect(jsonPath("$.accessToken").value("mocked-access-token"));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"test@example.com\", \"password\": \"wrongpassword\" }"))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("비밀번호가 일치하지 않습니다."));
+                .andExpect(jsonPath("$.error").value("비밀번호가 일치하지 않습니다."));
     }
 
     @Test
@@ -99,6 +99,6 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"nonexistent@example.com\", \"password\": \"password\" }"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("사용자 이메일을 찾을 수 없습니다."));
+                .andExpect(jsonPath("$.error").value("사용자 이메일을 찾을 수 없습니다."));
     }
 }
