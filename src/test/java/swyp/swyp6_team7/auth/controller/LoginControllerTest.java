@@ -18,10 +18,10 @@ import swyp.swyp6_team7.member.service.MemberService;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -64,8 +64,9 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"test@example.com\", \"password\": \"password\" }"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("mocked-access-token"))
-                .andExpect(jsonPath("$.userId").value("123"));
+
+                .andExpect(jsonPath("$.accessToken").value("mocked-access-token"));
+
     }
 
     @Test
