@@ -27,7 +27,8 @@ public class CompanionCustomRepositoryImpl implements CompanionCustomRepository 
         return queryFactory
                 .select(new QCompanionInfoDto(
                         users.userNumber,
-                        users.userName
+                        users.userName,
+                        users.userAgeGroup
                 ))
                 .from(companion)
                 .leftJoin(users).on(companion.userNumber.eq(users.userNumber))
