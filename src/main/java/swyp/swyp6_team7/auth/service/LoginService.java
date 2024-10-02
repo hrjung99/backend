@@ -12,7 +12,9 @@ import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LoginService {
@@ -26,7 +28,7 @@ public class LoginService {
         this.jwtProvider = jwtProvider;
     }
 
-    public String login(LoginRequestDto loginRequestDto,HttpServletResponse response) {
+    public  Map<String, String> login(LoginRequestDto loginRequestDto,HttpServletResponse response) {
         Users user = userRepository.findByUserEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("사용자 이메일을 찾을 수 없습니다."));
 
@@ -50,7 +52,9 @@ public class LoginService {
         response.addCookie(refreshTokenCookie);
 
         // Access Token을 반환
-        return accessToken;
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        return tokens;
     }
     // 이메일로 유저를 조회하는 메서드 추가
     public Users getUserByEmail(String email) {

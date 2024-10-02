@@ -15,6 +15,9 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.UserLoginHistoryService;
 import swyp.swyp6_team7.member.service.MemberService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,8 +49,12 @@ public class LoginControllerTest {
         Users user = new Users();
         user.setUserEmail("test@example.com");
 
+        Map<String, String> mockedTokenMap = new HashMap<>();
+        mockedTokenMap.put("accessToken", "mocked-access-token");
+
         Mockito.when(loginService.login(any(LoginRequestDto.class), any()))
-                .thenReturn("mocked-access-token");
+                .thenReturn(mockedTokenMap);
+
         Mockito.when(loginService.getUserByEmail(anyString()))
                 .thenReturn(user);
 
