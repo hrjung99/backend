@@ -20,6 +20,7 @@ public class TravelRecommendResponse {
     private String title;
     private int userNumber;
     private String userName;
+    private String location;
     private List<String> tags;
     private int nowPerson;
     private int maxPerson;
@@ -33,6 +34,7 @@ public class TravelRecommendResponse {
         this.title = dto.getTitle();
         this.userNumber = dto.getUserNumber();
         this.userName = dto.getUserName();
+        this.location = dto.getLocation();
         this.tags = dto.getTags();
         this.nowPerson = dto.getNowPerson();
         this.maxPerson = dto.getMaxPerson();
