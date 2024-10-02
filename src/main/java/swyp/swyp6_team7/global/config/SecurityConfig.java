@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "/api/login",
                                 "/api/logout",
                                 "/api/users/new",
-                                "/api/refresh-token",
+                                "/api/token/refresh",
                                 "/login/oauth/kakao/**",
                                 "/error",
                                 "/api/users-email",

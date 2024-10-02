@@ -16,6 +16,7 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,7 +73,9 @@ class LoginServiceTest {
 
 
         // When
-        String accessToken = loginService.login(loginRequestDto, response);
+        Map<String, String> tokenMap = loginService.login(loginRequestDto, response);
+        String accessToken = tokenMap.get("accessToken");
+
 
         // Then
         assertEquals(mockedAccessToken, accessToken);
