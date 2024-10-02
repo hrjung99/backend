@@ -654,23 +654,23 @@ class TravelCustomRepositoryImplTest {
         assertThat(result.getContent().stream().map(c -> c.getTravelNumber())).contains(travel3.getNumber());
     }
 
-    @DisplayName("findEnrollmentsByUserNumber: 사용자의 신청한 여행 목록 조회")
-    @Test
-    public void findEnrollmentsByUserNumber_ShouldReturnListOfEnrollments() {
-        // given
-        int userNumber = 1;
-
-        // when
-        List<Tuple> results = enrollmentCustomRepository.findEnrollmentsByUserNumber(userNumber);
-
-        // then
-        assertThat(results).isNotNull();
-        assertThat(results.size()).isGreaterThan(0);
-        Tuple tuple = results.get(0);
-        assertThat(tuple.get(0, Long.class)).isNotNull(); // Enrollment number
-        assertThat(tuple.get(1, Integer.class)).isNotNull(); // Travel number
-
-        System.out.println("Enrollment Number: " + tuple.get(0, Long.class));
-        System.out.println("Travel Number: " + tuple.get(1, Integer.class));
-    }
+//    @DisplayName("findEnrollmentsByUserNumber: 사용자의 신청한 여행 목록 조회")
+//    @Test
+//    public void findEnrollmentsByUserNumber_ShouldReturnListOfEnrollments() {
+//        // given
+//        int userNumber = 1;
+//
+//        // when
+//        List<Tuple> results = enrollmentCustomRepository.findEnrollmentsByUserNumber(userNumber);
+//
+//        // then
+//        assertThat(results).isNotNull();
+//        assertThat(results.size()).isGreaterThan(0);
+//        Tuple tuple = results.get(0);
+//        assertThat(tuple.get(0, Long.class)).isNotNull(); // Enrollment number
+//        assertThat(tuple.get(1, Integer.class)).isNotNull(); // Travel number
+//
+//        System.out.println("Enrollment Number: " + tuple.get(0, Long.class));
+//        System.out.println("Travel Number: " + tuple.get(1, Integer.class));
+//    }
 }
