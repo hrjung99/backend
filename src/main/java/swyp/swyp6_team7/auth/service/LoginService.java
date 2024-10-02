@@ -51,10 +51,12 @@ public class LoginService {
         refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 1주일
         response.addCookie(refreshTokenCookie);
 
-        // Access Token을 반환
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("accessToken", accessToken);
-        return tokens;
+        // Access Token과 userId를 포함하는 JSON 응답 반환
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("userId", String.valueOf(user.getUserNumber()));
+        responseMap.put("accessToken", accessToken);
+
+        return responseMap;
     }
     // 이메일로 유저를 조회하는 메서드 추가
     public Users getUserByEmail(String email) {
