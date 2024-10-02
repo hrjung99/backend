@@ -64,6 +64,11 @@ class TravelCustomRepositoryImplTest {
 
     @BeforeEach
     void setUp() {
+        travelTagRepository.deleteAll();
+        travelRepository.deleteAll();
+        tagRepository.deleteAll();
+        userRepository.deleteAll();
+        enrollmentRepository.deleteAll();
         Travel savedTravel = travelRepository.save(Travel.builder()
                 .title("기본 테스트 데이터")
                 .userNumber(1)
@@ -75,6 +80,7 @@ class TravelCustomRepositoryImplTest {
                 .build());
 
         Users user = userRepository.save(Users.builder()
+                .userNumber(1)
                 .userEmail("testuser@naver.com")
                 .userPw("password")
                 .userName("테스트 사용자")
