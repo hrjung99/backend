@@ -12,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -84,21 +88,63 @@ public class BookmarkControllerTest {
     @DisplayName("사용자 북마크 목록 조회 테스트")
     @WithMockUser
     void testGetBookmarks() throws Exception {
-        BookmarkResponse response = new BookmarkResponse(1, true, 1,"제목", "위치", "작성자", "오늘", "마감 D-5", 1, 4, false, List.of("가성비", "핫플"), "/api/travel/1", "/api/bookmarks/1");
+        BookmarkResponse response = new BookmarkResponse(
+                1,
+                "제목",
+                1,
+                "작성자",
+                List.of("가성비", "핫플"),
+                1,
+                4,
+                "2024년 09월 21일",
+                "2025년 05월 15일",
+                true);
+
         List<BookmarkResponse> responses = List.of(response);
+        PageRequest pageable = PageRequest.of(0, 5);
+        Page<BookmarkResponse> pageResponse = new PageImpl<>(responses, pageable, responses.size());
 
-        Mockito.when(bookmarkService.getBookmarksByUser(anyInt())).thenReturn(responses);
+        // When
+        when(bookmarkService.getBookmarksByUser(anyInt(), anyInt(), anyInt())).thenReturn(pageResponse);
 
+        // Then
         mockMvc.perform(get("/api/bookmarks")
-                        .header("Authorization", jwtToken))
+                        .header("Authorization", jwtToken)
+                        .param("page", "0")
+                        .param("size", "5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].travelNumber").value(1))
-                .andExpect(jsonPath("$[0].title").value("제목"))
-                .andExpect(jsonPath("$[0].location").value("위치"))
-                .andExpect(jsonPath("$[0].username").value("작성자"))
-                .andExpect(jsonPath("$[0].bookmarked").value(true));
+                .andExpect(jsonPath("$.content[0].travelNumber").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("제목"))
+                .andExpect(jsonPath("$.content[0].userName").value("작성자"))
+                //.andExpect(jsonPath("$.content[0].isBookmarked").value(true))
+                .andExpect(jsonPath("$.page.size").value(5))
+                .andExpect(jsonPath("$.page.number").value(0))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalPages").value(1));
 
-        Mockito.verify(bookmarkService).getBookmarksByUser(1);
+        verify(bookmarkService).getBookmarksByUser(1, 0, 5);
     }
+    @Test
+    @WithMockUser
+    @DisplayName("사용자의 북마크된 여행 번호 목록 조회 테스트")
+    public void getBookmarkedTravelNumbers_ShouldReturnListOfTravelNumbers() throws Exception {
+        // Given
+        String token = "Bearer test-token";
+        Integer userNumber = 1;
+        List<Integer> travelNumbers = List.of(101, 102, 103);
+
+        // When
+        when(jwtProvider.getUserNumber("test-token")).thenReturn(userNumber);
+        when(bookmarkService.getBookmarkedTravelNumbers(userNumber)).thenReturn(travelNumbers);
+
+        // Then
+        mockMvc.perform(get("/api/bookmarks/travel-number")
+                        .header(HttpHeaders.AUTHORIZATION, token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value(101))
+                .andExpect(jsonPath("$[1]").value(102))
+                .andExpect(jsonPath("$[2]").value(103));
+    }
+
 }
 
