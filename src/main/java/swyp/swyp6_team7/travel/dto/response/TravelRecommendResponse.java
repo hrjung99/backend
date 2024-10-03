@@ -28,6 +28,7 @@ public class TravelRecommendResponse {
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
+    private boolean bookmarked;
 
     public TravelRecommendResponse(TravelRecommendDto dto) {
         this.travelNumber = dto.getTravelNumber();
@@ -40,6 +41,7 @@ public class TravelRecommendResponse {
         this.maxPerson = dto.getMaxPerson();
         this.createdAt = dto.getCreatedAt();
         this.registerDue = dto.getRegisterDue();
+        this.bookmarked = dto.isBookmarked();
     }
 
 }

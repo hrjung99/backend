@@ -35,10 +35,11 @@ public class TravelHomeService {
 
     public Page<TravelRecommendDto> getRecommendTravelsByUser(PageRequest pageRequest, Principal principal) {
 
+        Integer loginUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
         List<String> preferredTags = memberService.findPreferredTagsByEmail(principal.getName());
         log.info("preferredTags: " + preferredTags);
 
-        Page<TravelRecommendDto> result = travelRepository.findAllByPreferredTags(pageRequest, preferredTags);
+        Page<TravelRecommendDto> result = travelRepository.findAllByPreferredTags(pageRequest, loginUserNumber, preferredTags);
         for (TravelRecommendDto dto : result.getContent()) {
             log.info(String.format("TravelRecommendDto = %d, %s", dto.getTravelNumber(), dto.getTags().toString()));
         }

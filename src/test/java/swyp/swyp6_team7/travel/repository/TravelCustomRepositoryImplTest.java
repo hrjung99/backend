@@ -60,6 +60,8 @@ class TravelCustomRepositoryImplTest {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    Users user;
+
     @BeforeEach
     void setUp() {
         Travel savedTravel = travelRepository.save(Travel.builder()
@@ -72,7 +74,7 @@ class TravelCustomRepositoryImplTest {
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
 
-        Users user = userRepository.save(Users.builder()
+        user = userRepository.save(Users.builder()
                 .userNumber(1)
                 .userEmail("testuser@naver.com")
                 .userPw("password")
@@ -245,7 +247,7 @@ class TravelCustomRepositoryImplTest {
 
         // when
         Page<TravelRecommendDto> result = travelRepository
-                .findAllByPreferredTags(PageRequest.of(0, 5), preferredTags);
+                .findAllByPreferredTags(PageRequest.of(0, 5), user.getUserNumber(), preferredTags);
 
         // then
         assertThat(result.getContent().size()).isEqualTo(5); //0, 1, 2, 1, 3

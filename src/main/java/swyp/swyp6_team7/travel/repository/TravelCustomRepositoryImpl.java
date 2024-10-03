@@ -120,7 +120,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     }
 
     @Override
-    public Page<TravelRecommendDto> findAllByPreferredTags(PageRequest pageRequest, List<String> preferredTags) {
+    public Page<TravelRecommendDto> findAllByPreferredTags(PageRequest pageRequest, Integer loginUserNumber, List<String> preferredTags) {
 
         NumberExpression<Long> matchingTagCount = new CaseBuilder()
                 .when(travel.travelTags.isEmpty()).then(Expressions.nullExpression())
@@ -165,6 +165,8 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
+                .leftJoin(bookmark).on(bookmark.userNumber.eq(loginUserNumber)
+                        .and(bookmark.travelNumber.eq(travel.number)))
                 .where(
                         travel.number.in(travels)
                 )
@@ -174,7 +176,8 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 users.userNumber,
                                 users.userName,
                                 travel.companions.size(),
-                                list(tag.name)
+                                list(tag.name),
+                                bookmark.bookmarkId.isNotNull()
                         ))
                 );
         content.stream()

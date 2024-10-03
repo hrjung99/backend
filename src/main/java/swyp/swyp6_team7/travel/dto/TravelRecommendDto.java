@@ -28,12 +28,14 @@ public class TravelRecommendDto {
     private LocalDateTime createdAt;
     private LocalDate registerDue;
     private int preferredNumber;
+    private boolean bookmarked;
 
     @Builder
     public TravelRecommendDto(
             int travelNumber, String title, int userNumber, String userName,
             String location, List<String> tags, int nowPerson, int maxPerson,
-            LocalDateTime createdAt, LocalDate registerDue, int preferredNumber
+            LocalDateTime createdAt, LocalDate registerDue, int preferredNumber,
+            boolean bookmarked
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
@@ -46,12 +48,13 @@ public class TravelRecommendDto {
         this.createdAt = createdAt;
         this.registerDue = registerDue;
         this.preferredNumber = preferredNumber;
+        this.bookmarked = bookmarked;
     }
 
     @QueryProjection
     public TravelRecommendDto(
             Travel travel, int userNumber, String userName,
-            int companionCount, List<String> tags
+            int companionCount, List<String> tags, boolean isBookmarked
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
@@ -63,6 +66,7 @@ public class TravelRecommendDto {
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
+        this.bookmarked = isBookmarked;
     }
 
     public void updatePreferredNumber(Integer number) {
@@ -83,6 +87,7 @@ public class TravelRecommendDto {
                 ", createdAt=" + createdAt +
                 ", registerDue=" + registerDue +
                 ", preferredNumber=" + preferredNumber +
+                ", bookmarked=" + bookmarked +
                 '}';
     }
 }
