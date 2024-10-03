@@ -15,6 +15,9 @@ import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.CityType;
+import swyp.swyp6_team7.location.repository.CityRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -41,6 +44,8 @@ public class TravelAppliedServiceTest {
     private CompanionRepository companionRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private CityRepository cityRepository;
     @InjectMocks
     private TravelAppliedService travelAppliedService;
     @BeforeEach
@@ -54,6 +59,11 @@ public class TravelAppliedServiceTest {
         // given
         Integer userNumber = 1;
         Pageable pageable = PageRequest.of(0, 5);
+        City city = City.builder()
+                .cityName("제주")
+                .cityType(CityType.DOMESTIC)
+                .build();
+        City savedCity = cityRepository.save(city);
 
         Travel travel = Travel.builder()
                 .number(1)
@@ -63,6 +73,7 @@ public class TravelAppliedServiceTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .maxPerson(10)
                 .status(TravelStatus.IN_PROGRESS)
+                .city(savedCity)
                 .build();
 
         Companion companion = Companion.builder()

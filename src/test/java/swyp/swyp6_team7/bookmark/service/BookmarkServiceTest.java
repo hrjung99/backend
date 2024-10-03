@@ -25,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.CityType;
 
 public class BookmarkServiceTest {
 
@@ -51,8 +53,13 @@ public class BookmarkServiceTest {
         BookmarkRequest request = new BookmarkRequest(1, 101);
         Users user = new Users();
         user.setUserNumber(1);
+        City city = new City();
+        city.setCityName("제주");
+        city.setCityType(CityType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location("제주")
+                .city(city)
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
         Bookmark oldestBookmark = new Bookmark(1, 1, LocalDateTime.now().minusDays(10));
@@ -77,8 +84,13 @@ public class BookmarkServiceTest {
         BookmarkRequest request = new BookmarkRequest(1, 101);
         Users user = new Users();
         user.setUserNumber(1);
+        City city = new City();
+        city.setCityName("제주");
+        city.setCityType(CityType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location("제주")
+                .city(city)
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
 
@@ -117,9 +129,14 @@ public class BookmarkServiceTest {
         // given
         Integer userNumber = 1;
         Bookmark bookmark = new Bookmark(userNumber, 101, LocalDateTime.now());
+        City city = new City();
+        city.setCityName("제주");
+        city.setCityType(CityType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
                 .title("Sample Travel")
+                .location("제주")
+                .city(city)
                 .createdAt(LocalDateTime.now().minusDays(5))
                 .dueDate(LocalDate.now().plusDays(5))
                 .maxPerson(4)

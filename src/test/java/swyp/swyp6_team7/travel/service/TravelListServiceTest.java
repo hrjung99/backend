@@ -101,6 +101,7 @@ class TravelListServiceTest {
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
+                    travel.getLocation(),
                     travel.getUserNumber(),
                     user.getUserName(),
                     tags,

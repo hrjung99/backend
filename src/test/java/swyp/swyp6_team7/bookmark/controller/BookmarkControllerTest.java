@@ -91,6 +91,7 @@ public class BookmarkControllerTest {
         BookmarkResponse response = new BookmarkResponse(
                 1,
                 "제목",
+                "제주",
                 1,
                 "작성자",
                 List.of("가성비", "핫플"),
