@@ -15,7 +15,9 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.request.TravelCreateRequest;
+import swyp.swyp6_team7.travel.dto.response.QTravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
+import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDateTime;
 
@@ -30,13 +32,16 @@ class TravelServiceTest {
     private UserRepository userRepository;
     @Autowired
     private CityRepository cityRepository;
-
+    @Autowired
+    private TravelRepository travelRepository;
+    
     Users user;
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+        travelRepository.deleteAll();
         cityRepository.deleteAll();
+        userRepository.deleteAll();
         user = userRepository.save(Users.builder()
                 .userEmail("test@naver.com")
                 .userPw("1234")

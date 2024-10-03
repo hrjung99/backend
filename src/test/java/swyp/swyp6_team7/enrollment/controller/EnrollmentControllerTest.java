@@ -22,6 +22,9 @@ import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentCreateRequest;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.CityType;
+import swyp.swyp6_team7.location.repository.CityRepository;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
@@ -64,9 +67,12 @@ class EnrollmentControllerTest {
     TravelRepository travelRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    CityRepository cityRepository;
 
     Travel travel;
     Users user;
+    City city;
 
     @BeforeEach
     void mockMvcSetup() {
@@ -96,6 +102,7 @@ class EnrollmentControllerTest {
     void setUp(){
         enrollmentRepository.deleteAll();
         travelRepository.deleteAll();
+        cityRepository.deleteAll();
     }
 
 
@@ -225,6 +232,7 @@ class EnrollmentControllerTest {
                 .userStatus(UserStatus.ABLE)
                 .build()
         );
+
         Enrollment enrollment = enrollmentRepository.save(Enrollment.builder()
                 .userNumber(owner.getUserNumber())
                 .travelNumber(travel.getNumber())
@@ -254,6 +262,11 @@ class EnrollmentControllerTest {
                 .userStatus(UserStatus.ABLE)
                 .build()
         );
+        city = new City();
+        city.setCityName("Seoul");
+        city.setCityType(CityType.DOMESTIC);
+        cityRepository.save(city);
+
         travel = travelRepository.save(Travel.builder()
                 .title("기본 여행")
                 .userNumber(host.getUserNumber())
@@ -262,6 +275,7 @@ class EnrollmentControllerTest {
                 .dueDate(dueDate)
                 .periodType(PeriodType.NONE)
                 .status(status)
+                .city(city)
                 .build()
         );
     }
