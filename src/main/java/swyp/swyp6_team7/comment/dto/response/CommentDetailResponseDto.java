@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class CommentDetailResponse {
+public class CommentDetailResponseDto {
 
     private int commentNumber;
     private int userNumber;
@@ -24,7 +24,7 @@ public class CommentDetailResponse {
     private int relatedNumber;
 
     @Builder
-    public CommentDetailResponse(
+    public CommentDetailResponseDto(
             int commentNumber, int userNumber, String content, int parentNumber,
             int likes, LocalDateTime regDate, String relatedType, int relatedNumber
     ) {
@@ -38,7 +38,7 @@ public class CommentDetailResponse {
         this.relatedNumber = relatedNumber;
     }
 
-    public CommentDetailResponse(Comment comment) {
+    public CommentDetailResponseDto(Comment comment) {
         this.commentNumber = comment.getCommentNumber();
         this.userNumber = comment.getUserNumber();
         this.content = comment.getContent();

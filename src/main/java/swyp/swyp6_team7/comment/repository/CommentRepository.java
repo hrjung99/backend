@@ -18,6 +18,7 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     //r
     //댓글 조회 (댓글, 답글 전부 조회)
     List<Comment> findByRelatedTypeAndRelatedNumber(String relatedType, int relatedNumber);
+
     // 답글 개수 조회
     long countByRelatedTypeAndRelatedNumberAndParentNumber(String relatedType, int relatedNumber, int parentNumber);
     

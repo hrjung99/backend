@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.comment.domain.Comment;
 import swyp.swyp6_team7.comment.dto.request.CommentCreateRequestDto;
-import swyp.swyp6_team7.comment.dto.response.CommentDetailResponse;
+import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
+import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.service.CommentService;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,7 +24,7 @@ public class CommentController {
 
     //Create
     @PostMapping("/api/{relatedType}/{relatedNumber}/comments")
-    public ResponseEntity<CommentDetailResponse> create(
+    public ResponseEntity<CommentDetailResponseDto> create(
             @RequestBody CommentCreateRequestDto request,
             @RequestHeader("Authorization") String token,
             @PathVariable String relatedType,
@@ -32,5 +35,16 @@ public class CommentController {
         Comment createdComment = commentService.create(request, userNumber, relatedType, relatedNumber);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(commentService.getCommentByNumber(createdComment.getCommentNumber()));
+    }
+
+    // List Read
+    @GetMapping("/api/{relatedType}/{relatedNumber}/comments")
+    public ResponseEntity<List<CommentListReponseDto>> getComments(
+            @RequestBody CommentCreateRequestDto request,
+            @RequestHeader("Authorization") String token,
+            @PathVariable String relatedType,
+            @PathVariable int relatedNumber) {
+        List<CommentListReponseDto> comments = commentService.getListByrelatedNumber(relatedType, relatedNumber);
+        return ResponseEntity.ok(comments);
     }
 }
