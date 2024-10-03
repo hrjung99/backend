@@ -36,9 +36,6 @@ public class Comment {
     @Column(name = "comment_parent_number", nullable = false, updatable = false)
     private int parentNumber;
 
-    //좋아요
-    @Column(name = "comment_likes", nullable = false)
-    private int likes;
 
     //작성 일시
     @CreatedDate
@@ -56,11 +53,10 @@ public class Comment {
 
     //C
     @Builder
-    public Comment (int userNumber, String content, int parentNumber, int likes, LocalDateTime regDate, String relatedType, int relatedNumber) {
+    public Comment (int userNumber, String content, int parentNumber, LocalDateTime regDate, String relatedType, int relatedNumber) {
         this.userNumber = userNumber;
         this.content = content;
         this.parentNumber = parentNumber;
-        this.likes = likes;
         this.regDate = regDate;
         this.relatedType = relatedType;
         this.relatedNumber = relatedNumber;

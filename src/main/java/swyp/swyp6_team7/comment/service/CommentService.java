@@ -10,6 +10,9 @@ import swyp.swyp6_team7.comment.dto.request.CommentCreateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
+import swyp.swyp6_team7.likes.dto.response.CommentLikeReadResponseDto;
+import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
+import swyp.swyp6_team7.likes.service.CommentLikeService;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
@@ -29,6 +32,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     final TravelService travelService;
     private final UserRepository userRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final CommentLikeService commentLikeService;
 
     //Create
     @Transactional
@@ -43,7 +48,6 @@ public class CommentService {
                 userNumber
                 , request.getContent()
                 , request.getParentNumber()
-                , 0 //likes
                 , LocalDateTime.now() // regDate
                 , relatedType
                 , relatedNumber
@@ -55,7 +59,8 @@ public class CommentService {
     public CommentDetailResponseDto getCommentByNumber(int commentNumber) {
         Comment comment = commentRepository.findById(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다." + commentNumber));
-        CommentDetailResponseDto detailResponse = new CommentDetailResponseDto(comment);
+        long likes = commentLikeRepository.countByCommentNumber(commentNumber);
+        CommentDetailResponseDto detailResponse = new CommentDetailResponseDto(comment, likes);
         return detailResponse;
     }
 
@@ -82,11 +87,11 @@ public class CommentService {
 
 
     @Transactional
-    public List<CommentListReponseDto> getListByrelatedNumber(String relatedType, int relatedNumber) {
+    public List<CommentListReponseDto> getListByrelatedNumber(String relatedType, int relatedNumber, int userNumber) {
 
         if (relatedType.equals("travel")) {
             List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
-            List<CommentListReponseDto> response = new ArrayList<>();
+            List<CommentListReponseDto> Listresponse = new ArrayList<>();
 
             for (Comment comment : comments) {
 
@@ -97,17 +102,27 @@ public class CommentService {
                 //답글 수 계산
                 long repliesCount = commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getParentNumber());
 
-                //DTO
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount);
-                response.add(dto);
+                //좋아요 상태 가져오기
+                CommentLikeReadResponseDto likeStatus = commentLikeService.getCommentLikeStatus(comment.getCommentNumber(), userNumber);
+                //좋아요 여부, true = 좋아요 누름
+                boolean liked = likeStatus.isLiked();
+                //좋아요 개수
+                long likes = likeStatus.getLikes();
 
-                return response;
+
+                //DTO
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked);
+                Listresponse.add(dto);
+
+                return Listresponse;
             }
-            return response; // for loop가 끝난 후 반환
+            return Listresponse;
         } else {
             throw new IllegalArgumentException("유효하지 않은 게시물 종류입니다: " + relatedType);
         }
     }
+
+    //
 
 
 

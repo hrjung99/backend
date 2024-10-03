@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.comment.domain.Comment;
 import swyp.swyp6_team7.comment.dto.request.CommentCreateRequestDto;
+import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.service.CommentService;
@@ -40,11 +41,18 @@ public class CommentController {
     // List Read
     @GetMapping("/api/{relatedType}/{relatedNumber}/comments")
     public ResponseEntity<List<CommentListReponseDto>> getComments(
-            @RequestBody CommentCreateRequestDto request,
             @RequestHeader("Authorization") String token,
             @PathVariable String relatedType,
             @PathVariable int relatedNumber) {
-        List<CommentListReponseDto> comments = commentService.getListByrelatedNumber(relatedType, relatedNumber);
+        int userNumber = jwtProvider.getUserNumber(token);
+        List<CommentListReponseDto> comments = commentService.getListByrelatedNumber(relatedType, relatedNumber, userNumber);
         return ResponseEntity.ok(comments);
     }
+
+    //Update
+    @PutMapping("/api/comments/{commentNumber}")
+    public ResponseEntity<CommentDetailResponseDto> update(
+            @RequestBody CommentUpdateRequestDto request,
+            @RequestHeader("Authorization") String token
+    )
 }

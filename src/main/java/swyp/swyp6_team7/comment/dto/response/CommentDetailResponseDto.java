@@ -17,7 +17,7 @@ public class CommentDetailResponseDto {
     private int userNumber;
     private String content;
     private int parentNumber;
-    private int likes;
+    private long likes;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime regDate;
     private String relatedType;
@@ -26,7 +26,7 @@ public class CommentDetailResponseDto {
     @Builder
     public CommentDetailResponseDto(
             int commentNumber, int userNumber, String content, int parentNumber,
-            int likes, LocalDateTime regDate, String relatedType, int relatedNumber
+            long likes, LocalDateTime regDate, String relatedType, int relatedNumber
     ) {
         this.commentNumber = commentNumber;
         this.userNumber = userNumber;
@@ -38,12 +38,12 @@ public class CommentDetailResponseDto {
         this.relatedNumber = relatedNumber;
     }
 
-    public CommentDetailResponseDto(Comment comment) {
+    public CommentDetailResponseDto(Comment comment, long likes) {
         this.commentNumber = comment.getCommentNumber();
         this.userNumber = comment.getUserNumber();
         this.content = comment.getContent();
         this.parentNumber = comment.getParentNumber();
-        this.likes = comment.getLikes();
+        this.likes = likes;
         this.regDate = comment.getRegDate();
         this.relatedType = comment.getRelatedType();
         this.relatedNumber = comment.getRelatedNumber();

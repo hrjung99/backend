@@ -30,12 +30,11 @@ public class CommentCreateRequestDto {
 
     }
 
-    public Comment toCommentEntity(int userNumber, String content, int parentNumber, int likes, LocalDateTime regDate, String relatedType, int relatedNumber) {
+    public Comment toCommentEntity(int userNumber, String content, int parentNumber, LocalDateTime regDate, String relatedType, int relatedNumber) {
         return Comment.builder()
                 .userNumber(userNumber)
                 .content(content)
                 .parentNumber(parentNumber)
-                .likes(likes)
                 .regDate(LocalDateTime.now())
                 .relatedType(relatedType)
                 .relatedNumber(relatedNumber)
