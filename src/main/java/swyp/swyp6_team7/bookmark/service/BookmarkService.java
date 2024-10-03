@@ -2,29 +2,26 @@ package swyp.swyp6_team7.bookmark.service;
 
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.dto.BookmarkRequest;
 import swyp.swyp6_team7.bookmark.dto.BookmarkResponse;
 import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
-import swyp.swyp6_team7.companion.repository.CompanionRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
-import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static swyp.swyp6_team7.bookmark.dto.BookmarkResponse.formatDDay;
-import static swyp.swyp6_team7.bookmark.dto.BookmarkResponse.formatPostedAgo;
+import static swyp.swyp6_team7.bookmark.dto.BookmarkResponse.*;
 
 @AllArgsConstructor
 @Service
@@ -73,71 +70,63 @@ public class BookmarkService {
     }
 
     @Transactional(readOnly = true)
-    public List<BookmarkResponse> getBookmarksByUser(Integer userNumber) {
+    public Page<BookmarkResponse> getBookmarksByUser(Integer userNumber, Integer page, Integer size) {
+        int currentPage = (page != null) ? page : 0;
+        int currentSize = (size != null) ? size : 5;
+        Pageable pageable = PageRequest.of(currentPage, currentSize);
+
         List<Bookmark> bookmarks = bookmarkRepository.findBookmarksByUserNumber(userNumber);
 
-        // 저장된 콘텐츠가 없을 때 빈 리스트 처리
+        // 저장된 콘텐츠가 없을 때 빈 page 객체 반환
         if (bookmarks.isEmpty()) {
-            return List.of();
+            return new PageImpl<>(List.of(), pageable, 0);
         }
 
         // 북마크 목록을 조회하면서 각 여행 정보 가져오기
-        return bookmarks.stream().map(bookmark -> {
-            Travel travel = travelRepository.findById(bookmark.getTravelNumber())
-                    .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
+        List<BookmarkResponse> responses = bookmarks.stream()
+                .map(bookmark -> {
+                    Integer travelNumber = bookmark.getTravelNumber();
+                    System.out.println("Travel Number: " + travelNumber); // 로그 추가
+                    
 
-            String dDay = formatDDay(travel.getDueDate());
-            String postedAgo = formatPostedAgo(travel.getCreatedAt().toLocalDate());
+                    Travel travel = travelRepository.findById(travelNumber)
+                            .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
 
-            Users user = userRepository.findById(userNumber)
-                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                    Users user = userRepository.findById(userNumber)
+                            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-            int currentApplicants = travel.getCompanions().size();
+                    int currentApplicants = travel.getCompanions().size();
 
-            List<String> tags = travel.getTravelTags().stream()
-                    .map(travelTag -> travelTag.getTag().getName())
-                    .collect(Collectors.toList());
+                    List<String> tags = travel.getTravelTags().stream()
+                            .map(travelTag -> travelTag.getTag().getName())
+                            .collect(Collectors.toList());
 
-            return new BookmarkResponse(
-                    travel.getNumber(),
-                    true,
-                    travel.getNumber(),
-                    travel.getTitle(),
-                    travel.getLocation(),
-                    user.getUserName(),
-                    postedAgo,
-                    dDay,
-                    currentApplicants,
-                    travel.getMaxPerson(),
-                    travel.getStatus() == TravelStatus.CLOSED,
-                    tags,
-                    "/api/travel/" + travel.getNumber(),
-                    "/api/bookmarks/" + travel.getNumber()
-            );
-        }).collect(Collectors.toList());
-    }
-    // 콘텐츠의 상세 URL을 생성하는 메서드
-    private String generateDetailUrl(Bookmark bookmark) {
-        return "/api/travel/" + bookmark.getTravelNumber();
-    }
+                    return new BookmarkResponse(
+                            travel.getNumber(),
+                            travel.getTitle(),
+                            user.getUserNumber(),
+                            user.getUserName(),
+                            tags,
+                            currentApplicants,
+                            travel.getMaxPerson(),
+                            formatDate(travel.getCreatedAt().toLocalDate()),
+                            formatDate(travel.getDueDate()),
+                            true
+                    );
+                }).collect(Collectors.toList());
 
-    // 북마크 제거 URL을 생성하는 메서드
-    private String generateRemoveBookmarkUrl(Bookmark bookmark) {
-        return "/api/bookmarks/" + bookmark.getTravelNumber();
-    }
-    // D-Day 형식으로 마감기한 포맷팅하는 메서드
-    private String formatDDay(LocalDate dueDate) {
-        long daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), dueDate);
-        return "마감 D-" + daysUntil;
+        int start = Math.min(currentPage * currentSize, responses.size());
+        int end = Math.min((currentPage + 1) * currentSize, responses.size());
+
+        return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }
 
-    // 작성일로부터 경과한 시간을 포맷팅하는 메서드
-    private String formatPostedAgo(LocalDate createdAt) {
-        long daysAgo = ChronoUnit.DAYS.between(createdAt, LocalDate.now());
-        if (daysAgo == 0) {
-            return "오늘";
-        } else {
-            return daysAgo + "일 전";
-        }
+    @Transactional(readOnly = true)
+    public List<Integer> getBookmarkedTravelNumbers(Integer userNumber) {
+        // 사용자 번호로 북마크된 모든 여행 번호를 조회
+        return bookmarkRepository.findBookmarksByUserNumber(userNumber).stream()
+                .map(Bookmark::getTravelNumber)
+                .collect(Collectors.toList());
     }
+
 }

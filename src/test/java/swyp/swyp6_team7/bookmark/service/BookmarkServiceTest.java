@@ -6,15 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
 import swyp.swyp6_team7.bookmark.dto.BookmarkRequest;
 import swyp.swyp6_team7.bookmark.dto.BookmarkResponse;
 import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
-import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
@@ -114,17 +113,15 @@ public class BookmarkServiceTest {
 
     @Test
     @DisplayName("사용자의 북마크 목록 조회")
-    public void testGetBookmarksByUser_EmptyList() {
+    public void testGetBookmarksByUser() {
         // given
         Integer userNumber = 1;
         Bookmark bookmark = new Bookmark(userNumber, 101, LocalDateTime.now());
         Travel travel = Travel.builder()
                 .number(101)
                 .title("Sample Travel")
-                .location("Seoul")
                 .createdAt(LocalDateTime.now().minusDays(5))
                 .dueDate(LocalDate.now().plusDays(5))
-                .status(TravelStatus.IN_PROGRESS)
                 .maxPerson(4)
                 .build();
 
@@ -137,13 +134,26 @@ public class BookmarkServiceTest {
         when(userRepository.findById(userNumber)).thenReturn(Optional.of(user));
 
         // when
-        List<BookmarkResponse> responses = bookmarkService.getBookmarksByUser(userNumber);
+        Page<BookmarkResponse> responses = bookmarkService.getBookmarksByUser(userNumber, 0, 5);
 
         // then
-        assertThat(responses).hasSize(1);
-        BookmarkResponse response = responses.get(0);
+        assertThat(responses.getContent()).hasSize(1);
+        BookmarkResponse response = responses.getContent().get(0);
         assertThat(response.getTravelNumber()).isEqualTo(101);
         assertThat(response.getTitle()).isEqualTo("Sample Travel");
-        assertThat(response.getUsername()).isEqualTo("John Doe");
+        assertThat(response.getUserName()).isEqualTo("John Doe");
+    }
+    @Test
+    @DisplayName("사용자의 북마크 목록 조회 - 빈 리스트 반환")
+    public void testGetBookmarksByUser_EmptyList() {
+        // given
+        Integer userNumber = 1;
+        when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of());
+
+        // when
+        Page<BookmarkResponse> responses = bookmarkService.getBookmarksByUser(userNumber, 0, 5);
+
+        // then
+        assertThat(responses.getContent()).isEmpty();
     }
 }

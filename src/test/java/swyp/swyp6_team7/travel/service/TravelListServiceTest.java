@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.GenderType;
@@ -24,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -52,35 +57,24 @@ class TravelListServiceTest {
     void testGetTravelListByUser() {
         // Given
         Integer userNumber = 1;
+        Pageable pageable = PageRequest.of(0, 2);
 
         Travel travel1 = Travel.builder()
                 .number(1)
                 .userNumber(userNumber)
                 .createdAt(LocalDateTime.now().minusDays(2))
-                .location("Location 1")
                 .title("Title 1")
-                .details("Details 1")
-                .viewCount(0)
                 .maxPerson(5)
-                .genderType(GenderType.MAN_ONLY)
                 .dueDate(LocalDate.now().plusDays(3))
-                .periodType(PeriodType.ONE_WEEK)
-                .status(TravelStatus.IN_PROGRESS)
                 .build();
 
         Travel travel2 = Travel.builder()
                 .number(2)
                 .userNumber(userNumber)
                 .createdAt(LocalDateTime.now().minusDays(6))
-                .location("Location 2")
                 .title("Title 2")
-                .details("Details 2")
-                .viewCount(0)
                 .maxPerson(10)
-                .genderType(GenderType.WOMAN_ONLY)
                 .dueDate(LocalDate.now().minusDays(1))
-                .periodType(PeriodType.MORE_THAN_MONTH)
-                .status(TravelStatus.CLOSED)
                 .build();
 
         // 태그 설정
@@ -98,40 +92,55 @@ class TravelListServiceTest {
         // 사용자 설정
         Users user = Users.builder().userNumber(userNumber).userName("Username 1").build();
 
+        // DTO 리스트 생성
+        List<TravelListResponseDto> dtos = travels.stream().map(travel -> {
+            boolean isBookmarked = true; // 예시로 모든 여행을 북마크된 것으로 설정
+            List<String> tags = travel.getTravelTags().stream()
+                    .map(travelTag -> travelTag.getTag().getName())
+                    .collect(Collectors.toList());
+            return new TravelListResponseDto(
+                    travel.getNumber(),
+                    travel.getTitle(),
+                    travel.getUserNumber(),
+                    user.getUserName(),
+                    tags,
+                    travel.getCompanions().size(),
+                    travel.getMaxPerson(),
+                    travel.getCreatedAt().toString(),
+                    travel.getDueDate().toString(),
+                    isBookmarked
+            );
+        }).collect(Collectors.toList());
+
+        Page<TravelListResponseDto> dtoPage = new PageImpl<>(dtos, pageable, dtos.size());
+
+
         // When
         when(travelRepository.findByUserNumber(userNumber)).thenReturn(travels);
         when(userRepository.findByUserNumber(userNumber)).thenReturn(Optional.of(user));
         when(bookmarkRepository.existsByUserNumberAndTravelNumber(eq(userNumber), anyInt())).thenReturn(true);
 
         // Then
-        List<TravelListResponseDto> result = travelListService.getTravelListByUser(userNumber);
+        Page<TravelListResponseDto> result = travelListService.getTravelListByUser(userNumber, pageable);
 
-        assertEquals(2, result.size());
+        assertEquals(2, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
 
-        TravelListResponseDto travel1Dto = result.get(0);
+        TravelListResponseDto travel1Dto = result.getContent().get(0);
         assertEquals("Title 1", travel1Dto.getTitle());
-        assertEquals("Location 1", travel1Dto.getLocation());
-        assertEquals("Username 1", travel1Dto.getUsername());
-        assertEquals("마감 D-3", travel1Dto.getDDay());
-        assertEquals("2일 전", travel1Dto.getPostedAgo());
-        assertEquals(0, travel1Dto.getCurrentApplicants());
-        assertEquals(5, travel1Dto.getMaxPerson());
-        assertEquals(false, travel1Dto.isCompletionStatus());
+        assertEquals("Username 1", travel1Dto.getUserName());
         assertEquals(List.of("tag1"), travel1Dto.getTags());
+        assertEquals(5, travel1Dto.getMaxPerson());
+        assertEquals(true, travel1Dto.isBookmarked());
 
-        TravelListResponseDto travel2Dto = result.get(1);
+        TravelListResponseDto travel2Dto = result.getContent().get(1);
         assertEquals("Title 2", travel2Dto.getTitle());
-        assertEquals("Location 2", travel2Dto.getLocation());
-        assertEquals("Username 1", travel2Dto.getUsername());
-        assertEquals("종료됨", travel2Dto.getDDay());
-        assertEquals("6일 전", travel2Dto.getPostedAgo());
-        assertEquals(0, travel2Dto.getCurrentApplicants());
-        assertEquals(10, travel2Dto.getMaxPerson());
-        assertEquals(true, travel2Dto.isCompletionStatus());
+        assertEquals("Username 1", travel2Dto.getUserName());
         assertEquals(List.of("tag2"), travel2Dto.getTags());
+        assertEquals(10, travel2Dto.getMaxPerson());
+        assertEquals(true, travel2Dto.isBookmarked());
 
         verify(travelRepository, times(1)).findByUserNumber(userNumber);
-        //verify(userRepository, times(1)).findByUserNumber(userNumber);
         verify(bookmarkRepository, times(2)).existsByUserNumberAndTravelNumber(eq(userNumber), anyInt());
     }
 }

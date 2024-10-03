@@ -1,27 +1,25 @@
 package swyp.swyp6_team7.travel.service;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.StringPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
-import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
-import swyp.swyp6_team7.travel.dto.response.TravelAppliedListResponseDto;
+import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
@@ -31,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 public class TravelAppliedServiceTest {
@@ -44,10 +41,6 @@ public class TravelAppliedServiceTest {
     private CompanionRepository companionRepository;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private EnrollmentRepository enrollmentRepository;
-    @Mock
-    private Tuple mockTuple;
     @InjectMocks
     private TravelAppliedService travelAppliedService;
     @BeforeEach
@@ -57,9 +50,11 @@ public class TravelAppliedServiceTest {
 
     @Test
     @DisplayName("사용자가 신청한 여행 목록 조회")
-    public void getAppliedTripsByUser_ShouldReturnListOfTrips() {
+    public void getAppliedTripsByUser(){
         // given
         Integer userNumber = 1;
+        Pageable pageable = PageRequest.of(0, 5);
+
         Travel travel = Travel.builder()
                 .number(1)
                 .title("Trip Title")
@@ -84,12 +79,6 @@ public class TravelAppliedServiceTest {
         when(companionRepository.findByUserNumber(userNumber))
                 .thenReturn(Collections.singletonList(companion));
 
-        // 엔롤먼트 조회 모킹 설정 (Tuple)
-        when(mockTuple.get(0, Long.class)).thenReturn(1L); // enrollment ID 또는 필요 값
-        when(mockTuple.get(1, EnrollmentStatus.class)).thenReturn(EnrollmentStatus.ACCEPTED);
-        when(enrollmentRepository.findEnrollmentsByUserNumber(userNumber))
-                .thenReturn(Collections.singletonList(mockTuple));
-
         // 사용자를 찾기
         when(userRepository.findById(userNumber))
                 .thenReturn(Optional.of(user));
@@ -99,20 +88,19 @@ public class TravelAppliedServiceTest {
                 .thenReturn(true);
 
         // when
-        List<TravelAppliedListResponseDto> result = travelAppliedService.getAppliedTripsByUser(userNumber);
+        Page<TravelListResponseDto> result = travelAppliedService.getAppliedTripsByUser(userNumber, pageable);
 
         // then
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Trip Title", result.get(0).getTitle());
-        assertEquals("Seoul", result.get(0).getLocation());
-        assertTrue(result.get(0).isBookmarked());
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Trip Title", result.getContent().get(0).getTitle());
+        assertTrue(result.getContent().get(0).isBookmarked());
 
         verify(companionRepository, times(1)).findByUserNumber(userNumber);
-        verify(enrollmentRepository, times(1)).findEnrollmentsByUserNumber(userNumber);
         verify(userRepository, times(1)).findById(userNumber);
         verify(bookmarkRepository, times(1)).existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
     }
+
 
     @Test
     @DisplayName("사용자가 특정 여행에 대한 참가 취소")

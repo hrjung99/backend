@@ -19,7 +19,7 @@ public class Bookmark {
     private Integer userNumber;
 
     @Column(nullable = false)
-    private Integer travelNumber; // 여행 또는 커뮤니티 컨텐츠 ID, number
+    private Integer travelNumber;
 
     @Column(nullable = false)
     private LocalDateTime bookmarkDate = LocalDateTime.now();
@@ -27,6 +27,9 @@ public class Bookmark {
     public Bookmark() {}
 
     public Bookmark(Integer userNumber, Integer travelNumber, LocalDateTime bookmarkDate) {
+        if (travelNumber == null || travelNumber <= 0) {
+            throw new IllegalArgumentException("유효하지 않은 여행 번호입니다.");
+        }
         this.userNumber = userNumber;
         this.travelNumber = travelNumber;
         this.bookmarkDate = bookmarkDate;
