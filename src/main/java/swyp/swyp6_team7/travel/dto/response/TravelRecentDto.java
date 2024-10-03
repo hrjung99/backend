@@ -30,12 +30,13 @@ public class TravelRecentDto {
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
+    private boolean bookmarked;
 
 
     @QueryProjection
     public TravelRecentDto(
             Travel travel, int userNumber, String userName,
-            int companionCount, List<String> tags
+            int companionCount, List<String> tags, boolean isBookmarked
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
@@ -47,6 +48,7 @@ public class TravelRecentDto {
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
+        this.bookmarked = isBookmarked;
     }
 
 }

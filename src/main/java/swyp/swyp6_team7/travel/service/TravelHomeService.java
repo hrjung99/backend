@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.member.service.MemberService;
+import swyp.swyp6_team7.member.util.MemberAuthorizeUtil;
 import swyp.swyp6_team7.travel.dto.TravelRecommendDto;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
@@ -28,7 +29,8 @@ public class TravelHomeService {
     private final MemberService memberService;
 
     public Page<TravelRecentDto> getTravelsSortedByCreatedAt(PageRequest pageRequest) {
-        return travelRepository.findAllSortedByCreatedAt(pageRequest);
+        Integer loginUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
+        return travelRepository.findAllSortedByCreatedAt(pageRequest, loginUserNumber);
     }
 
     public Page<TravelRecommendDto> getRecommendTravelsByUser(PageRequest pageRequest, Principal principal) {

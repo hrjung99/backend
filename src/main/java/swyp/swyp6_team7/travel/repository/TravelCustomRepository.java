@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface TravelCustomRepository {
 
-    Page<TravelRecentDto> findAllSortedByCreatedAt(PageRequest pageRequest);
+    Page<TravelRecentDto> findAllSortedByCreatedAt(PageRequest pageRequest, Integer loginUserNumber);
 
     Page<TravelRecommendDto> findAllByPreferredTags(PageRequest pageRequest, List<String> preferredTags);
 

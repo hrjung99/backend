@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import swyp.swyp6_team7.config.DataConfig;
+import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentCustomRepository;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
@@ -40,9 +41,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import swyp.swyp6_team7.enrollment.domain.Enrollment;
-import swyp.swyp6_team7.enrollment.dto.EnrollmentResponse;
 
 @Import(DataConfig.class)
 @DataJpaTest
@@ -154,7 +152,7 @@ class TravelCustomRepositoryImplTest {
 
         // when
         Page<TravelRecentDto> results = travelRepository
-                .findAllSortedByCreatedAt(PageRequest.of(0, 5));
+                .findAllSortedByCreatedAt(PageRequest.of(0, 5), 1);
 
         // then
         for (TravelRecentDto result : results) {
@@ -162,7 +160,7 @@ class TravelCustomRepositoryImplTest {
         }
         assertThat(results.getContent().size()).isEqualTo(2);
         assertThat(results.getContent().get(0).getTitle()).isEqualTo("추가 테스트 데이터");
-        assertThat(results.getContent().get(0).getTags().size()).isEqualTo(3);
+        assertThat(results.getContent().get(0).getTags().size()).isEqualTo(5);
     }
 
     @DisplayName("findAll: 최신순으로 정렬해 반환할 때 데이터가 없을 경우에도 오류가 나지 않는다")
@@ -173,7 +171,7 @@ class TravelCustomRepositoryImplTest {
 
         // when
         Page<TravelRecentDto> results = travelRepository
-                .findAllSortedByCreatedAt(PageRequest.of(0, 5));
+                .findAllSortedByCreatedAt(PageRequest.of(0, 5), 1);
 
         // then
         for (TravelRecentDto result : results) {

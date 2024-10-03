@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import swyp.swyp6_team7.bookmark.entity.ContentType;
+import swyp.swyp6_team7.bookmark.entity.QBookmark;
 import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
@@ -50,7 +52,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     QUsers users = QUsers.users;
     QTag tag = QTag.tag;
     QTravelTag travelTag = QTravelTag.travelTag;
-
+    QBookmark bookmark = QBookmark.bookmark;
 
     @Override
     public TravelDetailDto getDetailsByNumber(int travelNumber) {
@@ -72,7 +74,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
 
 
     @Override
-    public Page<TravelRecentDto> findAllSortedByCreatedAt(PageRequest pageRequest) {
+    public Page<TravelRecentDto> findAllSortedByCreatedAt(PageRequest pageRequest, Integer loginUserNumber) {
 
         List<Integer> travels = queryFactory
                 .select(travel.number)
@@ -91,6 +93,9 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
+                .leftJoin(bookmark).on(bookmark.userNumber.eq(loginUserNumber)
+                        .and(bookmark.contentId.eq(travel.number))
+                        .and(bookmark.contentType.eq(ContentType.TRAVEL)))
                 .where(
                         travel.number.in(travels)
                 )
@@ -101,7 +106,9 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 users.userNumber,
                                 users.userName,
                                 travel.companions.size(),
-                                list(tag.name)))
+                                list(tag.name),
+                                bookmark.bookmarkId.isNotNull()
+                        ))
                 );
 
         JPAQuery<Long> countQuery = queryFactory
