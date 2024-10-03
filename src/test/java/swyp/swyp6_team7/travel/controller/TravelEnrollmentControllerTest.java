@@ -18,9 +18,9 @@ import org.springframework.web.context.WebApplicationContext;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
-import swyp.swyp6_team7.location.domain.City;
-import swyp.swyp6_team7.location.domain.CityType;
-import swyp.swyp6_team7.location.repository.CityRepository;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
+import swyp.swyp6_team7.location.repository.LocationRepository;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
@@ -58,7 +58,7 @@ class TravelEnrollmentControllerTest {
     @Autowired
     EnrollmentRepository enrollmentRepository;
     @Autowired
-    CityRepository cityRepository;
+    LocationRepository locationRepository;
 
     Travel travel;
     Users host;
@@ -86,11 +86,11 @@ class TravelEnrollmentControllerTest {
 
     @BeforeEach
     void setTravel() {
-        City city = City.builder()
-                .cityName("제주")
-                .cityType(CityType.DOMESTIC)
+        Location travelLocation = Location.builder()
+                .locationName("Seoul")
+                .locationType(LocationType.DOMESTIC)
                 .build();
-        City savedCity = cityRepository.save(city);
+        Location savedLocation = locationRepository.save(travelLocation);
         travel = travelRepository.save(Travel.builder()
                 .title("기본 여행")
                 .userNumber(host.getUserNumber())
@@ -99,7 +99,7 @@ class TravelEnrollmentControllerTest {
                 .dueDate(LocalDate.now().plusDays(5))
                 .periodType(PeriodType.NONE)
                 .status(TravelStatus.IN_PROGRESS)
-                        .city(savedCity)
+                        .travelLocation(savedLocation)
                 .build()
         );
     }

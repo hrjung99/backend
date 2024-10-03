@@ -101,7 +101,7 @@ public class Travel {
         this.userNumber = userNumber;
         this.createdAt = createdAt;
         this.travelLocation = travelLocation;
-        this.location = travelLocation.getLocationName();
+        this.location = location;
         this.title = title;
         this.details = details;
         this.viewCount = viewCount;
@@ -114,7 +114,7 @@ public class Travel {
 
     public Travel update(TravelUpdateRequest travelUpdate, Location travelLocation) {
         this.travelLocation = travelLocation;
-        this.location = travelLocation.getLocationName();
+        this.location = travelUpdate.getLocation();
         this.title = travelUpdate.getTitle();
         this.details = travelUpdate.getDetails();
         this.maxPerson = travelUpdate.getMaxPerson();

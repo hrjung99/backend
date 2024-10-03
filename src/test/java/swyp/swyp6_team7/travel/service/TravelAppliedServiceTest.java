@@ -1,6 +1,5 @@
 package swyp.swyp6_team7.travel.service;
 
-import com.querydsl.core.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,11 +13,8 @@ import org.springframework.data.domain.Pageable;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
-import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
-import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
-import swyp.swyp6_team7.location.domain.City;
-import swyp.swyp6_team7.location.domain.CityType;
-import swyp.swyp6_team7.location.repository.CityRepository;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -58,9 +54,9 @@ public class TravelAppliedServiceTest {
         // given
         Integer userNumber = 1;
         Pageable pageable = PageRequest.of(0, 5);
-        City city = City.builder()
-                .cityName("제주")
-                .cityType(CityType.DOMESTIC)
+        Location travelLocation = Location.builder()
+                .locationName("Seoul")
+                .locationType(LocationType.DOMESTIC)
                 .build();
 
         Travel travel = Travel.builder()
@@ -71,7 +67,7 @@ public class TravelAppliedServiceTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .maxPerson(10)
                 .status(TravelStatus.IN_PROGRESS)
-                .city(city)
+                .travelLocation(travelLocation)
                 .build();
 
         Companion companion = Companion.builder()
@@ -101,7 +97,7 @@ public class TravelAppliedServiceTest {
                 travel.getTitle(),
                 travel.getLocation(),
                 travel.getMaxPerson(),
-                travel.getCity().getCityName(),
+                travel.getLocation(),
                 Collections.emptyList(), // 태그 리스트
                 travel.getViewCount(),
                 travel.getCompanions().size(),
@@ -133,13 +129,13 @@ public class TravelAppliedServiceTest {
         // given
         Integer userNumber = 1;
         int travelNumber = 1;
-        City city = City.builder()
-                .cityName("Seoul")
-                .cityType(CityType.DOMESTIC)
+        Location travelLocation = Location.builder()
+                .locationName("Seoul")
+                .locationType(LocationType.DOMESTIC)
                 .build();
         Travel travel = Travel.builder()
                 .number(travelNumber)
-                .city(city)
+                .travelLocation(travelLocation)
                 .build();
         Companion companion = Companion.builder()
                 .travel(travel)
