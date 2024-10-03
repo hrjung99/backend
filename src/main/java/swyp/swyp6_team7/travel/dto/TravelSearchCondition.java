@@ -51,8 +51,7 @@ public class TravelSearchCondition {
             return new ArrayList<>();
         }
         return locationTypes.stream()
-                .distinct()
-                .limit(TravelSearchConstant.LOCATION_TYPE_COUNT)
+                .distinct().limit(TravelSearchConstant.LOCATION_TYPE_COUNT)
                 .map(this::convertToCityType) // 문자열을 CityType으로 변환
                 .toList();
     }

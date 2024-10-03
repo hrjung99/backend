@@ -18,6 +18,7 @@ public class TravelRecommendResponse {
     @NotNull
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
     private List<String> tags;
@@ -31,6 +32,7 @@ public class TravelRecommendResponse {
     public TravelRecommendResponse(TravelRecommendDto dto) {
         this.travelNumber = dto.getTravelNumber();
         this.title = dto.getTitle();
+        this.location = dto.getLocation();
         this.userNumber = dto.getUserNumber();
         this.userName = dto.getUserName();
         this.tags = dto.getTags();

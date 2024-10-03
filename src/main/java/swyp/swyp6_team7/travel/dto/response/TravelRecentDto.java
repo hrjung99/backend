@@ -22,6 +22,7 @@ public class TravelRecentDto {
     @NotNull
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
     private List<String> tags;
@@ -35,12 +36,13 @@ public class TravelRecentDto {
 
     @Builder
     public TravelRecentDto(
-            int travelNumber, String title, int userNumber, String userName,
+            int travelNumber, String title, String location, int userNumber, String userName,
             List<String> tags, int nowPerson, int maxPerson,
             LocalDateTime createdAt, LocalDate registerDue
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
+        this.location = location;
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags;
@@ -57,6 +59,7 @@ public class TravelRecentDto {
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
+        this.location = travel.getLocation();
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();

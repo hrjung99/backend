@@ -21,6 +21,7 @@ public class TravelRecommendDto {
     @NotNull
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
     private List<String> tags;
@@ -32,12 +33,13 @@ public class TravelRecommendDto {
 
     @Builder
     public TravelRecommendDto(
-            int travelNumber, String title, int userNumber, String userName,
+            int travelNumber, String title, String location, int userNumber, String userName,
             List<String> tags, int nowPerson, int maxPerson,
             LocalDateTime createdAt, LocalDate registerDue, int preferredNumber
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
+        this.location = location;
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags;
@@ -55,6 +57,7 @@ public class TravelRecommendDto {
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
+        this.title = travel.getLocation();
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags.stream()
@@ -74,6 +77,7 @@ public class TravelRecommendDto {
         return "TravelRecommendDto{" +
                 "travelNumber=" + travelNumber +
                 ", title='" + title + '\'' +
+                ", location='" + location + '\'' +
                 ", userNumber=" + userNumber +
                 ", userName='" + userName + '\'' +
                 ", tags=" + tags +
