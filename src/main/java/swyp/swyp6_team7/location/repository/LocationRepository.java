@@ -6,5 +6,5 @@ import swyp.swyp6_team7.location.domain.Location;
 import java.util.Optional;
 
 public interface LocationRepository extends JpaRepository<Location, Integer> {
-    Optional<Location> findByLocationName(String cityName);
+    Optional<Location> findByLocationName(String locationName);
 }
