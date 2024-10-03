@@ -30,12 +30,13 @@ public class TravelSearchDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
     private String postStatus;
+    private boolean bookmarked;
 
 
     @QueryProjection
     public TravelSearchDto(
             Travel travel, int userNumber, String userName,
-            int companionCount, List<String> tags
+            int companionCount, List<String> tags, boolean isBookmarked
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
@@ -48,6 +49,7 @@ public class TravelSearchDto {
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
         this.postStatus = travel.getStatus().getName();
+        this.bookmarked = isBookmarked;
     }
 
     @Override
@@ -64,6 +66,7 @@ public class TravelSearchDto {
                 ", createdAt=" + createdAt +
                 ", registerDue=" + registerDue +
                 ", postStatus='" + postStatus + '\'' +
+                ", bookmarked=" + bookmarked +
                 '}';
     }
 }

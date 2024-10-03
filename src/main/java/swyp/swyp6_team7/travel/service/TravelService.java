@@ -61,6 +61,7 @@ public class TravelService {
 
         Integer requestUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
         TravelDetailDto travelDetail = travelRepository.getDetailsByNumber(travelNumber, requestUserNumber);
+
         //enrollment 개수
         int enrollmentCount = enrollmentRepository.countByTravelNumber(travelNumber);
         log.info("enrollmentCount: " + enrollmentCount);
@@ -68,8 +69,6 @@ public class TravelService {
         int bookmarkCount = bookmarkRepository.countByTravelNumber(travelNumber);
         TravelDetailResponse detailResponse = new TravelDetailResponse(travelDetail, enrollmentCount, bookmarkCount);
 
-//        String requestUserName = SecurityContextHolder.getContext().getAuthentication().getName();
-//        int requestUserNumber = memberService.findByEmail(requestUserName).getUserNumber();
         if (travelDetail.getHostNumber() == requestUserNumber) {
             detailResponse.setHostUserCheckTrue();
         } else {
@@ -111,7 +110,8 @@ public class TravelService {
 
 
     public Page<TravelSearchDto> search(TravelSearchCondition condition) {
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Integer requestUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
+        Page<TravelSearchDto> result = travelRepository.search(condition, requestUserNumber);
         for (TravelSearchDto travelSearchDto : result) {
             log.info("service: " + travelSearchDto.toString());
         }
