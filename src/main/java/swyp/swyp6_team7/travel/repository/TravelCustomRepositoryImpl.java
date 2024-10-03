@@ -68,6 +68,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                         travel,
                         users.userNumber,
                         users.userName,
+                        users.userAgeGroup,
                         travel.companions.size(),
                         list(tag.name),
                         bookmark.bookmarkId.isNotNull()
