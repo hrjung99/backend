@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import swyp.swyp6_team7.companion.domain.Companion;
+import swyp.swyp6_team7.location.domain.City;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
@@ -37,6 +38,11 @@ public class Travel {
     @CreatedDate
     @Column(name = "travel_reg_date", nullable = false)
     private LocalDateTime createdAt;
+
+    // 여행지 ID (참조)
+    @ManyToOne
+    @JoinColumn(name = "city_id", nullable = false)
+    private City city;
 
     //여행지
     @Column(name = "travel_location", length = 20)
@@ -87,14 +93,15 @@ public class Travel {
     @Builder
     public Travel(
             int number, int userNumber, LocalDateTime createdAt,
-            String location, String title, String details, int viewCount,
+            City city, String location, String title, String details, int viewCount,
             int maxPerson, GenderType genderType, LocalDate dueDate,
             PeriodType periodType, TravelStatus status
     ) {
         this.number = number;
         this.userNumber = userNumber;
         this.createdAt = createdAt;
-        this.location = location;
+        this.city = city;
+        this.location = city.getCityName();
         this.title = title;
         this.details = details;
         this.viewCount = viewCount;
@@ -105,8 +112,9 @@ public class Travel {
         this.status = status;
     }
 
-    public Travel update(TravelUpdateRequest travelUpdate) {
-        this.location = travelUpdate.getLocation();
+    public Travel update(TravelUpdateRequest travelUpdate, City city) {
+        this.city = city;
+        this.location = city.getCityName();
         this.title = travelUpdate.getTitle();
         this.details = travelUpdate.getDetails();
         this.maxPerson = travelUpdate.getMaxPerson();

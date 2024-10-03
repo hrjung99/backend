@@ -32,6 +32,10 @@ public class CityParser implements Parser<City> {
             case DOMESTIC:
                 country = columns[1].trim(); // 나라
                 city = columns[3].trim(); // 소분류 (시)
+                // '시' 제거 로직 추가
+                if (city.endsWith("시")) {
+                    city = city.substring(0, city.length() - 1);
+                }
                 break;
 
             case INTERNATIONAL:

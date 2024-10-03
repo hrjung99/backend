@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.repository.CityRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.tag.service.TravelTagService;
@@ -34,13 +36,16 @@ public class TravelService {
     private final BookmarkRepository bookmarkRepository;
     private final TravelTagService travelTagService;
     private final MemberService memberService;
+    private final CityRepository cityRepository;
 
     @Transactional
     public Travel create(TravelCreateRequest request, String email) {
 
         Users user = memberService.findByEmail(email);
+        City city = cityRepository.findByCityName(request.getLocation())
+                .orElseThrow(() -> new IllegalArgumentException("city not found: " + request.getLocation()));
 
-        Travel savedTravel = travelRepository.save(request.toTravelEntity(user.getUserNumber()));
+        Travel savedTravel = travelRepository.save(request.toTravelEntity(user.getUserNumber(), city));
         List<String> tags = travelTagService.create(savedTravel, request.getTags()).stream()
                 .map(tag -> tag.getName())
                 .toList();
@@ -86,7 +91,10 @@ public class TravelService {
 
         authorizeTravelOwner(travel);
 
-        Travel updatedTravel = travel.update(travelUpdate);
+        City city = cityRepository.findByCityName(travelUpdate.getLocation())
+                .orElseThrow(() -> new IllegalArgumentException("city not found: " + travelUpdate.getLocation()));
+
+        Travel updatedTravel = travel.update(travelUpdate, city);
         List<String> updatedTags = travelTagService.update(updatedTravel, travelUpdate.getTags());
     }
 

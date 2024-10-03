@@ -26,4 +26,5 @@ public class CityService {
         List<City> cities = csvReader.readByLine(filename, cityParser, cityType);
         cities.forEach(city -> cityDao.addCity(city));
     }
+
 }
