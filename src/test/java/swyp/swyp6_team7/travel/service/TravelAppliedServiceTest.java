@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
@@ -44,8 +45,6 @@ public class TravelAppliedServiceTest {
     private CompanionRepository companionRepository;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private CityRepository cityRepository;
     @InjectMocks
     private TravelAppliedService travelAppliedService;
     @BeforeEach
@@ -63,7 +62,6 @@ public class TravelAppliedServiceTest {
                 .cityName("제주")
                 .cityType(CityType.DOMESTIC)
                 .build();
-        City savedCity = cityRepository.save(city);
 
         Travel travel = Travel.builder()
                 .number(1)
@@ -73,7 +71,7 @@ public class TravelAppliedServiceTest {
                 .dueDate(LocalDate.now().plusDays(10))
                 .maxPerson(10)
                 .status(TravelStatus.IN_PROGRESS)
-                .city(savedCity)
+                .city(city)
                 .build();
 
         Companion companion = Companion.builder()
@@ -97,6 +95,22 @@ public class TravelAppliedServiceTest {
         // 북마크 여부 확인
         when(bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber()))
                 .thenReturn(true);
+         // 여행 목록 페이지로 변환
+        TravelListResponseDto travelListResponseDto = new TravelListResponseDto(
+                travel.getNumber(),
+                travel.getTitle(),
+                travel.getLocation(),
+                travel.getMaxPerson(),
+                travel.getCity().getCityName(),
+                Collections.emptyList(), // 태그 리스트
+                travel.getViewCount(),
+                travel.getCompanions().size(),
+                travel.getStatus().name(),
+                user.getUserName(),
+                true // 북마크 여부
+        );
+        List<TravelListResponseDto> travelList = List.of(travelListResponseDto);
+        Page<TravelListResponseDto> travelPage = new PageImpl<>(travelList, pageable, travelList.size());
 
         // when
         Page<TravelListResponseDto> result = travelAppliedService.getAppliedTripsByUser(userNumber, pageable);
@@ -119,8 +133,13 @@ public class TravelAppliedServiceTest {
         // given
         Integer userNumber = 1;
         int travelNumber = 1;
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
         Travel travel = Travel.builder()
                 .number(travelNumber)
+                .city(city)
                 .build();
         Companion companion = Companion.builder()
                 .travel(travel)

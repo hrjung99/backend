@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.CityType;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.GenderType;
@@ -58,6 +60,10 @@ class TravelListServiceTest {
         // Given
         Integer userNumber = 1;
         Pageable pageable = PageRequest.of(0, 2);
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
 
         Travel travel1 = Travel.builder()
                 .number(1)
@@ -66,6 +72,7 @@ class TravelListServiceTest {
                 .title("Title 1")
                 .maxPerson(5)
                 .dueDate(LocalDate.now().plusDays(3))
+                .city(city)
                 .build();
 
         Travel travel2 = Travel.builder()
@@ -75,6 +82,7 @@ class TravelListServiceTest {
                 .title("Title 2")
                 .maxPerson(10)
                 .dueDate(LocalDate.now().minusDays(1))
+                .city(city)
                 .build();
 
         // 태그 설정

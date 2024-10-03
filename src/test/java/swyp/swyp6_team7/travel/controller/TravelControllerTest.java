@@ -17,6 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.CityType;
+import swyp.swyp6_team7.location.repository.CityRepository;
 import swyp.swyp6_team7.member.entity.*;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.GenderType;
@@ -53,6 +56,8 @@ class TravelControllerTest {
     TravelRepository travelRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    CityRepository cityRepository;
 
     Users user;
 
@@ -93,11 +98,20 @@ class TravelControllerTest {
     @Test
     public void create() throws Exception {
         // given
+        cityRepository.deleteAll();
+        travelRepository.deleteAll();
         String url = "/api/travel";
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
+        City savedCity = cityRepository.save(city);
         TravelCreateRequest request = TravelCreateRequest.builder()
                 .title("Controller create")
                 .completionStatus(true)
+                .location(savedCity.getCityName())
                 .build();
+
 
         Principal principal = Mockito.mock(Principal.class);
         Mockito.when(principal.getName()).thenReturn(user.getEmail());
@@ -109,8 +123,7 @@ class TravelControllerTest {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        resultActions.
-                andExpect(status().isCreated());
+        resultActions.andExpect(status().isCreated());
         List<Travel> travels = travelRepository.findAll();
         assertThat(travels.size()).isEqualTo(1);
         assertThat(travels.get(0).getTitle()).isEqualTo("Controller create");
@@ -124,9 +137,14 @@ class TravelControllerTest {
         // given
         String url = "/api/travel/detail/{travelNumber}";
         Travel savedTravel = createTravel(user.getUserNumber(), TravelStatus.IN_PROGRESS);
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
+        City savedCity = cityRepository.save(city);
 
         // when
-        ResultActions resultActions = mockMvc.perform(get(url, savedTravel.getNumber()));
+        ResultActions resultActions = mockMvc.perform(get(url, savedTravel.getNumber(), savedCity));
 
         // then
         resultActions
@@ -141,9 +159,13 @@ class TravelControllerTest {
         // given
         String url = "/api/travel/detail/{travelNumber}";
         Travel savedTravel = createTravel(2, TravelStatus.DRAFT);
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
 
         // when
-        ResultActions resultActions = mockMvc.perform(get(url, savedTravel.getNumber()));
+        ResultActions resultActions = mockMvc.perform(get(url, savedTravel.getNumber(),city));
 
         // then
         resultActions
@@ -156,9 +178,13 @@ class TravelControllerTest {
         // given
         String url = "/api/travel/detail/{travelNumber}";
         Travel savedTravel = createTravel(user.getUserNumber(), TravelStatus.DELETED);
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
 
         // when
-        ResultActions resultActions = mockMvc.perform(get(url, savedTravel.getNumber()));
+        ResultActions resultActions = mockMvc.perform(get(url, savedTravel.getNumber(),city));
 
         // then
         resultActions
@@ -166,8 +192,14 @@ class TravelControllerTest {
     }
 
     private Travel createTravel(int userNumber, TravelStatus status) {
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
+        City savedCity = cityRepository.save(city);
         return travelRepository.save(Travel.builder()
                 .title("Travel Controller")
+                        .city(city)
                 .userNumber(userNumber)
                 .genderType(GenderType.NONE)
                 .periodType(PeriodType.NONE)

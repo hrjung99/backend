@@ -5,6 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.CityType;
+import swyp.swyp6_team7.location.repository.CityRepository;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
@@ -25,12 +28,15 @@ class TravelServiceTest {
     private TravelService travelService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private CityRepository cityRepository;
 
     Users user;
 
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
+        cityRepository.deleteAll();
         user = userRepository.save(Users.builder()
                 .userEmail("test@naver.com")
                 .userPw("1234")
@@ -48,9 +54,15 @@ class TravelServiceTest {
     @Test
     public void createTravelWithUser() {
         // given
+        City city = City.builder()
+                .cityName("Seoul")
+                .cityType(CityType.DOMESTIC)
+                .build();
+        City savedCity = cityRepository.save(city);
         TravelCreateRequest request = TravelCreateRequest.builder()
                 .title("test travel post")
                 .completionStatus(true)
+                .location(savedCity.getCityName())
                 .build();
 
         // when
@@ -59,6 +71,7 @@ class TravelServiceTest {
         // then
         assertThat(createdTravel.getTitle()).isEqualTo(request.getTitle());
         assertThat(createdTravel.getUserNumber()).isEqualTo(user.getUserNumber());
+        assertThat(createdTravel.getCity().getCityName()).isEqualTo(savedCity.getCityName());
     }
 
 }
