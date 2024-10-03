@@ -53,8 +53,9 @@ public class LoginController {
             userLoginHistoryService.saveLoginHistory(user);  // 로그인 이력 저장
             memberService.updateLoginDate(user);  // 로그인 시간 업데이트
 
-            Map<String, String> loginResponse = loginService.login(loginRequestDto, response);
-            return ResponseEntity.ok(loginResponse); // Access Token 반환
+
+            return ResponseEntity.ok(tokenMap); // Access Token 반환
+
         } catch (UsernameNotFoundException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
