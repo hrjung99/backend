@@ -56,7 +56,7 @@ public class TravelSearchCondition {
                 .toList();
     }
     private LocationType convertToCityType(String locationType) {
-        return LocationType.valueOf(locationType.toUpperCase());
+        return LocationType.fromString(locationType);
     }
 
 

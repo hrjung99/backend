@@ -18,6 +18,7 @@ public class TravelSearchDto {
 
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
     private List<String> tags;
@@ -31,12 +32,13 @@ public class TravelSearchDto {
 
     @Builder
     public TravelSearchDto(
-            int travelNumber, String title, int userNumber, String userName,
+            int travelNumber, String title, String location, int userNumber, String userName,
             List<String> tags, int maxPerson, int nowPerson,
             LocalDateTime createdAt, LocalDate registerDue, String postStatus
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
+        this.location = location;
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags;
@@ -54,6 +56,7 @@ public class TravelSearchDto {
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
+        this.location = travel.getLocation();
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags;
@@ -69,6 +72,7 @@ public class TravelSearchDto {
         return "TravelSearchDto{" +
                 "travelNumber=" + travelNumber +
                 ", title='" + title + '\'' +
+                ", location='" + location + '\'' +
                 ", userNumber=" + userNumber +
                 ", userName='" + userName + '\'' +
                 ", tags=" + tags +
