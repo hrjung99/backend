@@ -87,13 +87,10 @@ public class BookmarkService {
                 .map(bookmark -> {
                     Integer travelNumber = bookmark.getTravelNumber();
                     System.out.println("Travel Number: " + travelNumber); // 로그 추가
-
-                    Bookmark foundBookmark = bookmarkRepository.findById(bookmark.getBookmarkId())
-                            .orElseThrow(() -> new IllegalArgumentException("북마크를 찾을 수 없습니다."));
-
+                    
 
                     Travel travel = travelRepository.findById(travelNumber)
-                    .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
+                            .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
 
                     Users user = userRepository.findById(userNumber)
                             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -116,13 +113,14 @@ public class BookmarkService {
                             formatDate(travel.getDueDate()),
                             true
                     );
-        }).collect(Collectors.toList());
+                }).collect(Collectors.toList());
 
         int start = Math.min(currentPage * currentSize, responses.size());
         int end = Math.min((currentPage + 1) * currentSize, responses.size());
 
         return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }
+
     @Transactional(readOnly = true)
     public List<Integer> getBookmarkedTravelNumbers(Integer userNumber) {
         // 사용자 번호로 북마크된 모든 여행 번호를 조회
