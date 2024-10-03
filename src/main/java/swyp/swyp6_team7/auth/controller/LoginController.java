@@ -43,7 +43,6 @@ public class LoginController {
             ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
                     .secure(true)  // HTTPS 환경에서만 전송
-                    .sameSite("Strict")  // 다른 도메인 간의 요청 허용
                     .path("/")
                     .maxAge(7 * 24 * 60 * 60)  // 쿠키의 만료 시간 설정 (예: 7일)
                     .build();
