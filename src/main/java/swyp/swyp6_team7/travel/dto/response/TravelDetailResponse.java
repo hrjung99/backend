@@ -34,15 +34,17 @@ public class TravelDetailResponse {
     private String periodType;
     private List<String> tags;
     private String postStatus;
-    private boolean hostUserCheck;        //주최자 여부
-    private boolean enrollAvailable; //신청 가능 여부
+    private boolean hostUserCheck;      //주최자 여부
+    private boolean enrollAvailable;    //신청 가능 여부
+    private boolean bookmarked;     //북마크 여부
 
     @Builder
     public TravelDetailResponse(
             int travelNumber, int userNumber, String userName, LocalDateTime createdAt, String location,
             String title, String details, int viewCount, int enrollCount, int bookmarkCount,
             int nowPerson, int maxPerson, String genderType, LocalDate dueDate, String periodType,
-            List<String> tags, String postStatus, boolean hostUserCheck, boolean enrollAvailable
+            List<String> tags, String postStatus, boolean hostUserCheck, boolean enrollAvailable,
+            boolean isBookmarked
     ) {
         this.travelNumber = travelNumber;
         this.userNumber = userNumber;
@@ -63,6 +65,7 @@ public class TravelDetailResponse {
         this.postStatus = postStatus;
         this.hostUserCheck = hostUserCheck;
         this.enrollAvailable = enrollAvailable;
+        this.bookmarked = isBookmarked;
     }
 
     public TravelDetailResponse(
@@ -86,6 +89,7 @@ public class TravelDetailResponse {
         this.periodType = travelDetail.getTravel().getPeriodType().toString();
         this.tags = travelDetail.getTags();
         this.postStatus = travelDetail.getTravel().getStatus().toString();
+        this.bookmarked = travelDetail.isBookmarked();
     }
 
 
@@ -123,6 +127,7 @@ public class TravelDetailResponse {
                 ", postStatus='" + postStatus + '\'' +
                 ", hostUserCheck=" + hostUserCheck +
                 ", enrollAvailable=" + enrollAvailable +
+                ", bookmarked=" + bookmarked +
                 '}';
     }
 }

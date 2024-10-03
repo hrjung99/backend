@@ -14,17 +14,19 @@ public class TravelDetailDto {
     private String hostName;
     private int companionCount;
     private List<String> tags;
+    private boolean bookmarked;
 
     @QueryProjection
     public TravelDetailDto(
             Travel travel, int hostNumber, String hostName,
-            int companionCount, List<String> tags
+            int companionCount, List<String> tags, boolean isBookmarked
     ) {
         this.travel = travel;
         this.hostNumber = hostNumber;
         this.hostName = hostName;
         this.companionCount = companionCount;
         this.tags = tags;
+        this.bookmarked = isBookmarked;
     }
 
 }

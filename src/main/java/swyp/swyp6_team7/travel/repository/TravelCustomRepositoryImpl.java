@@ -54,20 +54,23 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     QBookmark bookmark = QBookmark.bookmark;
 
     @Override
-    public TravelDetailDto getDetailsByNumber(int travelNumber) {
+    public TravelDetailDto getDetailsByNumber(int travelNumber, Integer loginUserNumber) {
         return queryFactory
                 .select(travel)
                 .from(travel)
                 .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
+                .leftJoin(bookmark).on(bookmark.userNumber.eq(loginUserNumber)
+                        .and(bookmark.travelNumber.eq(travel.number)))
                 .where(travel.number.eq(travelNumber))
                 .transform(groupBy(travel.number).as(new QTravelDetailDto(
                         travel,
                         users.userNumber,
                         users.userName,
                         travel.companions.size(),
-                        list(tag.name)
+                        list(tag.name),
+                        bookmark.bookmarkId.isNotNull()
                 ))).get(travelNumber);
     }
 

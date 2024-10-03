@@ -18,6 +18,6 @@ public interface TravelCustomRepository {
 
     Page<TravelSearchDto> search(TravelSearchCondition condition);
 
-    TravelDetailDto getDetailsByNumber(int travelNumber);
+    TravelDetailDto getDetailsByNumber(int travelNumber, Integer loginUserNumber);
 
 }

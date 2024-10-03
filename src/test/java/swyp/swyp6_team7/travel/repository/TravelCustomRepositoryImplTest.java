@@ -124,7 +124,7 @@ class TravelCustomRepositoryImplTest {
         travelTagRepository.save(TravelTag.of(travel, tag2));
 
         // when
-        TravelDetailDto details = travelRepository.getDetailsByNumber(travel.getNumber());
+        TravelDetailDto details = travelRepository.getDetailsByNumber(travel.getNumber(), user.getUserNumber());
 
         // then
         System.out.println(details.toString());
