@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.config.DataConfig;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -25,75 +25,97 @@ public class BookmarkRepositoryTest {
     @DisplayName("사용자 번호로 북마크 조회 테스트")
     public void testFindByUserNumber() {
         // Given
-        Bookmark bookmark1 = new Bookmark();
-        bookmark1.setUserNumber(1);
-        bookmark1.setContentId(101);
-        bookmark1.setContentType(ContentType.TRAVEL);  // Enum 타입 사용
-        bookmark1.setBookmarkDate(LocalDateTime.now());
+        Integer userNumber = 1;
+        Bookmark bookmark1 = new Bookmark(userNumber, 101, LocalDateTime.now());
+        Bookmark bookmark2 = new Bookmark(userNumber, 102, LocalDateTime.now().minusDays(1));
         bookmarkRepository.save(bookmark1);
-
-        Bookmark bookmark2 = new Bookmark();
-        bookmark2.setUserNumber(1);
-        bookmark2.setContentId(102);
-        bookmark2.setContentType(ContentType.COMMUNITY);  // Enum 타입 사용
-        bookmark2.setBookmarkDate(LocalDateTime.now());
         bookmarkRepository.save(bookmark2);
 
-        // When
-        List<Bookmark> bookmarks = bookmarkRepository.findByUserNumber(1);
+        // when
+        List<Bookmark> bookmarks = bookmarkRepository.findByUserNumber(userNumber);
 
-        // Then
+        // then
         assertThat(bookmarks).hasSize(2);
-        assertThat(bookmarks.get(0).getContentId()).isEqualTo(101);
-        assertThat(bookmarks.get(0).getContentType()).isEqualTo(ContentType.TRAVEL);
-        assertThat(bookmarks.get(1).getContentId()).isEqualTo(102);
-        assertThat(bookmarks.get(1).getContentType()).isEqualTo(ContentType.COMMUNITY);
     }
 
     @Test
     @DisplayName("사용자 번호로 북마크 개수 조회 테스트")
-    public void testCountByUserNumber() {
-        // Given
-        Bookmark bookmark = new Bookmark();
-        bookmark.setUserNumber(1);
-        bookmark.setContentId(101);
-        bookmark.setContentType(ContentType.TRAVEL);  // Enum 타입 사용
-        bookmark.setBookmarkDate(LocalDateTime.now());
-        bookmarkRepository.save(bookmark);
+    void testCountByUserNumber() {
+        // given
+        Integer userNumber = 1;
+        bookmarkRepository.save(new Bookmark(userNumber, 101, LocalDateTime.now()));
+        bookmarkRepository.save(new Bookmark(userNumber, 102, LocalDateTime.now()));
 
-        // When
-        int count = bookmarkRepository.countByUserNumber(1);
+        // when
+        int count = bookmarkRepository.countByUserNumber(userNumber);
 
-        // Then
-        assertThat(count).isEqualTo(1);
+        // then
+        assertThat(count).isEqualTo(2);
+    }
+    @Test
+    @DisplayName("특정 여행 게시물의 북마크 개수를 조회한다")
+    void testCountByTravelNumber() {
+        // given
+        Integer userNumber1 = 1;
+        Integer userNumber2 = 2;
+        int travelNumber = 101;
+        bookmarkRepository.save(new Bookmark(userNumber1, travelNumber, LocalDateTime.now()));
+        bookmarkRepository.save(new Bookmark(userNumber2, travelNumber, LocalDateTime.now().minusDays(1)));
+
+        // when
+        int count = bookmarkRepository.countByTravelNumber(travelNumber);
+
+        // then
+        assertThat(count).isEqualTo(2);
     }
 
     @Test
     @DisplayName("가장 오래된 북마크 조회 테스트")
     public void testFindOldestByUserNumber() {
-        // Given
-        Bookmark bookmark1 = new Bookmark();
-        bookmark1.setUserNumber(1);
-        bookmark1.setContentId(101);
-        bookmark1.setContentType(ContentType.TRAVEL);  // Enum 타입 사용
-        bookmark1.setBookmarkDate(LocalDateTime.now().minusDays(2));
+        // given
+        Integer userNumber = 1;
+        Bookmark bookmark1 = new Bookmark(userNumber, 101, LocalDateTime.now().minusDays(5));
+        Bookmark bookmark2 = new Bookmark(userNumber, 102, LocalDateTime.now().minusDays(2));
         bookmarkRepository.save(bookmark1);
-
-        Bookmark bookmark2 = new Bookmark();
-        bookmark2.setUserNumber(1);
-        bookmark2.setContentId(102);
-        bookmark2.setContentType(ContentType.COMMUNITY);  // Enum 타입 사용
-        bookmark2.setBookmarkDate(LocalDateTime.now().minusDays(1));
         bookmarkRepository.save(bookmark2);
 
-        // When
-        List<Bookmark> oldestBookmarks = bookmarkRepository.findOldestByUserNumber(1);
+        // when
+        List<Bookmark> oldestBookmarks = bookmarkRepository.findOldestByUserNumber(userNumber);
 
-        // Then
+        // then
         assertThat(oldestBookmarks).hasSize(2);
-        assertThat(oldestBookmarks.get(0).getContentId()).isEqualTo(101);
-        assertThat(oldestBookmarks.get(0).getContentType()).isEqualTo(ContentType.TRAVEL);
-        assertThat(oldestBookmarks.get(1).getContentId()).isEqualTo(102);
-        assertThat(oldestBookmarks.get(1).getContentType()).isEqualTo(ContentType.COMMUNITY);
+        assertThat(oldestBookmarks.get(0)).isEqualTo(bookmark1);
+    }
+    @Test
+    @DisplayName("특정 사용자가 특정 여행을 북마크했는지 확인한다")
+    void testExistsByUserNumberAndTravelNumber() {
+        // given
+        Integer userNumber = 1;
+        int travelNumber = 101;
+        Bookmark bookmark = new Bookmark(userNumber, travelNumber, LocalDateTime.now());
+        bookmarkRepository.save(bookmark);
+
+        // when
+        boolean exists = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travelNumber);
+
+        // then
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    @DisplayName("특정 사용자의 특정 여행 북마크를 삭제한다")
+    void testDeleteByUserNumberAndTravelNumber() {
+        // given
+        Integer userNumber = 1;
+        int travelNumber = 101;
+        Bookmark bookmark = new Bookmark(userNumber, travelNumber, LocalDateTime.now());
+        bookmarkRepository.save(bookmark);
+
+        // when
+        int deletedCount = bookmarkRepository.deleteByUserNumberAndTravelNumber(userNumber, travelNumber);
+
+        // then
+        assertThat(deletedCount).isEqualTo(1); // 삭제된 엔티티의 수가 1인지 확인
+
     }
 }

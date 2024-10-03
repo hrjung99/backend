@@ -1,35 +1,24 @@
 package swyp.swyp6_team7.travel.service;
 
-import com.querydsl.core.Tuple;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
-import swyp.swyp6_team7.enrollment.domain.Enrollment;
-import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
-import swyp.swyp6_team7.enrollment.domain.QEnrollment;
-import swyp.swyp6_team7.enrollment.dto.EnrollmentResponse;
-import swyp.swyp6_team7.enrollment.repository.EnrollmentCustomRepository;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
-import swyp.swyp6_team7.travel.domain.TravelStatus;
-import swyp.swyp6_team7.travel.dto.response.TravelAppliedListResponseDto;
-import swyp.swyp6_team7.travel.domain.QTravel;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static swyp.swyp6_team7.travel.domain.QTravel.travel;
-
+import org.springframework.data.domain.Page;
 @Service
 @RequiredArgsConstructor
 public class TravelAppliedService {
@@ -42,57 +31,24 @@ public class TravelAppliedService {
 
 
     @Transactional(readOnly = true)
-    public List<TravelAppliedListResponseDto> getAppliedTripsByUser(Integer userNumber) {
+    public Page<TravelListResponseDto> getAppliedTripsByUser(Integer userNumber, Pageable pageable) {
         // 사용자가 승인된 동반자 목록 조회
         List<Companion> companions = companionRepository.findByUserNumber(userNumber);
-        // 동반자 목록에서 수락된 상태의 엔롤먼트만 필터링
-        List<Companion> acceptedCompanions = companions.stream()
-                .filter(companion -> enrollmentRepository.findEnrollmentsByUserNumber(userNumber).stream()
-                        .anyMatch(enrollment -> {
-                            EnrollmentStatus status = enrollment.get(QEnrollment.enrollment.status);
-                            return status == EnrollmentStatus.ACCEPTED;
-                        }))
-                .collect(Collectors.toList());
 
-        // 여행 엔티티를 DTO로 변환하여 반환
-        return companions.stream().map(companion -> {
+        List<TravelListResponseDto> dtos = companions.stream().map(companion -> {
             Travel travel = companion.getTravel();
-
-            String dDay = TravelAppliedListResponseDto.formatDDay(travel.getDueDate()); // 디데이 형식으로 마감기한 포맷팅
-            String postedAgo = TravelAppliedListResponseDto.formatPostedAgo(travel.getCreatedAt().toLocalDate()); // 작성일로부터 경과한 시간 포맷팅
-
             Users user = userRepository.findById(userNumber)
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-            // 동반자 수 계산
             int currentApplicants = travel.getCompanions().size();
 
-            // 태그 리스트 추출
-            List<String> tags = travel.getTravelTags().stream()
-                    .map(travelTag -> travelTag.getTag().getName())
-                    .collect(Collectors.toList());
+            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
 
-            // 북마크 여부 확인
-            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travel.getNumber(), ContentType.TRAVEL);
-
-            return new TravelAppliedListResponseDto(
-                    travel.getNumber(),
-                    travel.getTitle(),
-                    travel.getLocation(),
-                    user.getUserName(),
-                    dDay,
-                    postedAgo,
-                    currentApplicants,
-                    travel.getMaxPerson(),
-                    travel.getStatus() == TravelStatus.CLOSED,
-                    isBookmarked,
-                    tags,
-                    "/api/travel/" + travel.getNumber(),
-                    "/api/my-applied-trips/" + travel.getNumber() + "/cancel",
-                    "/api/bookmarks", // 북마크 추가 URL
-                    "/api/bookmarks/" + travel.getNumber() // 북마크 제거 URL
-            );
+            return TravelListResponseDto.fromEntity(travel, user, currentApplicants, isBookmarked);
         }).collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), dtos.size());
+        return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 
 

@@ -1,18 +1,17 @@
 package swyp.swyp6_team7.travel.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
-import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
-
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,16 +26,14 @@ public class TravelListService {
     private final BookmarkRepository bookmarkRepository;
 
     @Transactional(readOnly = true)
-    public List<TravelListResponseDto> getTravelListByUser(Integer userNumber) {
+    public Page<TravelListResponseDto> getTravelListByUser(Integer userNumber, Pageable pageable) {
         // 사용자 번호를 통해 여행 게시글 조회 (최신 등록순으로 정렬)
         List<Travel> travels = travelRepository.findByUserNumber(userNumber).stream()
                 .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt())) // 최신순으로 정렬
                 .collect(Collectors.toList());
 
         // 여행 엔티티를 DTO로 변환하여 반환
-        return travels.stream().map(travel -> {
-            String dDay = TravelListResponseDto.formatDDay(travel.getDueDate()); // 디데이 형식으로 마감기한 포맷팅
-            String postedAgo = TravelListResponseDto.formatPostedAgo(travel.getCreatedAt().toLocalDate()); // 작성일로부터 경과한 시간 포맷팅
+        List<TravelListResponseDto> dtos = travels.stream().map(travel -> {
 
             // 동반자 수 계산
             int currentApplicants = travel.getCompanions().size();
@@ -52,37 +49,24 @@ public class TravelListService {
                     .collect(Collectors.toList());
 
             // 북마크 여부 확인
-            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travel.getNumber(), ContentType.TRAVEL);
+            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
 
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
-                    travel.getLocation(),
+                    travel.getUserNumber(),
                     username,
-                    dDay,
-                    postedAgo,
+                    tags,
                     currentApplicants,
                     travel.getMaxPerson(),
-                    travel.getStatus() == TravelStatus.CLOSED,
-                    isBookmarked,
-                    tags,
-                    "/api/travel/" + travel.getNumber(),
-                    "/api/travel/" + travel.getNumber() + "/edit",
-                    "/api/travel/" + travel.getNumber() + "/delete",
-                    "/api/bookmarks", // 북마크 추가 URL
-                    "/api/bookmarks/" + travel.getNumber() // 북마크 제거 URL
+                    travel.getCreatedAt().toString(),
+                    travel.getDueDate().toString(),
+                    isBookmarked
             );
         }).collect(Collectors.toList());
-    }
-    @Transactional
-    public void addBookmark(Integer userNumber, int travelNumber) {
-        if (!bookmarkRepository.existsByUserNumberAndContentIdAndContentType(userNumber, travelNumber, ContentType.TRAVEL)) {
-            bookmarkRepository.save(new Bookmark(userNumber, travelNumber, ContentType.TRAVEL));
-        }
-    }
 
-    @Transactional
-    public void removeBookmark(Integer userNumber, int travelNumber) {
-        bookmarkRepository.deleteByUserNumberAndContentIdAndContentType(userNumber, travelNumber, ContentType.TRAVEL);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), dtos.size());
+        return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 }

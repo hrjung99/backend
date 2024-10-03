@@ -12,7 +12,9 @@ import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LoginService {
@@ -26,7 +28,7 @@ public class LoginService {
         this.jwtProvider = jwtProvider;
     }
 
-    public String login(LoginRequestDto loginRequestDto,HttpServletResponse response) {
+    public  Map<String, String> login(LoginRequestDto loginRequestDto,HttpServletResponse response) {
         Users user = userRepository.findByUserEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("사용자 이메일을 찾을 수 없습니다."));
 
@@ -41,16 +43,29 @@ public class LoginService {
         // Access Token 생성
         String accessToken = jwtProvider.createAccessToken(user.getUserEmail(),user.getUserNumber(), List.of(user.getRole().name()));
 
-        // Refresh Token 생성 및 httpOnly 쿠키로 설정
+        // Refresh Token 생성
         String refreshToken = jwtProvider.createRefreshToken(user.getUserEmail(),user.getUserNumber());
+
+        // RefreshToken 쿠키 삭제
+        Cookie deleteCookie = new Cookie("refreshToken", null);
+        deleteCookie.setMaxAge(0);
+        deleteCookie.setPath("/");
+        response.addCookie(deleteCookie);
+
+        //새 RefreshToken 쿠키 설정
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 1주일
         response.addCookie(refreshTokenCookie);
 
-        // Access Token을 반환
-        return accessToken;
+        // Access Token과 userId를 포함하는 JSON 응답 반환
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("userId", String.valueOf(user.getUserNumber()));
+        responseMap.put("accessToken", accessToken);
+
+        return responseMap;
     }
     // 이메일로 유저를 조회하는 메서드 추가
     public Users getUserByEmail(String email) {

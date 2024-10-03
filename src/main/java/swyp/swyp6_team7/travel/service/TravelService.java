@@ -6,8 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import swyp.swyp6_team7.auth.jwt.JwtProvider;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
@@ -65,8 +63,7 @@ public class TravelService {
         int enrollmentCount = enrollmentRepository.countByTravelNumber(travelNumber);
         log.info("enrollmentCount: " + enrollmentCount);
         //bookmark 개수
-        int bookmarkCount = bookmarkRepository.countByContentIdAndContentType(travelNumber, ContentType.TRAVEL);
-        log.info("bookmarkCount: " + bookmarkCount);
+        int bookmarkCount = bookmarkRepository.countByTravelNumber(travelNumber);
         TravelDetailResponse detailResponse = new TravelDetailResponse(travelDetail, enrollmentCount, bookmarkCount);
 
         String requestUserName = SecurityContextHolder.getContext().getAuthentication().getName();

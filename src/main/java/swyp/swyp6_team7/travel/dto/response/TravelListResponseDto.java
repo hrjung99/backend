@@ -1,47 +1,49 @@
 package swyp.swyp6_team7.travel.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.travel.domain.Travel;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Builder
 @Getter
 @AllArgsConstructor
 public class TravelListResponseDto {
-    private int travelNumber;
-    private String title;
-    private String location;
-    private String username;
-    private String dDay; // 마감 기한 (D-Day 형식)
-    private String postedAgo; // 작성일로부터 경과한 시간
-    private int currentApplicants; // 현재 신청 인원 수
-    private int maxPerson; //최대 인원 수
-    private boolean completionStatus;
-    private boolean isBookmarked; // 북마크 여부
-    private List<String> tags;
-    private String detailUrl; // 세부내용 조회 URL
-    private String updateUrl; // 게시글 수정 URL
-    private String deleteUrl; // 게시글 삭제 URL
-    private String addBookmarkUrl; // 북마크 추가 URL
-    private String removeBookmarkUrl; // 북마크 제거 URL
+    private int travelNumber;           // 여행 번호
+    private String title;               // 여행 제목
+    private int userNumber;             // 사용자 번호
+    private String userName;            // 사용자 이름
+    private List<String> tags;          // 태그 리스트
+    private int nowPerson;              // 현재 참가 인원 수
+    private int maxPerson;              // 최대 참가 인원 수
+    private String createdAt;           // 작성일
+    private String registerDue;         // 등록 마감일
+    private boolean isBookmarked;       // 북마크 여부
 
-    // 디데이 포맷 설정
-    public static String formatDDay(LocalDate dueDate){
-        long daysDifference = ChronoUnit.DAYS.between(LocalDate.now(),dueDate);
-        return (daysDifference >= 0) ? "마감 D-" + daysDifference : "종료됨";
+    public static String formatDate(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
     }
-    // 작성일 포맷 설정
-    public static String formatPostedAgo(LocalDate postedDate){
-        long daysDifference = ChronoUnit.DAYS.between(postedDate, LocalDate.now());
-        if (daysDifference == 0) {
-            return "오늘";
-        } else if (daysDifference > 0) {
-            return daysDifference + "일 전";
-        } else {
-            return -daysDifference + "일 후";
-        }
+
+    public static TravelListResponseDto fromEntity(Travel travel, Users user, int currentApplicants, boolean isBookmarked) {
+        return new TravelListResponseDto(
+                travel.getNumber(),
+                travel.getTitle(),
+                user.getUserNumber(),
+                user.getUserName(),
+                travel.getTravelTags().stream().map(tag -> tag.getTag().getName()).collect(Collectors.toList()),
+                currentApplicants,
+                travel.getMaxPerson(),
+                formatDate(travel.getCreatedAt().toLocalDate()),
+                formatDate(travel.getDueDate()),
+                isBookmarked
+        );
     }
 }

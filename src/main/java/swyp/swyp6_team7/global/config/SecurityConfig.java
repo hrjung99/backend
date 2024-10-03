@@ -8,9 +8,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import swyp.swyp6_team7.auth.jwt.JwtFilter;
+
+import java.util.List;
 
 
 @Configuration
@@ -27,11 +30,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                .cors(httpSecurityCorsConfigurer ->
+                        httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
-
-
                         .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll() // 모든 사용자 조회 가능
                         .requestMatchers(HttpMethod.POST, "/api/notices").hasRole("ADMIN") // POST는 관리자만 가능
                         .requestMatchers(HttpMethod.PUT, "/api/notices/**").hasRole("ADMIN") // PUT은 관리자만 가능
@@ -46,14 +49,12 @@ public class SecurityConfig {
                                 "/api/login",
                                 "/api/logout",
                                 "/api/users/new",
-                                "/api/refresh-token",
+                                "/api/token/refresh",
                                 "/login/oauth/kakao/**",
                                 "/error",
                                 "/api/users-email",
                                 "/actuator/health" // Health check endpoint permission
                         ).permitAll()
-
-
 
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -68,6 +69,18 @@ public class SecurityConfig {
     }
 
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("https://release-back.vercel.app"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
 }

@@ -1,10 +1,7 @@
 package swyp.swyp6_team7.bookmark.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "bookmarks")
 @Getter
 @Setter
+@AllArgsConstructor
 public class Bookmark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,30 +19,20 @@ public class Bookmark {
     private Integer userNumber;
 
     @Column(nullable = false)
-    private Integer contentId; // 여행 또는 커뮤니티 컨텐츠 ID, number
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ContentType contentType;  // TRAVEL 또는 COMMUNITY
+    private Integer travelNumber;
 
     @Column(nullable = false)
     private LocalDateTime bookmarkDate = LocalDateTime.now();
 
     public Bookmark() {}
 
-    public Bookmark(Integer userNumber, Integer contentId, ContentType contentType) {
+    public Bookmark(Integer userNumber, Integer travelNumber, LocalDateTime bookmarkDate) {
+        if (travelNumber == null || travelNumber <= 0) {
+            throw new IllegalArgumentException("유효하지 않은 여행 번호입니다.");
+        }
         this.userNumber = userNumber;
-        this.contentId = contentId;
-        this.contentType = contentType;
-        this.bookmarkDate = LocalDateTime.now();
-    }
-
-    // 모든 필드를 초기화하는 생성자 추가
-    public Bookmark(Integer bookmarkId, Integer userNumber, Integer contentId, ContentType contentType, LocalDateTime bookmarkDate) {
-        this.bookmarkId = bookmarkId;
-        this.userNumber = userNumber;
-        this.contentId = contentId;
-        this.contentType = contentType;
+        this.travelNumber = travelNumber;
         this.bookmarkDate = bookmarkDate;
     }
+
 }

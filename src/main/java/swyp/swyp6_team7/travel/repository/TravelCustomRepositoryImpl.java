@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.entity.QBookmark;
 import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
@@ -94,8 +93,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .leftJoin(bookmark).on(bookmark.userNumber.eq(loginUserNumber)
-                        .and(bookmark.contentId.eq(travel.number))
-                        .and(bookmark.contentType.eq(ContentType.TRAVEL)))
+                        .and(bookmark.travelNumber.eq(travel.number)))
                 .where(
                         travel.number.in(travels)
                 )
@@ -177,7 +175,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 users.userName,
                                 travel.companions.size(),
                                 list(tag.name)
-                                ))
+                        ))
                 );
         content.stream()
                 .forEach(dto -> dto.updatePreferredNumber(travelMap.get(dto.getTravelNumber())));

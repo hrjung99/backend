@@ -6,12 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
 import swyp.swyp6_team7.bookmark.dto.BookmarkRequest;
 import swyp.swyp6_team7.bookmark.dto.BookmarkResponse;
 import swyp.swyp6_team7.bookmark.entity.Bookmark;
-import swyp.swyp6_team7.bookmark.entity.ContentType;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.repository.TravelRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +33,11 @@ public class BookmarkServiceTest {
 
     @InjectMocks
     private BookmarkService bookmarkService;
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private TravelRepository travelRepository;
 
     @BeforeEach
     public void setup() {
@@ -37,18 +47,25 @@ public class BookmarkServiceTest {
     @Test
     @DisplayName("북마크 추가 - 북마크 개수 초과 시 오래된 북마크 삭제")
     public void testAddBookmark_MaxLimit() {
-        // Given
-        BookmarkRequest request = new BookmarkRequest(1, 101, "TRAVEL");
-        Bookmark oldestBookmark = new Bookmark(1, 1, 100, ContentType.TRAVEL, LocalDateTime.now().minusDays(10));
-        List<Bookmark> oldestBookmarks = List.of(oldestBookmark);
+        // given
+        BookmarkRequest request = new BookmarkRequest(1, 101);
+        Users user = new Users();
+        user.setUserNumber(1);
+        Travel travel = Travel.builder()
+                .number(101)
+                .dueDate(LocalDate.now().plusDays(5))
+                .build();
+        Bookmark oldestBookmark = new Bookmark(1, 1, LocalDateTime.now().minusDays(10));
 
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(travelRepository.findById(101)).thenReturn(Optional.of(travel));
         when(bookmarkRepository.countByUserNumber(1)).thenReturn(30);
-        when(bookmarkRepository.findOldestByUserNumber(1)).thenReturn(oldestBookmarks);
+        when(bookmarkRepository.findOldestByUserNumber(1)).thenReturn(List.of(oldestBookmark));
 
-        // When
+        // when
         bookmarkService.addBookmark(request);
 
-        // Then
+        // then
         verify(bookmarkRepository, times(1)).delete(oldestBookmark);
         verify(bookmarkRepository, times(1)).save(any(Bookmark.class));
     }
@@ -56,70 +73,87 @@ public class BookmarkServiceTest {
     @Test
     @DisplayName("북마크 추가 - 정상 추가")
     public void testAddBookmark_Normal() {
-        // Given
-        BookmarkRequest request = new BookmarkRequest(1, 101, "TRAVEL");
+        // given
+        BookmarkRequest request = new BookmarkRequest(1, 101);
+        Users user = new Users();
+        user.setUserNumber(1);
+        Travel travel = Travel.builder()
+                .number(101)
+                .dueDate(LocalDate.now().plusDays(5))
+                .build();
 
-        when(bookmarkRepository.countByUserNumber(1)).thenReturn(29);
 
-        // When
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(travelRepository.findById(101)).thenReturn(Optional.of(travel));
+        when(bookmarkRepository.countByUserNumber(1)).thenReturn(10);
+
+        // when
         bookmarkService.addBookmark(request);
 
-        // Then
-        verify(bookmarkRepository, never()).delete(any());
+        // then
         verify(bookmarkRepository, times(1)).save(any(Bookmark.class));
     }
 
     @Test
     @DisplayName("북마크 삭제")
     public void testRemoveBookmark() {
-        // Given
-        Integer bookmarkId = 1;
+        // given
+        Integer userNumber = 1;
+        Integer travelNumber = 101;
+        Bookmark bookmark = new Bookmark(userNumber, travelNumber, LocalDateTime.now());
 
-        doNothing().when(bookmarkRepository).deleteById(bookmarkId);
+        when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of(bookmark));
 
-        // When
-        bookmarkService.removeBookmark(bookmarkId);
+        // when
+        bookmarkService.removeBookmark(travelNumber, userNumber);
 
-        // Then
-        verify(bookmarkRepository, times(1)).deleteById(bookmarkId);
+        // then
+        verify(bookmarkRepository, times(1)).delete(bookmark);
     }
 
     @Test
-    @DisplayName("사용자의 북마크 목록 조회 - 빈 목록 처리")
+    @DisplayName("사용자의 북마크 목록 조회")
+    public void testGetBookmarksByUser() {
+        // given
+        Integer userNumber = 1;
+        Bookmark bookmark = new Bookmark(userNumber, 101, LocalDateTime.now());
+        Travel travel = Travel.builder()
+                .number(101)
+                .title("Sample Travel")
+                .createdAt(LocalDateTime.now().minusDays(5))
+                .dueDate(LocalDate.now().plusDays(5))
+                .maxPerson(4)
+                .build();
+
+        Users user = new Users();
+        user.setUserNumber(userNumber);
+        user.setUserName("John Doe");
+
+        when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of(bookmark));
+        when(travelRepository.findById(101)).thenReturn(Optional.of(travel));
+        when(userRepository.findById(userNumber)).thenReturn(Optional.of(user));
+
+        // when
+        Page<BookmarkResponse> responses = bookmarkService.getBookmarksByUser(userNumber, 0, 5);
+
+        // then
+        assertThat(responses.getContent()).hasSize(1);
+        BookmarkResponse response = responses.getContent().get(0);
+        assertThat(response.getTravelNumber()).isEqualTo(101);
+        assertThat(response.getTitle()).isEqualTo("Sample Travel");
+        assertThat(response.getUserName()).isEqualTo("John Doe");
+    }
+    @Test
+    @DisplayName("사용자의 북마크 목록 조회 - 빈 리스트 반환")
     public void testGetBookmarksByUser_EmptyList() {
-        // Given
+        // given
         Integer userNumber = 1;
+        when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of());
 
-        when(bookmarkRepository.findByUserNumber(userNumber)).thenReturn(List.of());
+        // when
+        Page<BookmarkResponse> responses = bookmarkService.getBookmarksByUser(userNumber, 0, 5);
 
-        // When
-        List<BookmarkResponse> response = bookmarkService.getBookmarksByUser(userNumber);
-
-        // Then
-        assertThat(response).isEmpty();
-    }
-
-    @Test
-    @DisplayName("사용자의 북마크 목록 조회 - 정렬된 결과 반환")
-    public void testGetBookmarksByUser_SortedList() {
-        // Given
-        Integer userNumber = 1;
-
-        Bookmark travelBookmark1 = new Bookmark(1, userNumber, 101, ContentType.TRAVEL, LocalDateTime.now().minusDays(3));
-        Bookmark travelBookmark2 = new Bookmark(2, userNumber, 102, ContentType.TRAVEL, LocalDateTime.now().minusDays(1));
-        Bookmark communityBookmark = new Bookmark(3, userNumber, 103, ContentType.COMMUNITY, LocalDateTime.now());
-
-        List<Bookmark> bookmarks = List.of(travelBookmark1, travelBookmark2, communityBookmark);
-
-        when(bookmarkRepository.findByUserNumber(userNumber)).thenReturn(bookmarks);
-
-        // When
-        List<BookmarkResponse> response = bookmarkService.getBookmarksByUser(userNumber);
-
-        // Then
-        assertThat(response).hasSize(3);
-        assertThat(response.get(0).getContentId()).isEqualTo(travelBookmark1.getContentId());
-        assertThat(response.get(1).getContentId()).isEqualTo(travelBookmark2.getContentId());
-        assertThat(response.get(2).getContentId()).isEqualTo(communityBookmark.getContentId());
+        // then
+        assertThat(responses.getContent()).isEmpty();
     }
 }
