@@ -1,62 +1,56 @@
 package swyp.swyp6_team7.location.parser;
 
 import org.springframework.stereotype.Component;
-import swyp.swyp6_team7.location.dao.CityDao;
-import swyp.swyp6_team7.location.parser.Parser;
-import swyp.swyp6_team7.location.domain.City;
-import swyp.swyp6_team7.location.domain.CityType;
-import swyp.swyp6_team7.location.reader.CsvReader;
+import swyp.swyp6_team7.location.dao.LocationDao;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 
 @Component
-public class CityParser implements Parser<City> {
+public class CityParser implements Parser<Location> {
 
-    private final CityDao cityDao;
+    private final LocationDao locationDao;
 
-    public CityParser(CityDao cityDao) {
-        this.cityDao = cityDao;
+    public CityParser(LocationDao locationDao) {
+        this.locationDao = locationDao;
     }
 
     @Override
-    public City parse(String line, CityType cityType) {
+    public Location parse(String line, LocationType locationType) {
         String[] columns = line.split(",");
 
-        String country;
-        String city;
+        String location;
 
-        switch (cityType) {
+        switch (locationType) {
             case DOMESTIC:
-                country = columns[1].trim(); // 나라
-                city = columns[3].trim(); // 소분류 (시)
+                location = columns[3].trim(); // 소분류 (시)
                 // '시' 제거 로직 추가
-                if (city.endsWith("시")) {
-                    city = city.substring(0, city.length() - 1);
+                if (location.endsWith("시")) {
+                    location = location.substring(0, location.length() - 1);
                 }
                 break;
 
             case INTERNATIONAL:
-                country = columns[2].trim(); // 중분류 (나라)
-                city = columns[3].trim(); // 소분류 (도시)
+                location = columns[2].trim(); // 중분류 (나라)
                 break;
 
             default:
-                throw new IllegalArgumentException("지원되지 않는 CityType입니다: " + cityType);
+                throw new IllegalArgumentException("지원되지 않는 CityType입니다: " + locationType);
         }
 
-        return new City(country, city, cityType);
+        return new Location(location, locationType);
     }
 
-    public void parseAndSave(String filePath, CityType cityType) {
+    public void parseAndSave(String filePath, LocationType locationType) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             br.readLine();
             while ((line = br.readLine()) != null) {
-                City cityObject = parse(line, cityType);
-                cityDao.addCity(cityObject);
+                Location locationObject = parse(line, locationType);
+                locationDao.addCity(locationObject);
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -8,7 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -57,11 +57,11 @@ public class TravelCreateRequest {
         this.completionStatus = completionStatus;
     }
 
-    public Travel toTravelEntity(int userNumber, City city) {
+    public Travel toTravelEntity(int userNumber, Location travelLocation) {
         return Travel.builder()
                 .userNumber(userNumber)
-                .city(city)
-                .location(city.getCityName())
+                .travelLocation(travelLocation)
+                .location(travelLocation.getLocationName())
                 .title(title)
                 .details(details)
                 .viewCount(0)

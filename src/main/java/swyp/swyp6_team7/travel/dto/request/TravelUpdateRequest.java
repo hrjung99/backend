@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import swyp.swyp6_team7.location.domain.City;
+import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -36,10 +36,10 @@ public class TravelUpdateRequest {
     @NotNull
     private Boolean completionStatus;
 
-    public Travel toTravelEntity(int userNumber, City city) {
+    public Travel toTravelEntity(int userNumber, Location travellocation) {
         return Travel.builder()
                 .userNumber(userNumber)
-                .location(city.getCityName())  // location 설정
+                .location(travellocation.getLocationName())  // location 설정
                 .title(title)
                 .details(details)
                 .viewCount(0)

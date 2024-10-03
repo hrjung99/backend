@@ -11,7 +11,7 @@ import swyp.swyp6_team7.travel.util.TravelSearchConstant;
 
 import java.util.ArrayList;
 import java.util.List;
-import swyp.swyp6_team7.location.domain.CityType;
+import swyp.swyp6_team7.location.domain.LocationType;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -19,7 +19,7 @@ public class TravelSearchCondition {
 
     private PageRequest pageRequest;
     private String keyword;
-    private List<CityType> locationFilter;
+    private List<LocationType> locationFilter;
     private List<GenderType> genderFilter;
     private List<String> personRangeFilter;
     private List<PeriodType> periodFilter;
@@ -46,7 +46,7 @@ public class TravelSearchCondition {
         this.tags = getTags(tags);
     }
 
-    private List<CityType> getLocationFilter(List<String> locationTypes) {
+    private List<LocationType> getLocationFilter(List<String> locationTypes) {
         if (locationTypes == null) {
             return new ArrayList<>();
         }
@@ -55,8 +55,8 @@ public class TravelSearchCondition {
                 .map(this::convertToCityType) // 문자열을 CityType으로 변환
                 .toList();
     }
-    private CityType convertToCityType(String locationType) {
-        return CityType.valueOf(locationType.toUpperCase());
+    private LocationType convertToCityType(String locationType) {
+        return LocationType.valueOf(locationType.toUpperCase());
     }
 
 

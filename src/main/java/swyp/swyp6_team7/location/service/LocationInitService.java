@@ -6,30 +6,28 @@ import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import swyp.swyp6_team7.location.domain.City;
-import swyp.swyp6_team7.location.domain.CityType;
-import swyp.swyp6_team7.location.repository.CityRepository;
+import swyp.swyp6_team7.location.repository.LocationRepository;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 @Transactional
 @Service
-public class CityInitService{
+public class LocationInitService {
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    private final CityRepository cityRepository;
+    private final LocationRepository locationRepository;
     private final TravelRepository travelRepository;
 
-    public CityInitService(CityRepository cityRepository, TravelRepository travelRepository) {
-        this.cityRepository = cityRepository;
+    public LocationInitService(LocationRepository locationRepository, TravelRepository travelRepository) {
+        this.locationRepository = locationRepository;
         this.travelRepository = travelRepository;
     }
 
     @PostConstruct
     public void init() {
         travelRepository.deleteAll();
-        cityRepository.deleteAll();
+        locationRepository.deleteAll();
     }
 
 
