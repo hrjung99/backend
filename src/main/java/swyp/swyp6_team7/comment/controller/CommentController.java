@@ -53,6 +53,15 @@ public class CommentController {
     @PutMapping("/api/comments/{commentNumber}")
     public ResponseEntity<CommentDetailResponseDto> update(
             @RequestBody CommentUpdateRequestDto request,
-            @RequestHeader("Authorization") String token
-    )
+            @RequestHeader("Authorization") String token,
+            @PathVariable int commentNumber
+
+    ) {
+        int userNumber = jwtProvider.getUserNumber(token);
+
+        CommentDetailResponseDto updateResponse = commentService.update(request, userNumber, commentNumber);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(updateResponse);
+    }
 }

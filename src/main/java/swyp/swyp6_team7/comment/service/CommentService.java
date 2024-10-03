@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.comment.domain.Comment;
 import swyp.swyp6_team7.comment.dto.request.CommentCreateRequestDto;
+import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
@@ -15,6 +16,7 @@ import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
 import swyp.swyp6_team7.likes.service.CommentLikeService;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.service.TravelService;
 
@@ -57,7 +59,7 @@ public class CommentService {
 
     //댓글 번호로 댓글 조회(response 용)
     public CommentDetailResponseDto getCommentByNumber(int commentNumber) {
-        Comment comment = commentRepository.findById(commentNumber)
+        Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다." + commentNumber));
         long likes = commentLikeRepository.countByCommentNumber(commentNumber);
         CommentDetailResponseDto detailResponse = new CommentDetailResponseDto(comment, likes);
@@ -122,7 +124,52 @@ public class CommentService {
         }
     }
 
-    //
+    // update
+    @Transactional
+    public CommentDetailResponseDto update(CommentUpdateRequestDto request,int commentNumber, int userNumber) {
+        // 댓글 존재 여부 검증 검증
+        Comment comment = commentRepository.findByCommentNumber(commentNumber)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다: " + commentNumber));
+
+        //댓글 작성자인지 확인
+        validateCommentWriter(commentNumber, userNumber);
+
+        // 업데이트 동작
+        comment.update(request.getContent()); // 수정할 내용을 설정
+
+        // 업데이트 저장
+        commentRepository.save(comment);
+
+        // 업데이트된 댓글의 detail 리턴
+        long likes = commentLikeRepository.countByCommentNumber(commentNumber);
+        CommentDetailResponseDto result = new CommentDetailResponseDto(comment, likes);
+
+        return result;
+    }
+
+    @Transactional
+    public void delete(int commentNumber, int userNumber) {
+        Comment comment = commentRepository.findByCommentNumber(commentNumber)
+                .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
+
+        validateCommentWriter(commentNumber, userNumber);
+        comment.delete(commentNumber);
+    }
+
+    // 댓글 작성자인지 검증하는 메소드
+    @Transactional(readOnly = true)
+    public void validateCommentWriter(int commentNumber, int userNumber) {
+        Comment comment = commentRepository.findByCommentNumber(commentNumber)
+                .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
+
+        // 댓글의 작성자와 요청한 사용자의 번호를 비교
+        if (comment.getUserNumber() != userNumber) {
+            throw new IllegalArgumentException("댓글 작성자만 수정할 수 있습니다.");
+        }
+    }
+
+
+
 
 
 
