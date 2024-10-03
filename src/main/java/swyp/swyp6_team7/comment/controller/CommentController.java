@@ -64,4 +64,16 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(updateResponse);
     }
+
+    //Update
+    @DeleteMapping("/api/comments/{commentNumber}")
+    public ResponseEntity delete(
+            @RequestHeader("Authorization") String token,
+            @PathVariable int commentNumber
+    ) {
+        int userNumber = jwtProvider.getUserNumber(token);
+
+        commentService.delete(commentNumber, userNumber);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
