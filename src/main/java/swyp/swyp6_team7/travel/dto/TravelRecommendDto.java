@@ -57,7 +57,7 @@ public class TravelRecommendDto {
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
-        this.title = travel.getLocation();
+        this.location = travel.getLocation();
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags.stream()
