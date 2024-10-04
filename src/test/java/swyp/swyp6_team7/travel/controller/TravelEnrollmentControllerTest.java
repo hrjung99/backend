@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,6 +35,7 @@ import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -87,7 +89,7 @@ class TravelEnrollmentControllerTest {
     @BeforeEach
     void setTravel() {
         Location travelLocation = Location.builder()
-                .locationName("Seoul")
+                .locationName("Seoul"+ UUID.randomUUID().toString())
                 .locationType(LocationType.DOMESTIC)
                 .build();
         Location savedLocation = locationRepository.save(travelLocation);
@@ -99,7 +101,7 @@ class TravelEnrollmentControllerTest {
                 .dueDate(LocalDate.now().plusDays(5))
                 .periodType(PeriodType.NONE)
                 .status(TravelStatus.IN_PROGRESS)
-                        .travelLocation(savedLocation)
+                        .location(savedLocation)
                 .build()
         );
     }
@@ -107,6 +109,7 @@ class TravelEnrollmentControllerTest {
 
     @DisplayName("findElements: 주최자는 특정 여행에 대한 참가 신청서 목록을 조회할 수 있다")
     @Test
+    @DirtiesContext
     public void findElementsWithHost() throws Exception {
         // given
         String url = "/api/travel/{travelNumber}/enrollments";

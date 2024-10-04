@@ -59,8 +59,8 @@ public class BookmarkServiceTest {
         travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
-                .location("제주")
-                .travelLocation(travelLocation)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
         Bookmark oldestBookmark = new Bookmark(1, 1, LocalDateTime.now().minusDays(10));
@@ -90,8 +90,8 @@ public class BookmarkServiceTest {
         travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
-                .location("제주")
-                .travelLocation(travelLocation)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
 
@@ -135,9 +135,9 @@ public class BookmarkServiceTest {
         travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .title("Sample Travel")
-                .location("제주")
-                .travelLocation(travelLocation)
                 .createdAt(LocalDateTime.now().minusDays(5))
                 .dueDate(LocalDate.now().plusDays(5))
                 .maxPerson(4)

@@ -52,7 +52,7 @@ public class TravelSearchCondition {
         }
         return locationTypes.stream()
                 .distinct().limit(TravelSearchConstant.LOCATION_TYPE_COUNT)
-                .map(this::convertToCityType) // 문자열을 CityType으로 변환
+                .map(this::convertToCityType)
                 .toList();
     }
     private LocationType convertToCityType(String locationType) {

@@ -49,14 +49,14 @@ class CompanionServiceTest {
         userRepository.deleteAll();
         travelRepository.deleteAll();
         Location travelLocation = new Location();
-        travelLocation.setLocationName("제주");
+        travelLocation.setLocationName("travel");
         travelLocation.setLocationType(LocationType.DOMESTIC);
         Location savedLocation = locationRepository.save(travelLocation);
 
         targetTravel = travelRepository.save(Travel.builder()
                 .title("Travel Controller")
-                .location("제주")
-                .travelLocation(savedLocation)
+                .locationName("travel")
+                .location(savedLocation)
                 .userNumber(100)
                 .genderType(GenderType.NONE)
                 .periodType(PeriodType.NONE)

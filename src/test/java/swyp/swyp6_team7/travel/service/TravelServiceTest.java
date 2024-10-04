@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.location.repository.LocationRepository;
@@ -55,6 +56,7 @@ class TravelServiceTest {
 
     @DisplayName("create: 이메일로 유저를 가져와 여행 콘텐츠를 만들 수 있다")
     @Test
+    @DirtiesContext
     public void createTravelWithUser() {
         // given
         Location travelLocation = Location.builder()
@@ -65,7 +67,7 @@ class TravelServiceTest {
         TravelCreateRequest request = TravelCreateRequest.builder()
                 .title("test travel post")
                 .completionStatus(true)
-                .location(savedLocation.getLocationName())
+                .locationName(savedLocation.getLocationName())
                 .build();
 
         // when
@@ -74,7 +76,8 @@ class TravelServiceTest {
         // then
         assertThat(createdTravel.getTitle()).isEqualTo(request.getTitle());
         assertThat(createdTravel.getUserNumber()).isEqualTo(user.getUserNumber());
-        assertThat(createdTravel.getLocation()).isEqualTo(savedLocation.getLocationName());
+        assertThat(createdTravel.getLocation().getLocationName()).isEqualTo(savedLocation.getLocationName());
+
     }
 
 }

@@ -68,7 +68,7 @@ class TravelListServiceTest {
                 .title("Title 1")
                 .maxPerson(5)
                 .dueDate(LocalDate.now().plusDays(3))
-                .travelLocation(travelLocation)
+                .location(travelLocation)
                 .build();
 
         Travel travel2 = Travel.builder()
@@ -78,7 +78,7 @@ class TravelListServiceTest {
                 .title("Title 2")
                 .maxPerson(10)
                 .dueDate(LocalDate.now().minusDays(1))
-                .travelLocation(travelLocation)
+                .location(travelLocation)
                 .build();
 
         // 태그 설정
@@ -105,7 +105,7 @@ class TravelListServiceTest {
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
-                    travel.getLocation(),
+                    travel.getLocationName(),
                     travel.getUserNumber(),
                     user.getUserName(),
                     tags,

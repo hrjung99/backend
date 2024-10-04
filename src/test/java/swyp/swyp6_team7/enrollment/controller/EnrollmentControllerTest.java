@@ -273,7 +273,7 @@ class EnrollmentControllerTest {
                 .dueDate(dueDate)
                 .periodType(PeriodType.NONE)
                 .status(status)
-                .travelLocation(travelLocation)
+                .location(travelLocation)
                 .build()
         );
     }

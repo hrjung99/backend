@@ -62,12 +62,12 @@ public class TravelAppliedServiceTest {
         Travel travel = Travel.builder()
                 .number(1)
                 .title("Trip Title")
-                .location("Seoul")
+                .locationName("Seoul")
                 .createdAt(LocalDateTime.now().minusDays(3))
                 .dueDate(LocalDate.now().plusDays(10))
                 .maxPerson(10)
                 .status(TravelStatus.IN_PROGRESS)
-                .travelLocation(travelLocation)
+                .location(travelLocation)
                 .build();
 
         Companion companion = Companion.builder()
@@ -95,9 +95,9 @@ public class TravelAppliedServiceTest {
         TravelListResponseDto travelListResponseDto = new TravelListResponseDto(
                 travel.getNumber(),
                 travel.getTitle(),
-                travel.getLocation(),
+                travel.getLocationName(),
                 travel.getMaxPerson(),
-                travel.getLocation(),
+                travel.getLocationName(),
                 Collections.emptyList(), // 태그 리스트
                 travel.getViewCount(),
                 travel.getCompanions().size(),
@@ -135,7 +135,7 @@ public class TravelAppliedServiceTest {
                 .build();
         Travel travel = Travel.builder()
                 .number(travelNumber)
-                .travelLocation(travelLocation)
+                .location(travelLocation)
                 .build();
         Companion companion = Companion.builder()
                 .travel(travel)
