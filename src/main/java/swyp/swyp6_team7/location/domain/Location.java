@@ -8,7 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "locations")
+@Table(name = "locations", indexes = {
+        @Index(name = "idx_location_name", columnList = "location_name")})
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
