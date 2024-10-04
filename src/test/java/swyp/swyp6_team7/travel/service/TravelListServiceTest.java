@@ -106,8 +106,8 @@ class TravelListServiceTest {
                     tags,
                     travel.getCompanions().size(),
                     travel.getMaxPerson(),
-                    travel.getCreatedAt().toString(),
-                    travel.getDueDate().toString(),
+                    travel.getCreatedAt(),
+                    travel.getDueDate(),
                     isBookmarked
             );
         }).collect(Collectors.toList());

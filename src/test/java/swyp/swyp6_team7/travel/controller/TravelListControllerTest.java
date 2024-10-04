@@ -22,6 +22,8 @@ import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.service.TravelListService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,6 +57,10 @@ public class TravelListControllerTest {
         String token = "Bearer test-token";
         Integer userNumber = 1;
         Pageable pageable = PageRequest.of(0, 5);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime createdAt = LocalDateTime.parse("2024-10-02 21:56", dateTimeFormatter);
+        LocalDate registerDue = LocalDate.parse("2025-05-15", dateFormatter);
         TravelListResponseDto responseDto = TravelListResponseDto.builder()
                 .travelNumber(25)
                 .title("호주 여행 같이 갈 사람 구해요")
@@ -63,8 +69,8 @@ public class TravelListControllerTest {
                 .tags(Collections.singletonList("즉흥"))
                 .nowPerson(1)
                 .maxPerson(5)
-                .createdAt("2024년 09월 21일")
-                .registerDue("2025년 05월 15일")
+                .createdAt(createdAt)
+                .registerDue(registerDue)
                 .isBookmarked(true)
                 .build();
         Page<TravelListResponseDto> page = new PageImpl<>(Collections.singletonList(responseDto), pageable, 1);
@@ -86,8 +92,8 @@ public class TravelListControllerTest {
                 .andExpect(jsonPath("$.content[0].tags[0]").value("즉흥"))
                 .andExpect(jsonPath("$.content[0].nowPerson").value(1))
                 .andExpect(jsonPath("$.content[0].maxPerson").value(5))
-                .andExpect(jsonPath("$.content[0].createdAt").value("2024년 09월 21일"))
-                .andExpect(jsonPath("$.content[0].registerDue").value("2025년 05월 15일"))
+                .andExpect(jsonPath("$.content[0].createdAt").value("2024-10-02 21:56"))
+                .andExpect(jsonPath("$.content[0].registerDue").value("2025-05-15"))
                 //.andExpect(jsonPath("$.content[0].isBookmarked").value(true))
                 .andExpect(jsonPath("$.page.size").value(5))
                 .andExpect(jsonPath("$.page.number").value(0))
