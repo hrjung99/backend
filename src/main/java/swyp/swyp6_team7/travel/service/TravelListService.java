@@ -67,6 +67,10 @@ public class TravelListService {
 
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
+
+        if (start > end) {
+            start = end;
+        }
         return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 }
