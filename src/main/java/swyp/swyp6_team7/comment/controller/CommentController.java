@@ -12,6 +12,8 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.service.CommentService;
+import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
+import swyp.swyp6_team7.likes.service.CommentLikeService;
 
 import java.util.List;
 
@@ -22,6 +24,8 @@ public class CommentController {
 
     private final CommentService commentService;
     private final JwtProvider jwtProvider;
+    private final CommentLikeRepository commentLikeRepository;
+    private final CommentLikeService commentLikeService;
 
     //Create
     @PostMapping("/api/{relatedType}/{relatedNumber}/comments")
@@ -30,7 +34,7 @@ public class CommentController {
             @RequestHeader("Authorization") String token,
             @PathVariable String relatedType,
             @PathVariable int relatedNumber
-            ) {
+    ) {
 
         int userNumber = jwtProvider.getUserNumber(token);
         Comment createdComment = commentService.create(request, userNumber, relatedType, relatedNumber);
@@ -76,4 +80,32 @@ public class CommentController {
         commentService.delete(commentNumber, userNumber);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+
+    //좋아요 동작
+
+    //좋아요 증가
+    @PostMapping("/api/comments/{commentNumber}/like")
+    public ResponseEntity<List<CommentListReponseDto>> like(
+            @PathVariable int commentNumber,
+            @RequestHeader("Authorization") String token) {
+
+        int userNumber = jwtProvider.getUserNumber(token);
+
+        List<CommentListReponseDto> result = commentLikeService.like(commentNumber, userNumber);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(result);
+    }
+
+    //좋아요 취소
+    @DeleteMapping("/api/comments/{commentNumber}/like")
+    public ResponseEntity<List<CommentListReponseDto>> unlike(@PathVariable int commentNumber, @RequestHeader("Authorization") String token) {
+        int userNumber = jwtProvider.getUserNumber(token);
+
+        List<CommentListReponseDto> result = commentLikeService.unlike(commentNumber, userNumber);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(result);
+
+    }
 }
+

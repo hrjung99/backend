@@ -1,6 +1,7 @@
 package swyp.swyp6_team7.likes.dto.response;
 
 import lombok.*;
+import swyp.swyp6_team7.comment.domain.Comment;
 import swyp.swyp6_team7.likes.domain.CommentLike;
 
 @Getter

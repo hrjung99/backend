@@ -1,7 +1,6 @@
 package swyp.swyp6_team7.comment.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import org.springframework.stereotype.Repository;
 import swyp.swyp6_team7.comment.domain.Comment;
 

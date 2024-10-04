@@ -1,7 +1,6 @@
 package swyp.swyp6_team7.comment.dto.request;
 
 
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,14 +19,10 @@ public class CommentCreateRequestDto {
     private String content;
     private int parentNumber;
 
-
-
-
     public CommentCreateRequestDto(
             String content, int parentNumber) {
         this.content = content;
         this.parentNumber = parentNumber;
-
     }
 
     public Comment toCommentEntity(int userNumber, String content, int parentNumber, LocalDateTime regDate, String relatedType, int relatedNumber) {
@@ -39,6 +34,5 @@ public class CommentCreateRequestDto {
                 .relatedType(relatedType)
                 .relatedNumber(relatedNumber)
                 .build();
-
     }
 }

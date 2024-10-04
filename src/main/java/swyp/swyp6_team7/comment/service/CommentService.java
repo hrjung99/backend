@@ -16,7 +16,6 @@ import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
 import swyp.swyp6_team7.likes.service.CommentLikeService;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
-import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.service.TravelService;
 
@@ -93,7 +92,7 @@ public class CommentService {
 
         if (relatedType.equals("travel")) {
             List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
-            List<CommentListReponseDto> Listresponse = new ArrayList<>();
+            List<CommentListReponseDto> listReponse = new ArrayList<>();
 
             for (Comment comment : comments) {
 
@@ -114,11 +113,11 @@ public class CommentService {
 
                 //DTO
                 CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked);
-                Listresponse.add(dto);
+                listReponse.add(dto);
 
-                return Listresponse;
+                return listReponse;
             }
-            return Listresponse;
+            return listReponse;
         } else {
             throw new IllegalArgumentException("유효하지 않은 게시물 종류입니다: " + relatedType);
         }
@@ -167,14 +166,5 @@ public class CommentService {
             throw new IllegalArgumentException("댓글 작성자만 수정할 수 있습니다.");
         }
     }
-
-
-
-
-
-
-
-
-
 
 }

@@ -29,10 +29,9 @@ public class CommentLike {
 
     // 좋아요 (create)
     @Builder
-    public CommentLike create(int commentNumber, int userNumber) {
+    public CommentLike(int commentNumber, int userNumber) {
         this.commentNumber = commentNumber;
         this.userNumber = userNumber;
-        return this;
     }
 
     // 좋아요 취소 (delete)
