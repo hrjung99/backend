@@ -42,8 +42,8 @@ public class TravelService {
     public Travel create(TravelCreateRequest request, String email) {
 
         Users user = memberService.findByEmail(email);
-        Location location = locationRepository.findByLocationName(request.getLocation())
-                .orElseThrow(() -> new IllegalArgumentException("city not found: " + request.getLocation()));
+        Location location = locationRepository.findByLocationName(request.getLocationName())
+                .orElseThrow(() -> new IllegalArgumentException("city not found: " + request.getLocationName()));
 
         Travel savedTravel = travelRepository.save(request.toTravelEntity(user.getUserNumber(), location));
         List<String> tags = travelTagService.create(savedTravel, request.getTags()).stream()
@@ -91,8 +91,8 @@ public class TravelService {
 
         authorizeTravelOwner(travel);
 
-        Location location = locationRepository.findByLocationName(travelUpdate.getLocation())
-                .orElseThrow(() -> new IllegalArgumentException("city not found: " + travelUpdate.getLocation()));
+        Location location = locationRepository.findByLocationName(travelUpdate.getLocationName())
+                .orElseThrow(() -> new IllegalArgumentException("city not found: " + travelUpdate.getLocationName()));
 
         Travel updatedTravel = travel.update(travelUpdate, location);
         List<String> updatedTags = travelTagService.update(updatedTravel, travelUpdate.getTags());

@@ -59,7 +59,7 @@ public class TravelRecentDto {
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
-        this.location = travel.getLocation();
+        this.location = travel.getLocationName();
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();

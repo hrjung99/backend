@@ -62,7 +62,7 @@ public class TravelListService {
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
-                    travel.getLocation(),
+                    travel.getLocationName(),
                     travel.getUserNumber(),
                     username,
                     tags,

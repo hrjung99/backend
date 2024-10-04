@@ -73,7 +73,7 @@ public class TravelDetailResponse {
         this.userNumber = travelDetail.getHostNumber();
         this.userName = travelDetail.getHostName();
         this.createdAt = travelDetail.getTravel().getCreatedAt();
-        this.location = travelDetail.getTravel().getLocation();
+        this.location = travelDetail.getTravel().getLocationName();
         this.title = travelDetail.getTravel().getTitle();
         this.details = travelDetail.getTravel().getDetails();
         this.viewCount = getViewCount();

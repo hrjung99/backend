@@ -42,11 +42,11 @@ public class Travel {
     // 여행지 ID (참조)
     @ManyToOne
     @JoinColumn(name = "location_id", nullable = false)
-    private Location travelLocation;
+    private Location location;
 
     //여행지
     @Column(name = "travel_location", length = 20)
-    private String location;
+    private String locationName;
 
     //제목
     @Column(name = "travel_title", length = 20)
@@ -93,15 +93,15 @@ public class Travel {
     @Builder
     public Travel(
             int number, int userNumber, LocalDateTime createdAt,
-            Location travelLocation, String location, String title, String details, int viewCount,
+            Location location, String locationName, String title, String details, int viewCount,
             int maxPerson, GenderType genderType, LocalDate dueDate,
             PeriodType periodType, TravelStatus status
     ) {
         this.number = number;
         this.userNumber = userNumber;
         this.createdAt = createdAt;
-        this.travelLocation = travelLocation;
         this.location = location;
+        this.locationName = locationName;
         this.title = title;
         this.details = details;
         this.viewCount = viewCount;
@@ -113,8 +113,8 @@ public class Travel {
     }
 
     public Travel update(TravelUpdateRequest travelUpdate, Location travelLocation) {
-        this.travelLocation = travelLocation;
-        this.location = travelUpdate.getLocation();
+        this.location = travelLocation;
+        this.locationName = travelUpdate.getLocationName();
         this.title = travelUpdate.getTitle();
         this.details = travelUpdate.getDetails();
         this.maxPerson = travelUpdate.getMaxPerson();
@@ -160,7 +160,7 @@ public class Travel {
                 "number=" + number +
                 ", userNumber=" + userNumber +
                 ", createdAt=" + createdAt +
-                ", location='" + location + '\'' +
+                ", location='" + locationName + '\'' +
                 ", title='" + title + '\'' +
                 ", details='" + details + '\'' +
                 ", viewCount=" + viewCount +
@@ -171,4 +171,8 @@ public class Travel {
                 ", status=" + status +
                 '}';
     }
+    public Long getLocationId() {
+        return location != null ? location.getId() : null;
+    }
+
 }

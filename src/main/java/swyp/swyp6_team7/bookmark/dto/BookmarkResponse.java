@@ -38,7 +38,7 @@ public class BookmarkResponse {
         return new TravelListResponseDto(
                 travel.getNumber(),
                 travel.getTitle(),
-                travel.getLocation(),
+                travel.getLocationName(),
                 user.getUserNumber(),
                 user.getUserName(),
                 travel.getTravelTags().stream().map(tag -> tag.getTag().getName()).collect(Collectors.toList()),

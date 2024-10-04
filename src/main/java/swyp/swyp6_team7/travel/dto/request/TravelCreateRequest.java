@@ -24,7 +24,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelCreateRequest {
 
-    private String location;
+    private String locationName;
     @Size(max = 20)
     private String title;
     private String details;
@@ -42,11 +42,11 @@ public class TravelCreateRequest {
 
 
     public TravelCreateRequest(
-            String location, String title, String details,
+            String locationName, String title, String details,
             int maxPerson, String genderType, LocalDate dueDate, String periodType,
             List<String> tags, boolean completionStatus
     ) {
-        this.location = location;
+        this.locationName = locationName;
         this.title = title;
         this.details = details;
         this.maxPerson = maxPerson;
@@ -57,11 +57,11 @@ public class TravelCreateRequest {
         this.completionStatus = completionStatus;
     }
 
-    public Travel toTravelEntity(int userNumber, Location travelLocation) {
+    public Travel toTravelEntity(int userNumber, Location location) {
         return Travel.builder()
                 .userNumber(userNumber)
-                .travelLocation(travelLocation)
-                .location(travelLocation.getLocationName())
+                .location(location)
+                .locationName(location.getLocationName())
                 .title(title)
                 .details(details)
                 .viewCount(0)

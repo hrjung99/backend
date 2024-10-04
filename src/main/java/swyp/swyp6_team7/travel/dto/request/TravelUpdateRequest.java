@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelUpdateRequest {
-    private String location;
+    private String locationName;
     @Size(max = 20)
     private String title;
     private String details;
@@ -36,10 +36,10 @@ public class TravelUpdateRequest {
     @NotNull
     private Boolean completionStatus;
 
-    public Travel toTravelEntity(int userNumber, Location travellocation) {
+    public Travel toTravelEntity(int userNumber, Location location) {
         return Travel.builder()
                 .userNumber(userNumber)
-                .location(travellocation.getLocationName())  // location 설정
+                .locationName(location.getLocationName())  // location 설정
                 .title(title)
                 .details(details)
                 .viewCount(0)
