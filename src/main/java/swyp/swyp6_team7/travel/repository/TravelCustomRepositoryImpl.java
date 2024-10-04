@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.util.StringUtils;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
@@ -28,6 +30,8 @@ import swyp.swyp6_team7.travel.dto.TravelSearchCondition;
 import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.util.TravelSearchConstant;
+import swyp.swyp6_team7.location.domain.QLocation;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +54,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     QUsers users = QUsers.users;
     QTag tag = QTag.tag;
     QTravelTag travelTag = QTravelTag.travelTag;
+    QLocation location = QLocation.location;
 
 
     @Override
@@ -184,13 +189,15 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .from(travel)
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
+                .leftJoin(location).on(travel.location.id.eq(location.id))
                 .where(
                         titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
                         eqPersonRangeType(condition.getPersonRangeFilter()),
                         eqPeriodType(condition.getPeriodFilter()),
-                        eqTags(condition.getTags())
+                        eqTags(condition.getTags()),
+                        eqLocationType(condition.getLocationFilter())
                 )
                 .groupBy(travel.number)
                 .having(tag.name.count().goe((long) condition.getTags().size()))
@@ -205,6 +212,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(users).on(travel.userNumber.eq(users.userNumber))
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
+                .leftJoin(location).on(travel.location.id.eq(location.id))
                 .where(
                         travel.number.in(travels)
                 )
@@ -224,13 +232,15 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .from(travel)
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
+                .leftJoin(location).on(travel.location.id.eq(location.id))
                 .where(
                         titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
                         eqPersonRangeType(condition.getPersonRangeFilter()),
                         eqPeriodType(condition.getPeriodFilter()),
-                        eqTags(condition.getTags())
+                        eqTags(condition.getTags()),
+                        eqLocationType(condition.getLocationFilter())
                 );
 
         return PageableExecutionUtils.getPage(content, condition.getPageRequest(), countQuery::fetchOne);
@@ -244,7 +254,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return null;
         }
-        return travel.title.contains(keyword).or(travel.location.like(keyword));
+        return travel.title.contains(keyword).or(location.locationName.like("%" + keyword + "%"));
     }
 
     private BooleanExpression statusActivated() {
@@ -299,6 +309,17 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
             return null;
         }
         return tag.name.in(tags);
+    }
+    private BooleanExpression eqLocationType(List<LocationType> locationFilter) {
+        if (locationFilter == null || locationFilter.isEmpty()) {
+            return null;
+        }
+        return travel.location.id.in( // 수정: travel.location.id로 변경
+                JPAExpressions
+                        .select(location.id)
+                        .from(location)
+                        .where(location.locationType.in(locationFilter))
+        );
     }
 
 }
