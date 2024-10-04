@@ -25,20 +25,6 @@ public class CommentLikeService {
     private final CommentLikeRepository commentLikeRepository;
     private final CommentRepository commentRepository;
     private final CommentService commentService;
-
-    //Read
-    //댓글 조회 시 필요한 좋아요 상태
-    public CommentLikeReadResponseDto getCommentLikeStatus(int commentNumber, int userNumber) {
-        // 좋아요 여부 확인
-        boolean liked = commentLikeRepository.existsByCommentNumberAndUserNumber(commentNumber, userNumber);
-
-        // 총 좋아요 수 가져오기
-        long likes = commentLikeRepository.countByCommentNumber(commentNumber);
-
-        // DTO 생성 및 반환
-        return new CommentLikeReadResponseDto(commentNumber, liked, likes);
-    }
-
     //Create
     //좋아요
     @Transactional

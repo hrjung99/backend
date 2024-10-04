@@ -14,6 +14,7 @@ import swyp.swyp6_team7.comment.repository.CommentRepository;
 import swyp.swyp6_team7.likes.dto.response.CommentLikeReadResponseDto;
 import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
 import swyp.swyp6_team7.likes.service.CommentLikeService;
+import swyp.swyp6_team7.likes.util.CommentLikeStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
@@ -34,7 +35,6 @@ public class CommentService {
     final TravelService travelService;
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
-    private final CommentLikeService commentLikeService;
 
     //Create
     @Transactional
@@ -104,7 +104,7 @@ public class CommentService {
                 long repliesCount = commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getParentNumber());
 
                 //좋아요 상태 가져오기
-                CommentLikeReadResponseDto likeStatus = commentLikeService.getCommentLikeStatus(comment.getCommentNumber(), userNumber);
+                CommentLikeReadResponseDto likeStatus = CommentLikeStatus.getCommentLikeStatus(commentLikeRepository, comment.getCommentNumber(), userNumber);
                 //좋아요 여부, true = 좋아요 누름
                 boolean liked = likeStatus.isLiked();
                 //좋아요 개수
