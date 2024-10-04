@@ -18,6 +18,7 @@ import swyp.swyp6_team7.likes.util.CommentLikeStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
+import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.time.LocalDateTime;
@@ -35,6 +36,7 @@ public class CommentService {
     final TravelService travelService;
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final TravelRepository travelRepository;
 
     //Create
     @Transactional
@@ -105,14 +107,16 @@ public class CommentService {
 
                 //좋아요 상태 가져오기
                 CommentLikeReadResponseDto likeStatus = CommentLikeStatus.getCommentLikeStatus(commentLikeRepository, comment.getCommentNumber(), userNumber);
-                //좋아요 여부, true = 좋아요 누름
-                boolean liked = likeStatus.isLiked();
                 //좋아요 개수
                 long likes = likeStatus.getLikes();
+                //좋아요 여부, true = 좋아요 누름
+                boolean liked = likeStatus.isLiked();
 
+                //게시글 작성자 회원번호
+                int travelWriterNumber = travelRepository.findByNumber(relatedNumber).get().getUserNumber();
 
                 //DTO
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked, travelWriterNumber);
                 listReponse.add(dto);
 
                 return listReponse;
@@ -130,7 +134,7 @@ public class CommentService {
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다: " + commentNumber));
 
-        //댓글 작성자인지 확인
+        // 댓글 작성자 혹은 게시글 작성자인지 확인
         validateCommentWriter(commentNumber, userNumber);
 
         // 업데이트 동작
@@ -155,15 +159,25 @@ public class CommentService {
         comment.delete(commentNumber);
     }
 
-    // 댓글 작성자인지 검증하는 메소드
+
+    // 댓글 작성자 혹은 게시글 작성자인지 검증하는 메소드
     @Transactional(readOnly = true)
     public void validateCommentWriter(int commentNumber, int userNumber) {
+
+        //존재하는 댓글인지 확인
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
 
-        // 댓글의 작성자와 요청한 사용자의 번호를 비교
-        if (comment.getUserNumber() != userNumber) {
-            throw new IllegalArgumentException("댓글 작성자만 수정할 수 있습니다.");
+        // 댓글 번호로 게시글 번호 가져오기
+        int travelNumber = comment.getRelatedNumber();
+
+        // 게시글 번호로 작성자 회원 번호 가져오기
+        int travelWriterNumber = travelRepository.findByNumber(travelNumber).get().getUserNumber();
+
+
+        // 요청한 사용자(=로그인 중인 사용자)가 댓글 작성자 혹은 게시글 작성자인지 확인
+        if (comment.getUserNumber() != userNumber | travelWriterNumber!= userNumber) {
+            throw new IllegalArgumentException("댓글 작성자 혹은 게시글 작성자에게만 유효한 동작입니다.");
         }
     }
 

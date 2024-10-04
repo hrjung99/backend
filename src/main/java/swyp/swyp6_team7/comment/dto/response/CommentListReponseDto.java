@@ -27,6 +27,7 @@ public class CommentListReponseDto {
     private long repliesCount;      // 답글 수
     private long likes;             //좋아요 수
     private boolean liked;          // 좋아요 눌렀는지 여부
+    private int travelWriterNumber; //게시글의 작성자 회원 번호
 
 
     public static String formatDate(LocalDateTime date) {
@@ -35,7 +36,7 @@ public class CommentListReponseDto {
 
 
 
-    public static CommentListReponseDto fromEntity(Comment comment, String writer, long repliesCount, long likes, boolean liked) {
+    public static CommentListReponseDto fromEntity(Comment comment, String writer, long repliesCount, long likes, boolean liked, int travelWriterNumber) {
         return new CommentListReponseDto(
                 comment.getCommentNumber(),
                 comment.getUserNumber(),
@@ -47,8 +48,8 @@ public class CommentListReponseDto {
                 writer,
                 repliesCount,
                 likes,
-                liked
-
+                liked,
+                travelWriterNumber
         );
     }
 
@@ -65,7 +66,8 @@ public class CommentListReponseDto {
                 ", writer='" + writer + '\'' +
                 ", repliesCount=" + repliesCount +
                 ", likes=" + likes +
-                ", liked=" + liked +
+                ", liked=" + liked + '\'' +
+                ", travelWriterNumber=" + travelWriterNumber +
                 '}';
     }
 
