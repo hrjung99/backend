@@ -1,11 +1,12 @@
 package swyp.swyp6_team7.travel.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import swyp.swyp6_team7.travel.domain.Travel;
-import swyp.swyp6_team7.travel.domain.TravelStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,4 +14,10 @@ public interface TravelRepository extends JpaRepository<Travel, Integer>, Travel
     Optional<Travel> findByNumber(Integer integer);
     List<Travel> findByUserNumber(int userNumber);
 
+    @Query("SELECT t.enrollmentsLastViewedAt FROM Travel t WHERE t.number = :travelNumber")
+    LocalDateTime getEnrollmentsLastViewedAtByNumber(@Param("travelNumber") int travelNumber);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Travel t SET t.enrollmentsLastViewedAt = :lastViewedAt WHERE t.number = :travelNumber")
+    void updateEnrollmentsLastViewedAtByNumber(@Param("travelNumber") int travelNumber, @Param("lastViewedAt") LocalDateTime lastViewedAt);
 }

@@ -7,9 +7,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
+import swyp.swyp6_team7.member.util.MemberAuthorizeUtil;
 import swyp.swyp6_team7.tag.service.TravelTagService;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
@@ -21,6 +23,7 @@ import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -58,22 +61,25 @@ public class TravelService {
             throw new IllegalArgumentException("Deleted Travel.");
         }
 
-        TravelDetailDto travelDetail = travelRepository.getDetailsByNumber(travelNumber);
+        Integer requestUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
+        TravelDetailDto travelDetail = travelRepository.getDetailsByNumber(travelNumber, requestUserNumber);
+
         //enrollment 개수
         int enrollmentCount = enrollmentRepository.countByTravelNumber(travelNumber);
-        log.info("enrollmentCount: " + enrollmentCount);
+
         //bookmark 개수
         int bookmarkCount = bookmarkRepository.countByTravelNumber(travelNumber);
+
         TravelDetailResponse detailResponse = new TravelDetailResponse(travelDetail, enrollmentCount, bookmarkCount);
 
-        String requestUserName = SecurityContextHolder.getContext().getAuthentication().getName();
-        int requestUserNumber = memberService.findByEmail(requestUserName).getUserNumber();
+        //로그인 요청자 주최 여부, 신청 확인
         if (travelDetail.getHostNumber() == requestUserNumber) {
             detailResponse.setHostUserCheckTrue();
         } else {
-            boolean existEnrollment = enrollmentRepository
-                    .existsByUserNumberAndTravelNumber(requestUserNumber, travelNumber);
-            detailResponse.setEnrollAvailable(existEnrollment);
+            Enrollment enrollmented = enrollmentRepository
+                    .findOneByUserNumberAndTravelNumber(requestUserNumber, travelNumber);
+            //log.info("enrollmented = " + enrollmented);
+            detailResponse.setEnrollmentNumber(enrollmented);
         }
 
         return detailResponse;
@@ -109,10 +115,21 @@ public class TravelService {
 
 
     public Page<TravelSearchDto> search(TravelSearchCondition condition) {
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Integer requestUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
+        Page<TravelSearchDto> result = travelRepository.search(condition, requestUserNumber);
         for (TravelSearchDto travelSearchDto : result) {
             log.info("service: " + travelSearchDto.toString());
         }
         return result;
+    }
+
+
+    public LocalDateTime getEnrollmentsLastViewedAt(int travelNumber) {
+        return travelRepository.getEnrollmentsLastViewedAtByNumber(travelNumber);
+    }
+
+    @Transactional
+    public void updateEnrollmentLastViewedAt(int travelNumber, LocalDateTime lastViewedAt) {
+        travelRepository.updateEnrollmentsLastViewedAtByNumber(travelNumber, lastViewedAt);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import swyp.swyp6_team7.config.DataConfig;
+import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentCustomRepository;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
@@ -41,9 +42,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import swyp.swyp6_team7.enrollment.domain.Enrollment;
-import swyp.swyp6_team7.enrollment.dto.EnrollmentResponse;
-
 @Import(DataConfig.class)
 @DataJpaTest
 class TravelCustomRepositoryImplTest {
@@ -62,13 +60,10 @@ class TravelCustomRepositoryImplTest {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    Users user;
+
     @BeforeEach
     void setUp() {
-        travelTagRepository.deleteAll();
-        travelRepository.deleteAll();
-        tagRepository.deleteAll();
-        userRepository.deleteAll();
-        enrollmentRepository.deleteAll();
         Travel savedTravel = travelRepository.save(Travel.builder()
                 .title("기본 테스트 데이터")
                 .userNumber(1)
@@ -79,7 +74,7 @@ class TravelCustomRepositoryImplTest {
                 .status(TravelStatus.IN_PROGRESS)
                 .build());
 
-        Users user = userRepository.save(Users.builder()
+        user = userRepository.save(Users.builder()
                 .userNumber(1)
                 .userEmail("testuser@naver.com")
                 .userPw("password")
@@ -129,7 +124,7 @@ class TravelCustomRepositoryImplTest {
         travelTagRepository.save(TravelTag.of(travel, tag2));
 
         // when
-        TravelDetailDto details = travelRepository.getDetailsByNumber(travel.getNumber());
+        TravelDetailDto details = travelRepository.getDetailsByNumber(travel.getNumber(), user.getUserNumber());
 
         // then
         System.out.println(details.toString());
@@ -139,7 +134,7 @@ class TravelCustomRepositoryImplTest {
         assertThat(details.getTags().size()).isEqualTo(2);
     }
 
-    /*@DisplayName("findAll: 여행 콘텐츠를 DTO로 만들어 최신순으로 정렬해 반환한다")
+    @DisplayName("findAll: 여행 콘텐츠를 DTO로 만들어 최신순으로 정렬해 반환한다")
     @Test
     public void findAllSortedByCreatedAt() {
         // given
@@ -160,7 +155,7 @@ class TravelCustomRepositoryImplTest {
 
         // when
         Page<TravelRecentDto> results = travelRepository
-                .findAllSortedByCreatedAt(PageRequest.of(0, 5));
+                .findAllSortedByCreatedAt(PageRequest.of(0, 5), 1);
 
         // then
         for (TravelRecentDto result : results) {
@@ -168,8 +163,8 @@ class TravelCustomRepositoryImplTest {
         }
         assertThat(results.getContent().size()).isEqualTo(2);
         assertThat(results.getContent().get(0).getTitle()).isEqualTo("추가 테스트 데이터");
-        assertThat(results.getContent().get(0).getTags().size()).isEqualTo(3);
-    }*/
+        assertThat(results.getContent().get(0).getTags().size()).isEqualTo(5);
+    }
 
     @DisplayName("findAll: 최신순으로 정렬해 반환할 때 데이터가 없을 경우에도 오류가 나지 않는다")
     @Test
@@ -179,7 +174,7 @@ class TravelCustomRepositoryImplTest {
 
         // when
         Page<TravelRecentDto> results = travelRepository
-                .findAllSortedByCreatedAt(PageRequest.of(0, 5));
+                .findAllSortedByCreatedAt(PageRequest.of(0, 5), 1);
 
         // then
         for (TravelRecentDto result : results) {
@@ -251,10 +246,11 @@ class TravelCustomRepositoryImplTest {
         travelTagRepository.save(TravelTag.of(travel5, tag3));
 
         // when
-        List<TravelRecommendDto> result = travelRepository.findAllByPreferredTags(preferredTags);
+        Page<TravelRecommendDto> result = travelRepository
+                .findAllByPreferredTags(PageRequest.of(0, 5), user.getUserNumber(), preferredTags);
 
         // then
-        assertThat(result.size()).isEqualTo(5); //0, 1, 2, 1, 3
+        assertThat(result.getContent().size()).isEqualTo(5); //0, 1, 2, 1, 3
         List<Integer> preferredNum = result.stream()
                 .map(dto -> dto.getPreferredNumber())
                 .toList();
@@ -285,7 +281,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> results = travelRepository.search(condition);
+        Page<TravelSearchDto> results = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(1);
@@ -322,7 +318,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> results = travelRepository.search(condition);
+        Page<TravelSearchDto> results = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(2);
@@ -350,7 +346,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> results = travelRepository.search(condition);
+        Page<TravelSearchDto> results = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(2);
@@ -388,7 +384,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> results = travelRepository.search(condition);
+        Page<TravelSearchDto> results = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(results.getTotalElements()).isEqualTo(1);
@@ -417,7 +413,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Page<TravelSearchDto> result = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(result.getTotalPages()).isEqualTo(2);
@@ -451,7 +447,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Page<TravelSearchDto> result = travelRepository.search(condition, user.getUserNumber());
 
         // then;
         assertThat(result.getTotalPages()).isEqualTo(2);
@@ -502,7 +498,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Page<TravelSearchDto> result = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(result.getTotalPages()).isEqualTo(1);
@@ -548,7 +544,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Page<TravelSearchDto> result = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(result.getContent().size()).isEqualTo(2);
@@ -596,7 +592,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Page<TravelSearchDto> result = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(result.getContent().size()).isEqualTo(2);
@@ -645,7 +641,7 @@ class TravelCustomRepositoryImplTest {
                 .build();
 
         // when
-        Page<TravelSearchDto> result = travelRepository.search(condition);
+        Page<TravelSearchDto> result = travelRepository.search(condition, user.getUserNumber());
 
         // then
         assertThat(result.getContent().size()).isEqualTo(2);

@@ -2,8 +2,8 @@ package swyp.swyp6_team7.travel.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -16,10 +16,12 @@ import java.util.List;
 @Getter
 public class TravelSearchDto {
 
+    @NotNull
     private int travelNumber;
     private String title;
     private int userNumber;
     private String userName;
+    private String location;
     private List<String> tags;
     private int nowPerson;
     private int maxPerson;
@@ -28,40 +30,26 @@ public class TravelSearchDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
     private String postStatus;
+    private boolean bookmarked;
 
-    @Builder
-    public TravelSearchDto(
-            int travelNumber, String title, int userNumber, String userName,
-            List<String> tags, int maxPerson, int nowPerson,
-            LocalDateTime createdAt, LocalDate registerDue, String postStatus
-    ) {
-        this.travelNumber = travelNumber;
-        this.title = title;
-        this.userNumber = userNumber;
-        this.userName = userName;
-        this.tags = tags;
-        this.nowPerson = nowPerson;
-        this.maxPerson = maxPerson;
-        this.createdAt = createdAt;
-        this.registerDue = registerDue;
-        this.postStatus = postStatus;
-    }
 
     @QueryProjection
     public TravelSearchDto(
             Travel travel, int userNumber, String userName,
-            int companionCount, List<String> tags
+            int companionCount, List<String> tags, boolean isBookmarked
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
         this.userNumber = userNumber;
         this.userName = userName;
+        this.location = travel.getLocation();
         this.tags = tags;
         this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
         this.postStatus = travel.getStatus().getName();
+        this.bookmarked = isBookmarked;
     }
 
     @Override
@@ -71,12 +59,14 @@ public class TravelSearchDto {
                 ", title='" + title + '\'' +
                 ", userNumber=" + userNumber +
                 ", userName='" + userName + '\'' +
+                ", location='" + location + '\'' +
                 ", tags=" + tags +
                 ", nowPerson=" + nowPerson +
                 ", maxPerson=" + maxPerson +
                 ", createdAt=" + createdAt +
                 ", registerDue=" + registerDue +
                 ", postStatus='" + postStatus + '\'' +
+                ", bookmarked=" + bookmarked +
                 '}';
     }
 }

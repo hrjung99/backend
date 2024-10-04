@@ -17,13 +17,12 @@ import java.util.List;
 @Getter
 public class TravelRecentDto {
 
-    private static final int TAG_MAX_NUMBER = 3;
-
     @NotNull
     private int travelNumber;
     private String title;
     private int userNumber;
     private String userName;
+    private String location;
     private List<String> tags;
     private int nowPerson;
     private int maxPerson;
@@ -31,39 +30,25 @@ public class TravelRecentDto {
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
+    private boolean bookmarked;
 
-
-    @Builder
-    public TravelRecentDto(
-            int travelNumber, String title, int userNumber, String userName,
-            List<String> tags, int nowPerson, int maxPerson,
-            LocalDateTime createdAt, LocalDate registerDue
-    ) {
-        this.travelNumber = travelNumber;
-        this.title = title;
-        this.userNumber = userNumber;
-        this.userName = userName;
-        this.tags = tags;
-        this.nowPerson = nowPerson;
-        this.maxPerson = maxPerson;
-        this.createdAt = createdAt;
-        this.registerDue = registerDue;
-    }
 
     @QueryProjection
     public TravelRecentDto(
             Travel travel, int userNumber, String userName,
-            int companionCount, List<String> tags
+            int companionCount, List<String> tags, boolean isBookmarked
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
         this.userNumber = userNumber;
         this.userName = userName;
-        this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();
+        this.location = travel.getLocation();
+        this.tags = tags;
         this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
+        this.bookmarked = isBookmarked;
     }
 
 }
