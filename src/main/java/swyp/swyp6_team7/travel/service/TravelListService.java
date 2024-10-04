@@ -59,8 +59,8 @@ public class TravelListService {
                     tags,
                     currentApplicants,
                     travel.getMaxPerson(),
-                    travel.getCreatedAt().toString(),
-                    travel.getDueDate().toString(),
+                    travel.getCreatedAt(),
+                    travel.getDueDate(),
                     isBookmarked
             );
         }).collect(Collectors.toList());

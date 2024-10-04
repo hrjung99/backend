@@ -109,8 +109,8 @@ public class BookmarkService {
                             tags,
                             currentApplicants,
                             travel.getMaxPerson(),
-                            formatDate(travel.getCreatedAt().toLocalDate()),
-                            formatDate(travel.getDueDate()),
+                            travel.getCreatedAt(),
+                            travel.getDueDate(),
                             true
                     );
                 }).collect(Collectors.toList());
