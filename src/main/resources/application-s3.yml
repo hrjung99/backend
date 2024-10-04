@@ -1,0 +1,12 @@
+# AWS 설정 정보
+cloud:
+  aws:
+    s3:
+      bucket: moing-hosted-contents
+      folder:
+        folderName1: user/
+        folderName2: post/
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
