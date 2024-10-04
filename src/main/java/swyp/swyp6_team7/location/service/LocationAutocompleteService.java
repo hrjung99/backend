@@ -29,7 +29,7 @@ public class LocationAutocompleteService {
         String userNumber = authentication.getName();
 
         // 사용자별 캐시 키 생성
-        String cacheKey = userNumber + ":" + KoreanCharDecomposer.decompose(prefix.charAt(0));
+        String cacheKey = userNumber + ":" + prefix;
 
 
         // Redis 캐시에서 데이터 조회
@@ -37,7 +37,8 @@ public class LocationAutocompleteService {
 
         if (cachedSuggestions == null) {
             // 캐시에 없으면 DB에서 검색
-            List<String> newSuggestions = locationRepository.findByLocationNameStartingWith(cacheKey)
+            // 캐시에 없으면 DB에서 검색
+            List<String> newSuggestions = locationRepository.findByLocationNameStartingWith(prefix)
                     .stream()
                     .map(Location::getLocationName)
                     .limit(5)  // 결과 수 제한
@@ -45,6 +46,7 @@ public class LocationAutocompleteService {
 
             // 비동기적으로 캐시 업데이트
             CompletableFuture.runAsync(() -> redisTemplate.opsForValue().set(cacheKey, newSuggestions));
+
 
             return newSuggestions;
         }

@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import swyp.swyp6_team7.location.service.LocationAutocompleteService;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/autocomplete")
@@ -20,12 +22,15 @@ public class LocationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<String>> getAutocompleteSuggestions(@RequestParam(value = "location", required = false) String location) {
+    public ResponseEntity<Map<String, List<String>>> getAutocompleteSuggestions(@RequestParam(value = "location", required = false) String location) {
         if (location == null || location.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.emptyList());
+            return ResponseEntity.badRequest().body(Collections.singletonMap("suggestions", Collections.emptyList()));
         }
 
         List<String> suggestions = locationAutocompleteService.getAutocompleteSuggestions(location);
-        return ResponseEntity.ok(suggestions);
+
+        Map<String, List<String>> response = new HashMap<>();
+        response.put("suggestions", suggestions);
+        return ResponseEntity.ok(response);
     }
 }
