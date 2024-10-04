@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.travel.dto.TravelDetailDto;
 
 import java.time.LocalDate;
@@ -35,8 +36,8 @@ public class TravelDetailResponse {
     private String periodType;
     private List<String> tags;
     private String postStatus;
-    private boolean hostUserCheck;      //주최자 여부
-    private boolean enrollAvailable;    //신청 가능 여부
+    private boolean hostUserCheck;       //주최자 여부
+    private Long enrollmentNumber;       //신청 번호(없으면 null)
     private boolean bookmarked;     //북마크 여부
 
     @Builder
@@ -44,7 +45,7 @@ public class TravelDetailResponse {
             int travelNumber, int userNumber, String userName, String userAgeGroup, LocalDateTime createdAt,
             String location, String title, String details, int viewCount, int enrollCount, int bookmarkCount,
             int nowPerson, int maxPerson, String genderType, LocalDate dueDate, String periodType,
-            List<String> tags, String postStatus, boolean hostUserCheck, boolean enrollAvailable,
+            List<String> tags, String postStatus, boolean hostUserCheck, Long enrollmentNumber,
             boolean isBookmarked
     ) {
         this.travelNumber = travelNumber;
@@ -66,7 +67,7 @@ public class TravelDetailResponse {
         this.tags = tags;
         this.postStatus = postStatus;
         this.hostUserCheck = hostUserCheck;
-        this.enrollAvailable = enrollAvailable;
+        this.enrollmentNumber = enrollmentNumber;
         this.bookmarked = isBookmarked;
     }
 
@@ -100,11 +101,11 @@ public class TravelDetailResponse {
         this.hostUserCheck = true;
     }
 
-    public void setEnrollAvailable(boolean existEnrollment) {
-        if (existEnrollment) {
-            this.enrollAvailable = false;
+    public void setEnrollmentNumber(Enrollment enrollment) {
+        if (enrollment==null) {
+            this.enrollmentNumber = null;
         } else {
-            this.enrollAvailable = true;
+            this.enrollmentNumber = enrollment.getNumber();
         }
     }
 
@@ -130,7 +131,7 @@ public class TravelDetailResponse {
                 ", tags=" + tags +
                 ", postStatus='" + postStatus + '\'' +
                 ", hostUserCheck=" + hostUserCheck +
-                ", enrollAvailable=" + enrollAvailable +
+                ", enrollmentNumber=" + enrollmentNumber +
                 ", bookmarked=" + bookmarked +
                 '}';
     }

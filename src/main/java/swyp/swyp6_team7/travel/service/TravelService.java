@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
@@ -64,17 +65,20 @@ public class TravelService {
 
         //enrollment 개수
         int enrollmentCount = enrollmentRepository.countByTravelNumber(travelNumber);
-        log.info("enrollmentCount: " + enrollmentCount);
+
         //bookmark 개수
         int bookmarkCount = bookmarkRepository.countByTravelNumber(travelNumber);
+
         TravelDetailResponse detailResponse = new TravelDetailResponse(travelDetail, enrollmentCount, bookmarkCount);
 
+        //로그인 요청자 주최 여부, 신청 확인
         if (travelDetail.getHostNumber() == requestUserNumber) {
             detailResponse.setHostUserCheckTrue();
         } else {
-            boolean existEnrollment = enrollmentRepository
-                    .existsByUserNumberAndTravelNumber(requestUserNumber, travelNumber);
-            detailResponse.setEnrollAvailable(existEnrollment);
+            Enrollment enrollmented = enrollmentRepository
+                    .findOneByUserNumberAndTravelNumber(requestUserNumber, travelNumber);
+            //log.info("enrollmented = " + enrollmented);
+            detailResponse.setEnrollmentNumber(enrollmented);
         }
 
         return detailResponse;

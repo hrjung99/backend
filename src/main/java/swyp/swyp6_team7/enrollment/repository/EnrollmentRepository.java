@@ -7,6 +7,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long>, E
 
     int countByTravelNumber(int travelNumber);
 
+    Enrollment findOneByUserNumberAndTravelNumber(int userNumber, int travelNumber);
+
     boolean existsByUserNumberAndTravelNumber(int userNumber, int travelNumber);
 
 }
