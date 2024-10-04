@@ -13,8 +13,8 @@ public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "location_id")
-    private int locationId;
-    @Column(name = "location_name")
+    private Long id;
+    @Column(name = "location_name",unique = true)
     private String locationName;
     @Enumerated(EnumType.STRING)
     @Column(name = "location_type")
