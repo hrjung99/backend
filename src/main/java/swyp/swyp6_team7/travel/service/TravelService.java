@@ -23,6 +23,7 @@ import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -120,5 +121,15 @@ public class TravelService {
             log.info("service: " + travelSearchDto.toString());
         }
         return result;
+    }
+
+
+    public LocalDateTime getEnrollmentsLastViewedAt(int travelNumber) {
+        return travelRepository.getEnrollmentsLastViewedAtByNumber(travelNumber);
+    }
+
+    @Transactional
+    public void updateEnrollmentLastViewedAt(int travelNumber, LocalDateTime lastViewedAt) {
+        travelRepository.updateEnrollmentsLastViewedAtByNumber(travelNumber, lastViewedAt);
     }
 }

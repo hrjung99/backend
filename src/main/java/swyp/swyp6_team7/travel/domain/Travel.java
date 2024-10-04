@@ -78,6 +78,9 @@ public class Travel {
     @Column(name = "travel_status", nullable = false, length = 20)
     private TravelStatus status;
 
+    @Column(name = "enrollments_last_viewed")
+    private LocalDateTime enrollmentsLastViewedAt;
+
     @OneToMany(mappedBy = "travel")
     private List<TravelTag> travelTags = new ArrayList<>();
 
@@ -89,7 +92,7 @@ public class Travel {
             int number, int userNumber, LocalDateTime createdAt,
             String location, String title, String details, int viewCount,
             int maxPerson, GenderType genderType, LocalDate dueDate,
-            PeriodType periodType, TravelStatus status
+            PeriodType periodType, TravelStatus status, LocalDateTime enrollmentsLastViewedAt
     ) {
         this.number = number;
         this.userNumber = userNumber;
@@ -103,6 +106,7 @@ public class Travel {
         this.dueDate = dueDate;
         this.periodType = periodType;
         this.status = status;
+        this.enrollmentsLastViewedAt = enrollmentsLastViewedAt;
     }
 
     public Travel update(TravelUpdateRequest travelUpdate) {
@@ -161,6 +165,7 @@ public class Travel {
                 ", dueDate=" + dueDate +
                 ", periodType=" + periodType +
                 ", status=" + status +
+                ", enrollmentsLastViewedAt=" + enrollmentsLastViewedAt +
                 '}';
     }
 }
