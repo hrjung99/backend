@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class MemberControllerTest {
 
     @Autowired

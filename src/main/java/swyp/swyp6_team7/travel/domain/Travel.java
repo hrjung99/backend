@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import swyp.swyp6_team7.companion.domain.Companion;
+import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
@@ -38,9 +39,14 @@ public class Travel {
     @Column(name = "travel_reg_date", nullable = false)
     private LocalDateTime createdAt;
 
+    // 여행지 ID (참조)
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
+
     //여행지
     @Column(name = "travel_location", length = 20)
-    private String location;
+    private String locationName;
 
     //제목
     @Column(name = "travel_title", length = 20)
@@ -78,6 +84,9 @@ public class Travel {
     @Column(name = "travel_status", nullable = false, length = 20)
     private TravelStatus status;
 
+    @Column(name = "enrollments_last_viewed")
+    private LocalDateTime enrollmentsLastViewedAt;
+
     @OneToMany(mappedBy = "travel")
     private List<TravelTag> travelTags = new ArrayList<>();
 
@@ -87,14 +96,15 @@ public class Travel {
     @Builder
     public Travel(
             int number, int userNumber, LocalDateTime createdAt,
-            String location, String title, String details, int viewCount,
+            Location location, String locationName, String title, String details, int viewCount,
             int maxPerson, GenderType genderType, LocalDate dueDate,
-            PeriodType periodType, TravelStatus status
+            PeriodType periodType, TravelStatus status, LocalDateTime enrollmentsLastViewedAt
     ) {
         this.number = number;
         this.userNumber = userNumber;
         this.createdAt = createdAt;
         this.location = location;
+        this.locationName = locationName;
         this.title = title;
         this.details = details;
         this.viewCount = viewCount;
@@ -103,10 +113,12 @@ public class Travel {
         this.dueDate = dueDate;
         this.periodType = periodType;
         this.status = status;
+        this.enrollmentsLastViewedAt = enrollmentsLastViewedAt;
     }
 
-    public Travel update(TravelUpdateRequest travelUpdate) {
-        this.location = travelUpdate.getLocation();
+    public Travel update(TravelUpdateRequest travelUpdate, Location travelLocation) {
+        this.location = travelLocation;
+        this.locationName = travelUpdate.getLocationName();
         this.title = travelUpdate.getTitle();
         this.details = travelUpdate.getDetails();
         this.maxPerson = travelUpdate.getMaxPerson();
@@ -152,7 +164,7 @@ public class Travel {
                 "number=" + number +
                 ", userNumber=" + userNumber +
                 ", createdAt=" + createdAt +
-                ", location='" + location + '\'' +
+                ", location='" + locationName + '\'' +
                 ", title='" + title + '\'' +
                 ", details='" + details + '\'' +
                 ", viewCount=" + viewCount +
@@ -161,6 +173,11 @@ public class Travel {
                 ", dueDate=" + dueDate +
                 ", periodType=" + periodType +
                 ", status=" + status +
+                ", enrollmentsLastViewedAt=" + enrollmentsLastViewedAt +
                 '}';
     }
+    public Long getLocationId() {
+        return location != null ? location.getId() : null;
+    }
+
 }

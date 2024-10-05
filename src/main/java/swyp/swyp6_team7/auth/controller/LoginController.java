@@ -1,8 +1,10 @@
 package swyp.swyp6_team7.auth.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import swyp.swyp6_team7.auth.dto.LoginRequestDto;
 import swyp.swyp6_team7.auth.service.LoginService;
 import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.member.service.UserLoginHistoryService;
 
@@ -23,11 +26,13 @@ public class LoginController {
     private final LoginService loginService;
     private final UserLoginHistoryService userLoginHistoryService;
     private final MemberService memberService;
+    private final UserRepository userRepository;
 
-    public LoginController(LoginService loginService, UserLoginHistoryService userLoginHistoryService, MemberService memberService) {
+    public LoginController(LoginService loginService, UserLoginHistoryService userLoginHistoryService, MemberService memberService,UserRepository userRepository) {
         this.loginService = loginService;
         this.userLoginHistoryService = userLoginHistoryService;
         this.memberService = memberService;
+        this.userRepository = userRepository;
     }
 
 
@@ -35,7 +40,7 @@ public class LoginController {
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
         try {
             // LoginService에서 실제로 로그인 유저를 가져오도록 수정
-            Map<String, String> tokenMap = loginService.login(loginRequestDto, response);
+            Map<String, String> tokenMap = loginService.login(loginRequestDto);
             String accessToken = tokenMap.get("accessToken");
             String refreshToken = tokenMap.get("refreshToken");
 
@@ -48,17 +53,27 @@ public class LoginController {
                     .build();
             response.addHeader("Set-Cookie", cookie.toString());
 
-            Users user = loginService.getUserByEmail(loginRequestDto.getEmail()); // 로그인한 유저 정보 가져오기
+            Users user = userRepository.findByUserEmail(loginRequestDto.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("사용자 이메일을 찾을 수 없습니다."));
             userLoginHistoryService.saveLoginHistory(user);  // 로그인 이력 저장
             memberService.updateLoginDate(user);  // 로그인 시간 업데이트
 
 
-            return ResponseEntity.ok(tokenMap); // Access Token 반환
+            // Access Token과 userId를 포함하는 JSON 응답 반환
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("userId", String.valueOf(user.getUserNumber()));
+            responseMap.put("accessToken", accessToken);
+
+            return ResponseEntity.ok(responseMap); // Access Token 반환
 
         } catch (UsernameNotFoundException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);  // 404 Not Found 반환
+        } catch (BadCredentialsException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse); // 401 Unauthorized 반환
         } catch (IllegalArgumentException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());

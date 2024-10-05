@@ -18,6 +18,7 @@ public class TravelRecommendResponse {
     @NotNull
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
     private List<String> tags;
@@ -27,17 +28,21 @@ public class TravelRecommendResponse {
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
+    private boolean bookmarked;
 
     public TravelRecommendResponse(TravelRecommendDto dto) {
         this.travelNumber = dto.getTravelNumber();
         this.title = dto.getTitle();
+        this.location = dto.getLocation();
         this.userNumber = dto.getUserNumber();
         this.userName = dto.getUserName();
+        this.location = dto.getLocation();
         this.tags = dto.getTags();
         this.nowPerson = dto.getNowPerson();
         this.maxPerson = dto.getMaxPerson();
         this.createdAt = dto.getCreatedAt();
         this.registerDue = dto.getRegisterDue();
+        this.bookmarked = dto.isBookmarked();
     }
 
 }

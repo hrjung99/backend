@@ -12,11 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import swyp.swyp6_team7.auth.dto.LoginRequestDto;
 import swyp.swyp6_team7.auth.service.LoginService;
 import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.member.service.UserLoginHistoryService;
 import swyp.swyp6_team7.member.service.MemberService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -39,33 +41,43 @@ public class LoginControllerTest {
     @MockBean
     private MemberService memberService;
 
+    @MockBean
+    private UserRepository userRepository;
+
     @Test
     public void testLoginSuccess() throws Exception {
         // Given
+        String email = "test@example.com";
+        String password = "password";
         LoginRequestDto loginRequestDto = new LoginRequestDto();
         loginRequestDto.setEmail("test@example.com");
         loginRequestDto.setPassword("password");
 
-        Users user = new Users();
-        user.setUserEmail("test@example.com");
+        Users mockUser = Users.builder()
+                .userNumber(123)
+                .userEmail(email)
+                .userPw("encodedPassword")
+                .userSocialTF(false)
+                .build();
 
         Map<String, String> mockedTokenMap = new HashMap<>();
         mockedTokenMap.put("accessToken", "mocked-access-token");
-        mockedTokenMap.put("userId", "123");
+        mockedTokenMap.put("refreshToken", "mocked-refresh-token");
 
-        Mockito.when(loginService.login(any(LoginRequestDto.class), any()))
-                .thenReturn(mockedTokenMap);
+        Mockito.when(userRepository.findByUserEmail(anyString())).thenReturn(Optional.of(mockUser));  // 사용자 조회 설정 추가
+        Mockito.when(loginService.login(any(LoginRequestDto.class))).thenReturn(mockedTokenMap);
+        Mockito.when(loginService.getUserByEmail(anyString())).thenReturn(mockUser);
 
-        Mockito.when(loginService.getUserByEmail(anyString()))
-                .thenReturn(user);
 
         // When & Then
         mockMvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"email\": \"test@example.com\", \"password\": \"password\" }"))
                 .andExpect(status().isOk())
-
-                .andExpect(jsonPath("$.accessToken").value("mocked-access-token"));
+                .andExpect(jsonPath("$.accessToken").value("mocked-access-token"))
+                .andExpect(cookie().value("refreshToken", "mocked-refresh-token"))
+                .andExpect(cookie().httpOnly("refreshToken", true))
+                .andExpect(cookie().secure("refreshToken", true));
 
     }
 
@@ -76,7 +88,7 @@ public class LoginControllerTest {
         loginRequestDto.setEmail("test@example.com");
         loginRequestDto.setPassword("wrongpassword");
 
-        Mockito.when(loginService.login(any(LoginRequestDto.class), any()))
+        Mockito.when(loginService.login(any(LoginRequestDto.class)))
                 .thenThrow(new IllegalArgumentException("비밀번호가 일치하지 않습니다."));
 
         // When & Then
@@ -94,7 +106,7 @@ public class LoginControllerTest {
         loginRequestDto.setEmail("nonexistent@example.com");
         loginRequestDto.setPassword("password");
 
-        Mockito.when(loginService.login(any(LoginRequestDto.class), any()))
+        Mockito.when(loginService.login(any(LoginRequestDto.class)))
                 .thenThrow(new UsernameNotFoundException("사용자 이메일을 찾을 수 없습니다."));
 
         // When & Then
