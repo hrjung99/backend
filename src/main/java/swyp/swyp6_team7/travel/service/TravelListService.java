@@ -13,6 +13,7 @@ import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,8 +80,8 @@ public class TravelListService {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
 
-        if (start > end) {
-            start = end;
+        if (start > dtos.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, dtos.size());
         }
         return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
