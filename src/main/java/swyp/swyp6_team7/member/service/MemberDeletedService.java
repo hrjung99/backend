@@ -29,10 +29,14 @@ public class MemberDeletedService {
     @Transactional
     public void deleteUserData(Users user) {
         // 탈퇴 회원 정보 저장 (비식별화 처리)
-        saveDeletedUser(user);
+        DeletedUsers deletedUser = saveDeletedUser(user);
+
+        if (deletedUser == null || deletedUser.getUserNumber() == null) {
+            throw new IllegalStateException("탈퇴 회원 정보가 올바르게 저장되지 않았습니다.");
+        }
 
         // 사용자가 생성한 콘텐츠의 참조 업데이트 (탈퇴 회원 테이블로 연결)
-        updateUserContentReferences(user.getUserNumber());
+        updateUserContentReferences(user.getUserNumber(),deletedUser);
 
         // 기존 회원 정보 삭제
         deleteUserFromRepository(user);
@@ -46,13 +50,14 @@ public class MemberDeletedService {
         deletedUser.setDeletedUserLoginDate(user.getUserLoginDate());
         deletedUser.setDeletedUserDeleteDate(LocalDateTime.now());
 
-        deletedUsersRepository.save(deletedUser);
+        return deletedUsersRepository.save(deletedUser);
     }
 
-    private void updateUserContentReferences(Integer userNumber) {
+    private void updateUserContentReferences(Integer userNumber, DeletedUsers deletedUser) {
         List<Travel> userTravels = travelRepository.findByUserNumber(userNumber);
         for (Travel travel : userTravels) {
-            travel.setUserNumber(null); // 또는 탈퇴 회원의 ID로 설정
+            travel.setDeletedUser(deletedUser); // 콘텐츠를 탈퇴한 사용자와 연결
+            travelRepository.save(travel);
         }
     }
 

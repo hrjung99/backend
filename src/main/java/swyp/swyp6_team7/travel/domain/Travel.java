@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.member.entity.DeletedUsers;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
@@ -90,6 +91,11 @@ public class Travel {
 
     @OneToMany(mappedBy = "travel", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Companion> companions = new ArrayList<>();
+
+    // 기존의 Users 참조 대신 탈퇴 회원을 참조할 수 있는 필드 추가
+    @ManyToOne
+    @JoinColumn(name = "deleted_user_id")
+    private DeletedUsers deletedUser;
 
     @Builder
     public Travel(
