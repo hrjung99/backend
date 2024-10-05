@@ -21,7 +21,6 @@ public class TravelRecommendResponse {
     private String location;
     private int userNumber;
     private String userName;
-    private String location;
     private List<String> tags;
     private int nowPerson;
     private int maxPerson;

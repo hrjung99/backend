@@ -22,7 +22,6 @@ public class TravelRecommendDto {
     private String location;
     private int userNumber;
     private String userName;
-    private String location;
     private List<String> tags;
     private int nowPerson;
     private int maxPerson;
@@ -42,7 +41,6 @@ public class TravelRecommendDto {
         this.location = location;
         this.userNumber = userNumber;
         this.userName = userName;
-        this.location = location;
         this.tags = tags;
         this.nowPerson = nowPerson;
         this.maxPerson = maxPerson;
@@ -62,7 +60,6 @@ public class TravelRecommendDto {
         this.location = travel.getLocationName();
         this.userNumber = userNumber;
         this.userName = userName;
-        this.location = travel.getLocation();
         this.tags = tags;
         this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
