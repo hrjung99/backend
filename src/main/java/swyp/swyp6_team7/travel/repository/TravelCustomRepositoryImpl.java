@@ -35,7 +35,6 @@ import swyp.swyp6_team7.travel.util.TravelSearchSortingType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.LongSupplier;
 
 import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.group.GroupBy.list;

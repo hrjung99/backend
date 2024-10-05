@@ -117,9 +117,6 @@ public class TravelService {
     public Page<TravelSearchDto> search(TravelSearchCondition condition) {
         Integer requestUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
         Page<TravelSearchDto> result = travelRepository.search(condition, requestUserNumber);
-        for (TravelSearchDto travelSearchDto : result) {
-            log.info("service: " + travelSearchDto.toString());
-        }
         return result;
     }
 
