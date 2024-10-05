@@ -27,7 +27,13 @@ public class LocationService {
 
     public void importCities(InputStream inputStream, LocationType locationType) throws IOException {
         List<Location> cities = csvReader.readByLine(inputStream, cityParser, locationType);
-        cities.forEach(city -> locationDao.addCity(city));
+        cities.forEach(city -> {
+            if (city != null && city.getLocationName() != null && !city.getLocationName().trim().isEmpty()) {
+                locationDao.addCity(city);
+            } else {
+                System.out.println("Invalid location data: " + city);
+            }
+        });
     }
 
     public void loadAllLocations() throws IOException {
