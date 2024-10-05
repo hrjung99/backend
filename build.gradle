@@ -58,7 +58,7 @@ dependencies {
 
     //redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'io.lettuce.core:lettuce-core'
+    implementation 'io.lettuce:lettuce-core:6.2.1.RELEASE'
 
     //S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
@@ -67,7 +67,12 @@ dependencies {
 
 
 
+}
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:3.3.3"
+    }
 }
 
 tasks.named('test') {

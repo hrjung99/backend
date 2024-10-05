@@ -1,6 +1,9 @@
 spring:
   profiles:
-    active: application-*.yml
+    active: local-db
+    include:
+      - credentials
+      - s3
 ---
 #spring:
 #  datasource:

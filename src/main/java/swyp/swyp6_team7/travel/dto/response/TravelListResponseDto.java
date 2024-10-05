@@ -33,14 +33,13 @@ public class TravelListResponseDto {
     private boolean isBookmarked;       // 북마크 여부
 
 
-    public static TravelListResponseDto fromEntity(Travel travel, Users user, int currentApplicants, boolean isBookmarked) {
-
+    public static TravelListResponseDto fromEntity(Travel travel, Users host, int currentApplicants, boolean isBookmarked) {
         return new TravelListResponseDto(
                 travel.getNumber(),
                 travel.getTitle(),
                 travel.getLocationName(),
-                user.getUserNumber(),
-                user.getUserName(),
+                host.getUserNumber(),
+                host.getUserName(),
                 travel.getTravelTags().stream().map(tag -> tag.getTag().getName()).collect(Collectors.toList()),
                 currentApplicants,
                 travel.getMaxPerson(),
