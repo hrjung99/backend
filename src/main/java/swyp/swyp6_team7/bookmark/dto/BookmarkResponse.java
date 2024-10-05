@@ -33,21 +33,4 @@ public class BookmarkResponse {
     private LocalDate registerDue;
     private boolean isBookmarked;       // 북마크 여부
 
-
-    public static TravelListResponseDto fromEntity(Travel travel, Users user, int currentApplicants, boolean isBookmarked) {
-        return new TravelListResponseDto(
-                travel.getNumber(),
-                travel.getTitle(),
-                travel.getLocationName(),
-                user.getUserNumber(),
-                user.getUserName(),
-                travel.getTravelTags().stream().map(tag -> tag.getTag().getName()).collect(Collectors.toList()),
-                currentApplicants,
-                travel.getMaxPerson(),
-                travel.getCreatedAt(),
-                travel.getDueDate(),
-                isBookmarked
-        );
-    }
-
 }

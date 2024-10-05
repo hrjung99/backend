@@ -92,8 +92,8 @@ public class BookmarkService {
                     Travel travel = travelRepository.findById(travelNumber)
                             .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
 
-                    Users user = userRepository.findById(userNumber)
-                            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                    Users host = userRepository.findByUserNumber(travel.getUserNumber())
+                            .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
 
                     int currentApplicants = travel.getCompanions().size();
 
@@ -105,8 +105,8 @@ public class BookmarkService {
                             travel.getNumber(),
                             travel.getTitle(),
                             travel.getLocationName(),
-                            user.getUserNumber(),
-                            user.getUserName(),
+                            host.getUserNumber(),
+                            host.getUserName(),
                             tags,
                             currentApplicants,
                             travel.getMaxPerson(),
