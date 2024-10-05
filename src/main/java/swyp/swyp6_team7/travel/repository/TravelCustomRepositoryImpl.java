@@ -381,7 +381,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                     .otherwise(travels.size())
                     .asc();
         } else {
-            return null;
+            return travel.dueDate.asc();
         }
     }
 }
