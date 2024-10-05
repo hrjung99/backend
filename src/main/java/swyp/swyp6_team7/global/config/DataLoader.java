@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.location.service.LocationService;
 
+import java.io.InputStream;
+
 @Component
 public class DataLoader implements CommandLineRunner {
     @Autowired
@@ -13,7 +15,7 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        locationService.importCities("src/main/resources/korea_cities.csv", LocationType.DOMESTIC);
-        locationService.importCities("src/main/resources/foreign_cities.csv", LocationType.INTERNATIONAL);
+        // 모든 로케이션 데이터를 한 번에 로드합니다.
+        locationService.loadAllLocations();
     }
 }

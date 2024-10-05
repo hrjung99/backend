@@ -1,32 +1,35 @@
 package swyp.swyp6_team7.location.reader;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.location.domain.LocationType;
+import swyp.swyp6_team7.location.parser.CityParser;
 import swyp.swyp6_team7.location.parser.Parser;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class CsvReader <T>{
 
-    public List<T> readByLine(String filename, Parser<T> parser, LocationType locationType) throws IOException {
-        List<T> result = new ArrayList<>();
-        BufferedReader reader = new BufferedReader(new FileReader(filename));
-        String line;
+    private final ResourceLoader resourceLoader;
 
-        while ((line = reader.readLine()) != null) {
-            try {
-                result.add(parser.parse(line, locationType));
-            } catch (Exception e) {
-                System.out.printf("파싱 중 문제가 생겨 이 라인은 넘어갑니다. 파일 내용: %s\n", line);
+    public CsvReader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
+    public List<T> readByLine(InputStream inputStream, Parser<T> parser, LocationType locationType) throws IOException {
+        List<T> items = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                items.add(parser.parse(line, locationType));
             }
         }
-
-        reader.close();
-        return result;
+        return items;
     }
 }
