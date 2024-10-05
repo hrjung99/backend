@@ -28,7 +28,7 @@ public class CommentLikeService {
     //Create
     //좋아요
     @Transactional
-    public List<CommentListReponseDto> like(int commentNumber, int userNumber) {
+    public List<CommentListReponseDto> toggleLike(int commentNumber, int userNumber) {
 
         // 댓글 존재 여부 검증 검증
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
@@ -38,45 +38,17 @@ public class CommentLikeService {
         boolean liked = commentLikeRepository.existsByCommentNumberAndUserNumber(commentNumber, userNumber);
 
         if (liked) { // 이미 좋아요를 누른 경우
-            throw new IllegalArgumentException("유효하지않은 접근 입니다 : 이미 like 상태입니다.");
-        }
-
-        // 좋아요 추가
-        CommentLike commentLike = new CommentLike(commentNumber, userNumber);
-        commentLikeRepository.save(commentLike);
-
-        //result
-        List<CommentListReponseDto> result = new ArrayList<>();
-        result = commentService.getListByrelatedNumber(comment.getRelatedType(), comment.getRelatedNumber(), userNumber);
-
-        return result;
-    }
-
-    //좋아요 취소
-    @Transactional
-    public List<CommentListReponseDto> unlike(int commentNumber, int userNumber) {
-
-        // 댓글 존재 여부 검증 검증
-        Comment comment = commentRepository.findByCommentNumber(commentNumber)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다: " + commentNumber));
-
-        // 좋아요 여부 확인
-        boolean liked = commentLikeRepository.existsByCommentNumberAndUserNumber(commentNumber, userNumber);
-
-        if (liked) { //좋아요를 누른 상태인 경우
-
+            // 좋아요 취소
             Optional<CommentLike> commentLike = commentLikeRepository.findByCommentNumberAndUserNumber(commentNumber, userNumber);
-            commentLike.get().delete(commentLike.get().getLikeNumber());
-
-            //result
-            List<CommentListReponseDto> result = new ArrayList<>();
-            result = commentService.getListByrelatedNumber(comment.getRelatedType(), comment.getRelatedNumber(), userNumber);
-
-            return result;
-
-        } else {
-            throw new IllegalArgumentException("유효하지않은 접근 입니다 : 이미 unlike 상태입니다.");
+            commentLike.ifPresent(cl -> {
+                commentLikeRepository.delete(cl); // 좋아요 삭제
+            });
+        } else { // 좋아요를 누르지 않은 경우
+            // 좋아요 추가
+            CommentLike commentLike = new CommentLike(commentNumber, userNumber);
+            commentLikeRepository.save(commentLike);
         }
-
+        return commentService.getListByrelatedNumber(comment.getRelatedType(), comment.getRelatedNumber(), userNumber);
     }
+
 }

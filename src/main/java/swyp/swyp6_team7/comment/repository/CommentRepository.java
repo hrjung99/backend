@@ -16,7 +16,14 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     // 답글 개수 조회
     long countByRelatedTypeAndRelatedNumberAndParentNumber(String relatedType, int relatedNumber, int parentNumber);
-    
+
+    //같은 부모를 가지는 댓글 조회
+    List<Comment> findByRelatedTypeAndRelatedNumberAndParentNumber(String relatedType, int relatedNumber, int parentNumber);
+
+
+
+    //댓글 번호로 댓글 삭제
+    void deleteByCommentNumber(int commentNumber);
     //댓글(혹은 답글) 한개 조회
     Optional<Comment> findByCommentNumber(int commentNumber);
 
