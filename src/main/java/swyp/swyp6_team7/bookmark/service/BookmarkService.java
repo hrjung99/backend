@@ -104,19 +104,24 @@ public class BookmarkService {
                     return new BookmarkResponse(
                             travel.getNumber(),
                             travel.getTitle(),
+                            travel.getLocationName(),
                             user.getUserNumber(),
                             user.getUserName(),
                             tags,
                             currentApplicants,
                             travel.getMaxPerson(),
-                            formatDate(travel.getCreatedAt().toLocalDate()),
-                            formatDate(travel.getDueDate()),
+                            travel.getCreatedAt(),
+                            travel.getDueDate(),
                             true
                     );
                 }).collect(Collectors.toList());
 
         int start = Math.min(currentPage * currentSize, responses.size());
         int end = Math.min((currentPage + 1) * currentSize, responses.size());
+
+        if (start > end) {
+            start = end; // 잘못된 범위를 방지하기 위한 추가적인 안전 처리
+        }
 
         return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }

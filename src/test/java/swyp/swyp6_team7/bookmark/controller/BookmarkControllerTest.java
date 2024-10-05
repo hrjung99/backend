@@ -24,7 +24,9 @@ import swyp.swyp6_team7.bookmark.dto.BookmarkRequest;
 import swyp.swyp6_team7.bookmark.dto.BookmarkResponse;
 import swyp.swyp6_team7.bookmark.service.BookmarkService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -88,16 +90,23 @@ public class BookmarkControllerTest {
     @DisplayName("사용자 북마크 목록 조회 테스트")
     @WithMockUser
     void testGetBookmarks() throws Exception {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        // String 값을 LocalDateTime, LocalDate로 변환
+        LocalDateTime createdAt = LocalDateTime.parse("2024-10-02 21:56", dateTimeFormatter);
+        LocalDate registerDue = LocalDate.parse("2025-05-15", dateFormatter);
         BookmarkResponse response = new BookmarkResponse(
                 1,
                 "제목",
+                "제주",
                 1,
                 "작성자",
                 List.of("가성비", "핫플"),
                 1,
                 4,
-                "2024년 09월 21일",
-                "2025년 05월 15일",
+                createdAt,
+                registerDue,
                 true);
 
         List<BookmarkResponse> responses = List.of(response);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -19,9 +20,9 @@ public class TravelSearchDto {
     @NotNull
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
-    private String location;
     private List<String> tags;
     private int nowPerson;
     private int maxPerson;
@@ -33,6 +34,26 @@ public class TravelSearchDto {
     private boolean bookmarked;
 
 
+    @Builder
+    public TravelSearchDto(
+            int travelNumber, String title, String location, int userNumber, String userName,
+            List<String> tags, int maxPerson, int nowPerson,
+            LocalDateTime createdAt, LocalDate registerDue, String postStatus
+    ) {
+        this.travelNumber = travelNumber;
+        this.title = title;
+        this.location = location;
+        this.userNumber = userNumber;
+        this.userName = userName;
+        this.tags = tags;
+        this.nowPerson = nowPerson;
+        this.maxPerson = maxPerson;
+        this.createdAt = createdAt;
+        this.registerDue = registerDue;
+        this.postStatus = postStatus;
+    }
+
+
     @QueryProjection
     public TravelSearchDto(
             Travel travel, int userNumber, String userName,
@@ -40,9 +61,9 @@ public class TravelSearchDto {
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
+        this.location = travel.getLocationName();
         this.userNumber = userNumber;
         this.userName = userName;
-        this.location = travel.getLocation();
         this.tags = tags;
         this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
@@ -57,6 +78,7 @@ public class TravelSearchDto {
         return "TravelSearchDto{" +
                 "travelNumber=" + travelNumber +
                 ", title='" + title + '\'' +
+                ", location='" + location + '\'' +
                 ", userNumber=" + userNumber +
                 ", userName='" + userName + '\'' +
                 ", location='" + location + '\'' +

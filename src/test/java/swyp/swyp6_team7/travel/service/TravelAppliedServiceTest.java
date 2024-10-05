@@ -1,6 +1,5 @@
 package swyp.swyp6_team7.travel.service;
 
-import com.querydsl.core.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,13 +7,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
-import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
-import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -54,15 +54,20 @@ public class TravelAppliedServiceTest {
         // given
         Integer userNumber = 1;
         Pageable pageable = PageRequest.of(0, 5);
+        Location travelLocation = Location.builder()
+                .locationName("Seoul")
+                .locationType(LocationType.DOMESTIC)
+                .build();
 
         Travel travel = Travel.builder()
                 .number(1)
                 .title("Trip Title")
-                .location("Seoul")
+                .locationName("Seoul")
                 .createdAt(LocalDateTime.now().minusDays(3))
                 .dueDate(LocalDate.now().plusDays(10))
                 .maxPerson(10)
                 .status(TravelStatus.IN_PROGRESS)
+                .location(travelLocation)
                 .build();
 
         Companion companion = Companion.builder()
@@ -86,6 +91,22 @@ public class TravelAppliedServiceTest {
         // 북마크 여부 확인
         when(bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber()))
                 .thenReturn(true);
+         // 여행 목록 페이지로 변환
+        TravelListResponseDto travelListResponseDto = new TravelListResponseDto(
+                travel.getNumber(),
+                travel.getTitle(),
+                travel.getLocationName(),
+                travel.getUserNumber(),
+                user.getUserName(),
+                Collections.emptyList(), // 태그 리스트
+                0,  //현재참여인원
+                travel.getMaxPerson(),
+                travel.getCreatedAt(),
+                travel.getDueDate(),
+                true // 북마크 여부
+        );
+        List<TravelListResponseDto> travelList = List.of(travelListResponseDto);
+        Page<TravelListResponseDto> travelPage = new PageImpl<>(travelList, pageable, travelList.size());
 
         // when
         Page<TravelListResponseDto> result = travelAppliedService.getAppliedTripsByUser(userNumber, pageable);
@@ -108,8 +129,13 @@ public class TravelAppliedServiceTest {
         // given
         Integer userNumber = 1;
         int travelNumber = 1;
+        Location travelLocation = Location.builder()
+                .locationName("Seoul")
+                .locationType(LocationType.DOMESTIC)
+                .build();
         Travel travel = Travel.builder()
                 .number(travelNumber)
+                .location(travelLocation)
                 .build();
         Companion companion = Companion.builder()
                 .travel(travel)

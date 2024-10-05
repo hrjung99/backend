@@ -33,7 +33,15 @@ public class TravelListService {
                 .collect(Collectors.toList());
 
         // 여행 엔티티를 DTO로 변환하여 반환
-        List<TravelListResponseDto> dtos = travels.stream().map(travel -> {
+        List<TravelListResponseDto> dtos = travels.stream()
+                .map(travel -> toTravelListResponseDto(travel, userNumber))
+                .collect(Collectors.toList());
+
+        return toPage(dtos, pageable);
+    }
+
+    // Travel 엔티티를 TravelListResponseDto로 변환하는 메서드
+    private TravelListResponseDto toTravelListResponseDto(Travel travel, Integer userNumber) {
 
             // 동반자 수 계산
             int currentApplicants = travel.getCompanions().size();
@@ -54,19 +62,26 @@ public class TravelListService {
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
+                    travel.getLocationName(),
                     travel.getUserNumber(),
                     username,
                     tags,
                     currentApplicants,
                     travel.getMaxPerson(),
-                    travel.getCreatedAt().toString(),
-                    travel.getDueDate().toString(),
+                    travel.getCreatedAt(),
+                    travel.getDueDate(),
                     isBookmarked
             );
-        }).collect(Collectors.toList());
+        }
 
+    // Page 객체를 생성하는 메서드
+    private Page<TravelListResponseDto> toPage(List<TravelListResponseDto> dtos, Pageable pageable) {
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
+
+        if (start > end) {
+            start = end;
+        }
         return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 }

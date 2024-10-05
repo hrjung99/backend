@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.util.StringUtils;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+
 import swyp.swyp6_team7.bookmark.entity.QBookmark;
+
+import swyp.swyp6_team7.location.domain.LocationType;
+
 import swyp.swyp6_team7.member.entity.QUsers;
 import swyp.swyp6_team7.tag.domain.QTag;
 import swyp.swyp6_team7.tag.domain.QTravelTag;
@@ -31,6 +36,7 @@ import swyp.swyp6_team7.travel.dto.response.TravelRecentDto;
 import swyp.swyp6_team7.travel.dto.response.TravelSearchDto;
 import swyp.swyp6_team7.travel.util.TravelSearchConstant;
 import swyp.swyp6_team7.travel.util.TravelSearchSortingType;
+import swyp.swyp6_team7.location.domain.QLocation;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +60,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
     QTag tag = QTag.tag;
     QTravelTag travelTag = QTravelTag.travelTag;
     QBookmark bookmark = QBookmark.bookmark;
+    QLocation location = QLocation.location;
 
     @Override
     public TravelDetailDto getDetailsByNumber(int travelNumber, Integer loginUserNumber) {
@@ -208,13 +215,15 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .leftJoin(bookmark).on(bookmark.travelNumber.eq(travel.number))
+                .leftJoin(location).on(travel.location.id.eq(location.id))
                 .where(
                         titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
                         eqPersonRangeType(condition.getPersonRangeFilter()),
                         eqPeriodType(condition.getPeriodFilter()),
-                        eqTags(condition.getTags())
+                        eqTags(condition.getTags()),
+                        eqLocationType(condition.getLocationFilter())
                 )
                 .groupBy(travel.number)
                 .having(tag.name.count().goe((long) condition.getTags().size()))
@@ -235,13 +244,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .where(
                         travel.number.in(travels)
                 )
-                .orderBy(
-                        new CaseBuilder()
-                                .when(travel.number.eq(travels.get(0))).then(0)
-                                .when(travel.number.eq(travels.get(1))).then(1)
-                                .otherwise(travels.size())
-                                .asc()
-                )
+                .orderBy(orderCaseBuilder(travels))
                 .transform(groupBy(travel.number).list(
                         Projections.constructor(TravelSearchDto.class,
                                 travel,
@@ -249,8 +252,11 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 users.userName,
                                 travel.companions.size(),
                                 list(tag.name),
-                                bookmark.userNumber.isNotNull())
+                                bookmark.userNumber.eq(loginUserNumber))
                 ));
+        for (TravelSearchDto travelSearchDto : content) {
+            log.info("searchDto = " + travelSearchDto.toString());
+        }
 
         JPAQuery<Long> countQuery = queryFactory
                 .select(travel.number.countDistinct())
@@ -258,13 +264,15 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                 .leftJoin(travel.travelTags, travelTag)
                 .leftJoin(travelTag.tag, tag)
                 .leftJoin(bookmark).on(bookmark.travelNumber.eq(travel.number))
+                .leftJoin(location).on(travel.location.id.eq(location.id))
                 .where(
                         titleAndLocationLike(condition.getKeyword()),
                         statusActivated(),
                         eqGenderTypes(condition.getGenderFilter()),
                         eqPersonRangeType(condition.getPersonRangeFilter()),
                         eqPeriodType(condition.getPeriodFilter()),
-                        eqTags(condition.getTags())
+                        eqTags(condition.getTags()),
+                        eqLocationType(condition.getLocationFilter())
                 );
 
         return PageableExecutionUtils.getPage(content, condition.getPageRequest(), countQuery::fetchOne);
@@ -278,7 +286,7 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return null;
         }
-        return travel.title.contains(keyword).or(travel.location.like(keyword));
+        return travel.title.contains(keyword).or(location.locationName.like("%" + keyword + "%"));
     }
 
     private BooleanExpression statusActivated() {
@@ -335,19 +343,43 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
         return tag.name.in(tags);
     }
 
+    private BooleanExpression eqLocationType(List<LocationType> locationFilter) {
+        if (locationFilter == null || locationFilter.isEmpty()) {
+            return null;
+        }
+        return travel.location.id.in( // 수정: travel.location.id로 변경
+                JPAExpressions
+                        .select(location.id)
+                        .from(location)
+                        .where(location.locationType.in(locationFilter.stream().toList()))
+        );
+    }
+
     private List<OrderSpecifier<?>> getOrderSpecifier(TravelSearchSortingType sortingType) {
         if (sortingType == null) {
             return List.of(travel.dueDate.asc());
         }
         switch (sortingType) {
             case RECOMMEND:
-                return List.of(bookmark.bookmarkId.count().desc(), travel.dueDate.asc());
+                return List.of(bookmark.bookmarkId.count().desc(), travel.viewCount.desc());
             case CREATED_AT_DESC:
                 return List.of(travel.createdAt.desc());
             case CREATED_AT_ASC:
                 return List.of(travel.createdAt.asc());
             default:
                 return List.of(travel.dueDate.asc());
+        }
+    }
+
+    private OrderSpecifier orderCaseBuilder(List<Integer> travels) {
+        if (travels.size() > 1) {
+            return new CaseBuilder()
+                    .when(travel.number.eq(travels.get(0))).then(0)
+                    .when(travel.number.eq(travels.get(1))).then(1)
+                    .otherwise(travels.size())
+                    .asc();
+        } else {
+            return null;
         }
     }
 }

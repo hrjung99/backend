@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "bookmarks")
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class Bookmark {
     @Id
@@ -24,8 +25,7 @@ public class Bookmark {
     @Column(nullable = false)
     private LocalDateTime bookmarkDate = LocalDateTime.now();
 
-    public Bookmark() {}
-
+    @Builder
     public Bookmark(Integer userNumber, Integer travelNumber, LocalDateTime bookmarkDate) {
         if (travelNumber == null || travelNumber <= 0) {
             throw new IllegalArgumentException("유효하지 않은 여행 번호입니다.");

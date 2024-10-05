@@ -19,9 +19,9 @@ public class TravelRecommendDto {
     @NotNull
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
-    private String location;
     private List<String> tags;
     private int nowPerson;
     private int maxPerson;
@@ -32,16 +32,15 @@ public class TravelRecommendDto {
 
     @Builder
     public TravelRecommendDto(
-            int travelNumber, String title, int userNumber, String userName,
-            String location, List<String> tags, int nowPerson, int maxPerson,
-            LocalDateTime createdAt, LocalDate registerDue, int preferredNumber,
-            boolean bookmarked
+            int travelNumber, String title, String location, int userNumber, String userName,
+            List<String> tags, int nowPerson, int maxPerson,
+            LocalDateTime createdAt, LocalDate registerDue, int preferredNumber
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
+        this.location = location;
         this.userNumber = userNumber;
         this.userName = userName;
-        this.location = location;
         this.tags = tags;
         this.nowPerson = nowPerson;
         this.maxPerson = maxPerson;
@@ -58,9 +57,9 @@ public class TravelRecommendDto {
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
+        this.location = travel.getLocationName();
         this.userNumber = userNumber;
         this.userName = userName;
-        this.location = travel.getLocation();
         this.tags = tags;
         this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
@@ -78,6 +77,7 @@ public class TravelRecommendDto {
         return "TravelRecommendDto{" +
                 "travelNumber=" + travelNumber +
                 ", title='" + title + '\'' +
+                ", location='" + location + '\'' +
                 ", userNumber=" + userNumber +
                 ", userName='" + userName + '\'' +
                 ", location='" + location + '\'' +

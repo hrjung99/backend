@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,12 +21,14 @@ import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentCreateRequest;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
+import swyp.swyp6_team7.location.repository.LocationRepository;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
-import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -64,9 +65,12 @@ class EnrollmentControllerTest {
     TravelRepository travelRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    LocationRepository locationRepository;
 
     Travel travel;
     Users user;
+    Location location;
 
     @BeforeEach
     void mockMvcSetup() {
@@ -96,6 +100,7 @@ class EnrollmentControllerTest {
     void setUp(){
         enrollmentRepository.deleteAll();
         travelRepository.deleteAll();
+        locationRepository.deleteAll();
     }
 
 
@@ -225,6 +230,7 @@ class EnrollmentControllerTest {
                 .userStatus(UserStatus.ABLE)
                 .build()
         );
+
         Enrollment enrollment = enrollmentRepository.save(Enrollment.builder()
                 .userNumber(owner.getUserNumber())
                 .travelNumber(travel.getNumber())
@@ -254,6 +260,11 @@ class EnrollmentControllerTest {
                 .userStatus(UserStatus.ABLE)
                 .build()
         );
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("제주");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
+        locationRepository.save(travelLocation);
+
         travel = travelRepository.save(Travel.builder()
                 .title("기본 여행")
                 .userNumber(host.getUserNumber())
@@ -262,6 +273,7 @@ class EnrollmentControllerTest {
                 .dueDate(dueDate)
                 .periodType(PeriodType.NONE)
                 .status(status)
+                .location(travelLocation)
                 .build()
         );
     }

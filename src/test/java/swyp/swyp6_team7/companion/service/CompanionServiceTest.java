@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.dto.CompanionInfoDto;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
+import swyp.swyp6_team7.location.repository.LocationRepository;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
@@ -35,6 +38,8 @@ class CompanionServiceTest {
     private UserRepository userRepository;
     @Autowired
     private TravelRepository travelRepository;
+    @Autowired
+    private LocationRepository locationRepository;
 
     Travel targetTravel;
 
@@ -43,9 +48,15 @@ class CompanionServiceTest {
         companionRepository.deleteAll();
         userRepository.deleteAll();
         travelRepository.deleteAll();
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("travel");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
+        Location savedLocation = locationRepository.save(travelLocation);
 
         targetTravel = travelRepository.save(Travel.builder()
                 .title("Travel Controller")
+                .locationName("travel")
+                .location(savedLocation)
                 .userNumber(100)
                 .genderType(GenderType.NONE)
                 .periodType(PeriodType.NONE)
