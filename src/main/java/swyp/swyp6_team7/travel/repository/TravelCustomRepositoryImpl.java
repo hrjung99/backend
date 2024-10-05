@@ -378,6 +378,11 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                     .when(travel.number.eq(travels.get(1))).then(1)
                     .otherwise(travels.size())
                     .asc();
+        } else if (travels.size() > 0) {
+            return new CaseBuilder()
+                    .when(travel.number.eq(travels.get(0))).then(0)
+                    .otherwise(travels.size())
+                    .asc();
         } else {
             return null;
         }
