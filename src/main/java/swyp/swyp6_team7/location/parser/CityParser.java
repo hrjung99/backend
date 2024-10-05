@@ -1,14 +1,16 @@
 package swyp.swyp6_team7.location.parser;
 
-import jakarta.transaction.Transactional;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import swyp.swyp6_team7.location.dao.LocationDao;
 import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.location.domain.LocationType;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 @Component
 public class CityParser implements Parser<Location> {
@@ -52,11 +54,13 @@ public class CityParser implements Parser<Location> {
         return new Location(location, locationType);
     }
 
-    @Transactional
-    public void parseAndSave(String filePath, LocationType locationType) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+    public void parseAndSave(String resourcePath, LocationType locationType) {
+        Resource resource = new ClassPathResource(resourcePath);
+        try (InputStream inputStream = resource.getInputStream();
+             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+
             String line;
-            br.readLine();
+            br.readLine(); // 첫 번째 행 건너뜀 (헤더)
             while ((line = br.readLine()) != null) {
                 Location locationObject = parse(line, locationType);
                 if (locationObject != null) {
