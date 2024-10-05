@@ -1,5 +1,6 @@
 package swyp.swyp6_team7.companion.domain;
 
+import com.querydsl.core.annotations.QueryEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import swyp.swyp6_team7.travel.domain.Travel;
+
 
 @Getter
 @Table(name = "companions", uniqueConstraints = {
@@ -16,6 +18,7 @@ import swyp.swyp6_team7.travel.domain.Travel;
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@QueryEntity
 @Entity
 public class Companion {
 

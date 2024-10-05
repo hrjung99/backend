@@ -22,9 +22,7 @@ import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -102,9 +100,11 @@ public class CommentService {
 
         if (relatedType.equals("travel")) {
             List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
-            List<CommentListReponseDto> listReponse = new ArrayList<>();
+            List<Comment> sortedComments = sortComments(comments);
 
-            for (Comment comment : comments) {
+
+            List<CommentListReponseDto> listReponse = new ArrayList<>();
+            for (Comment comment : sortedComments) {
 
                 //작성자 조회
                 Optional<Users> user = userRepository.findByUserNumber(comment.getUserNumber());
@@ -126,8 +126,6 @@ public class CommentService {
                 //DTO
                 CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked, travelWriterNumber);
                 listReponse.add(dto);
-
-                return listReponse;
             }
             return listReponse;
         } else {
@@ -167,8 +165,6 @@ public class CommentService {
         validateCommentWriter(commentNumber, userNumber);
 
         try {
-
-
             // 답글 삭제
             List<Comment> replies = commentRepository.findByRelatedTypeAndRelatedNumberAndParentNumber(comment.getRelatedType(), comment.getRelatedNumber(), comment.getCommentNumber());
             for (Comment reply : replies) {
@@ -214,5 +210,31 @@ public class CommentService {
         }
     }
 
+    // 댓글을 정렬하는 메소드
+    private List<Comment> sortComments(List<Comment> allComments) {
+        List<Comment> sortedComments = new ArrayList<>();
+        Map<Integer, List<Comment>> parentToChildrenMap = new HashMap<>();
 
+        // 부모 댓글과 자식 댓글을 분리
+        for (Comment comment : allComments) {
+            if (comment.getParentNumber() == 0) { // 부모 댓글인 경우
+                sortedComments.add(comment);
+            } else { // 자식 댓글인 경우
+                parentToChildrenMap
+                        .computeIfAbsent(comment.getParentNumber(), k -> new ArrayList<>())
+                        .add(comment);
+            }
+        }
+
+        // 부모 댓글 아래에 자식 댓글 추가
+        List<Comment> finalSortedComments = new ArrayList<>();
+        for (Comment parent : sortedComments) {
+            finalSortedComments.add(parent); // 부모 댓글 추가
+            List<Comment> children = parentToChildrenMap.get(parent.getCommentNumber());
+            if (children != null) {
+                finalSortedComments.addAll(children); // 자식 댓글 추가
+            }
+        }
+        return finalSortedComments;
+    }
 }
