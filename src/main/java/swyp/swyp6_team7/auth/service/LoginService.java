@@ -28,12 +28,12 @@ public class LoginService {
         this.jwtProvider = jwtProvider;
     }
 
-    public  Map<String, String> login(LoginRequestDto loginRequestDto,HttpServletResponse response) {
+    public  Map<String, String> login(LoginRequestDto loginRequestDto) {
         Users user = userRepository.findByUserEmail(loginRequestDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("사용자 이메일을 찾을 수 없습니다."));
 
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getUserPw())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
         }
 
         if (user.getUserSocialTF()) { //소셜 로그인으로 가입된 사용자일 경우 예외 처리
@@ -46,26 +46,12 @@ public class LoginService {
         // Refresh Token 생성
         String refreshToken = jwtProvider.createRefreshToken(user.getUserEmail(),user.getUserNumber());
 
-        // RefreshToken 쿠키 삭제
-        Cookie deleteCookie = new Cookie("refreshToken", null);
-        deleteCookie.setMaxAge(0);
-        deleteCookie.setPath("/");
-        response.addCookie(deleteCookie);
+        // Access Token과 Refresh Token을 Map에 담아 반환
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("accessToken", accessToken);
+        tokenMap.put("refreshToken", refreshToken);
 
-        //새 RefreshToken 쿠키 설정
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 1주일
-        response.addCookie(refreshTokenCookie);
-
-        // Access Token과 userId를 포함하는 JSON 응답 반환
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("userId", String.valueOf(user.getUserNumber()));
-        responseMap.put("accessToken", accessToken);
-
-        return responseMap;
+        return tokenMap;
     }
     // 이메일로 유저를 조회하는 메서드 추가
     public Users getUserByEmail(String email) {

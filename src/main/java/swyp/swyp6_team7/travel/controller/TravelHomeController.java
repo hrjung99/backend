@@ -36,12 +36,15 @@ public class TravelHomeController {
     }
 
     @GetMapping("/api/travels/recommend")
-    public ResponseEntity<List<TravelRecommendResponse>> getRecommendTravels(Principal principal) {
+    public ResponseEntity<Page<TravelRecommendResponse>> getRecommendTravels(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            Principal principal
+    ) {
 
-        List<TravelRecommendResponse> result = travelHomeService.getRecommendTravelsByUser(principal)
-                .stream()
-                .map(dto -> new TravelRecommendResponse(dto))
-                .toList();
+        Page<TravelRecommendResponse> result = travelHomeService
+                .getRecommendTravelsByUser(PageRequest.of(page, size), principal)
+                .map(dto -> new TravelRecommendResponse(dto));
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(result);

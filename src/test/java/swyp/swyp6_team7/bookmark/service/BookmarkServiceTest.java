@@ -11,6 +11,7 @@ import swyp.swyp6_team7.bookmark.dto.BookmarkRequest;
 import swyp.swyp6_team7.bookmark.dto.BookmarkResponse;
 import swyp.swyp6_team7.bookmark.entity.Bookmark;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -25,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+import swyp.swyp6_team7.location.domain.LocationType;
 
 public class BookmarkServiceTest {
 
@@ -51,8 +54,13 @@ public class BookmarkServiceTest {
         BookmarkRequest request = new BookmarkRequest(1, 101);
         Users user = new Users();
         user.setUserNumber(1);
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("제주");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
         Bookmark oldestBookmark = new Bookmark(1, 1, LocalDateTime.now().minusDays(10));
@@ -77,8 +85,13 @@ public class BookmarkServiceTest {
         BookmarkRequest request = new BookmarkRequest(1, 101);
         Users user = new Users();
         user.setUserNumber(1);
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("제주");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
 
@@ -117,8 +130,13 @@ public class BookmarkServiceTest {
         // given
         Integer userNumber = 1;
         Bookmark bookmark = new Bookmark(userNumber, 101, LocalDateTime.now());
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("제주");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .title("Sample Travel")
                 .createdAt(LocalDateTime.now().minusDays(5))
                 .dueDate(LocalDate.now().plusDays(5))
@@ -129,9 +147,13 @@ public class BookmarkServiceTest {
         user.setUserNumber(userNumber);
         user.setUserName("John Doe");
 
+        Users host = new Users();
+        host.setUserNumber(travel.getUserNumber());
+        host.setUserName("Host Name");
+
         when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of(bookmark));
         when(travelRepository.findById(101)).thenReturn(Optional.of(travel));
-        when(userRepository.findById(userNumber)).thenReturn(Optional.of(user));
+        when(userRepository.findByUserNumber(travel.getUserNumber())).thenReturn(Optional.of(host));
 
         // when
         Page<BookmarkResponse> responses = bookmarkService.getBookmarksByUser(userNumber, 0, 5);
@@ -141,7 +163,7 @@ public class BookmarkServiceTest {
         BookmarkResponse response = responses.getContent().get(0);
         assertThat(response.getTravelNumber()).isEqualTo(101);
         assertThat(response.getTitle()).isEqualTo("Sample Travel");
-        assertThat(response.getUserName()).isEqualTo("John Doe");
+        assertThat(response.getUserName()).isEqualTo("Host Name");
     }
     @Test
     @DisplayName("사용자의 북마크 목록 조회 - 빈 리스트 반환")

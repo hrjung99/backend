@@ -74,13 +74,4 @@ public class Comment {
         return this;
     }
 
-//    // 외래 키 관계 설정
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "comment_related_number", referencedColumnName = "travel_number", insertable = false, updatable = false)
-//    private Travel number; // 여행 관련 외래 키
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "related_number", referencedColumnName = "post_number", insertable = false, updatable = false)
-//    private CommunityPost communityPost; // 커뮤니티 관련 외래 키
-
 }

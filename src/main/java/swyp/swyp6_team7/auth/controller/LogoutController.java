@@ -1,4 +1,6 @@
 package swyp.swyp6_team7.auth.controller;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,7 +30,7 @@ public class LogoutController {
     }
 
     @PostMapping("/api/logout")
-    public ResponseEntity<String> logout() {
+    public ResponseEntity<String> logout(HttpServletResponse response) {
         // 현재 인증된 유저 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
@@ -43,6 +45,13 @@ public class LogoutController {
                 // 로그아웃 이력 업데이트
                 userLoginHistoryService.updateLogoutHistory(user);
                 memberService.updateLogoutDate(user);
+
+                // 클라이언트 측의 refreshToken 쿠키 삭제
+                Cookie deleteCookie = new Cookie("refreshToken", null);
+                deleteCookie.setMaxAge(0);
+                deleteCookie.setPath("/");
+                deleteCookie.setHttpOnly(true);
+                response.addCookie(deleteCookie);
 
                 // SecurityContext에서 인증 정보 제거
                 SecurityContextHolder.clearContext();

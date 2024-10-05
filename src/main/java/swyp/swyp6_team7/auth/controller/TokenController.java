@@ -52,6 +52,7 @@ public class TokenController {
 
             // 새로운 Access Token을 JSON 응답으로 반환
             Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("userId", String.valueOf(user.getUserNumber()));
             responseMap.put("accessToken", newAccessToken);
             return ResponseEntity.ok(responseMap);
         } else {

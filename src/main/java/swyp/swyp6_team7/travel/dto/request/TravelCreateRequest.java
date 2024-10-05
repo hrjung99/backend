@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -23,7 +24,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TravelCreateRequest {
 
-    private String location;
+    private String locationName;
     @Size(max = 20)
     private String title;
     private String details;
@@ -41,11 +42,11 @@ public class TravelCreateRequest {
 
 
     public TravelCreateRequest(
-            String location, String title, String details,
+            String locationName, String title, String details,
             int maxPerson, String genderType, LocalDate dueDate, String periodType,
             List<String> tags, boolean completionStatus
     ) {
-        this.location = location;
+        this.locationName = locationName;
         this.title = title;
         this.details = details;
         this.maxPerson = maxPerson;
@@ -56,10 +57,11 @@ public class TravelCreateRequest {
         this.completionStatus = completionStatus;
     }
 
-    public Travel toTravelEntity(int userNumber) {
+    public Travel toTravelEntity(int userNumber, Location location) {
         return Travel.builder()
                 .userNumber(userNumber)
                 .location(location)
+                .locationName(location.getLocationName())
                 .title(title)
                 .details(details)
                 .viewCount(0)

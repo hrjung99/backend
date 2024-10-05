@@ -8,9 +8,11 @@ import org.springframework.data.domain.PageRequest;
 import swyp.swyp6_team7.travel.domain.GenderType;
 import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.util.TravelSearchConstant;
+import swyp.swyp6_team7.travel.util.TravelSearchSortingType;
 
 import java.util.ArrayList;
 import java.util.List;
+import swyp.swyp6_team7.location.domain.LocationType;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -18,13 +20,12 @@ public class TravelSearchCondition {
 
     private PageRequest pageRequest;
     private String keyword;
-    private List<String> locationFilter;
+    private List<LocationType> locationFilter;
     private List<GenderType> genderFilter;
     private List<String> personRangeFilter;
     private List<PeriodType> periodFilter;
     private List<String> tags;
-
-    //정렬 -> 추천순, 최신순, 등록일순, 정확도순
+    private TravelSearchSortingType sortingType;
 
     @Builder
     public TravelSearchCondition(
@@ -34,7 +35,8 @@ public class TravelSearchCondition {
             List<String> genderTypes,
             List<String> personTypes,
             List<String> periodTypes,
-            List<String> tags
+            List<String> tags,
+            String sortingType
     ) {
         this.pageRequest = pageRequest;
         this.keyword = keyword;
@@ -43,16 +45,22 @@ public class TravelSearchCondition {
         this.personRangeFilter = getPersonFilter(personTypes);
         this.periodFilter = getPeriodFilter(periodTypes);
         this.tags = getTags(tags);
+        this.sortingType = TravelSearchSortingType.of(sortingType);
     }
 
-    private List<String> getLocationFilter(List<String> locationTypes) {
+    private List<LocationType> getLocationFilter(List<String> locationTypes) {
         if (locationTypes == null) {
             return new ArrayList<>();
         }
         return locationTypes.stream()
                 .distinct().limit(TravelSearchConstant.LOCATION_TYPE_COUNT)
+                .map(this::convertToCityType)
                 .toList();
     }
+    private LocationType convertToCityType(String locationType) {
+        return LocationType.fromString(locationType);
+    }
+
 
     private List<GenderType> getGenderFilter(List<String> genderTypes) {
         if (genderTypes == null) {

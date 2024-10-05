@@ -18,6 +18,7 @@ import swyp.swyp6_team7.likes.util.CommentLikeStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
+import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.time.LocalDateTime;
@@ -35,8 +36,9 @@ public class CommentService {
     final TravelService travelService;
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final TravelRepository travelRepository;
 
-    //Create
+    // Create
     @Transactional
     public Comment create(CommentCreateRequestDto request, int userNumber, String relatedType, int relatedNumber) {
         // 게시물 존재 여부 검증
@@ -45,13 +47,21 @@ public class CommentService {
             throw new IllegalArgumentException(validationResponse.getBody());
         }
 
+        // parentNumber가 0이 아닐 경우 해당 댓글이 존재하는지 검증
+        if (request.getParentNumber() != 0) {
+            Optional<Comment> parentComment = commentRepository.findByCommentNumber(request.getParentNumber());
+            if (parentComment.isEmpty()) {
+                throw new IllegalArgumentException("부모 댓글이 존재하지 않습니다: " + request.getParentNumber());
+            }
+        }
+
         Comment savedComment = commentRepository.save(request.toCommentEntity(
-                userNumber
-                , request.getContent()
-                , request.getParentNumber()
-                , LocalDateTime.now() // regDate
-                , relatedType
-                , relatedNumber
+                userNumber,
+                request.getContent(),
+                request.getParentNumber(),
+                LocalDateTime.now(), // regDate
+                relatedType,
+                relatedNumber
         ));
         return savedComment;
     }
@@ -105,14 +115,16 @@ public class CommentService {
 
                 //좋아요 상태 가져오기
                 CommentLikeReadResponseDto likeStatus = CommentLikeStatus.getCommentLikeStatus(commentLikeRepository, comment.getCommentNumber(), userNumber);
-                //좋아요 여부, true = 좋아요 누름
-                boolean liked = likeStatus.isLiked();
                 //좋아요 개수
                 long likes = likeStatus.getLikes();
+                //좋아요 여부, true = 좋아요 누름
+                boolean liked = likeStatus.isLiked();
 
+                //게시글 작성자 회원번호
+                int travelWriterNumber = travelRepository.findByNumber(relatedNumber).get().getUserNumber();
 
                 //DTO
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked, travelWriterNumber);
                 listReponse.add(dto);
 
                 return listReponse;
@@ -125,12 +137,12 @@ public class CommentService {
 
     // update
     @Transactional
-    public CommentDetailResponseDto update(CommentUpdateRequestDto request,int commentNumber, int userNumber) {
+    public CommentDetailResponseDto update(CommentUpdateRequestDto request, int commentNumber, int userNumber) {
         // 댓글 존재 여부 검증 검증
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다: " + commentNumber));
 
-        //댓글 작성자인지 확인
+        // 댓글 작성자 혹은 게시글 작성자인지 확인
         validateCommentWriter(commentNumber, userNumber);
 
         // 업데이트 동작
@@ -146,25 +158,61 @@ public class CommentService {
         return result;
     }
 
+    //Delete
     @Transactional
     public void delete(int commentNumber, int userNumber) {
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
 
         validateCommentWriter(commentNumber, userNumber);
-        comment.delete(commentNumber);
+
+        try {
+
+
+            // 답글 삭제
+            List<Comment> replies = commentRepository.findByRelatedTypeAndRelatedNumberAndParentNumber(comment.getRelatedType(), comment.getRelatedNumber(), comment.getCommentNumber());
+            for (Comment reply : replies) {
+                try {
+                    commentRepository.deleteByCommentNumber(reply.getCommentNumber());
+                    commentLikeRepository.deleteByCommentNumber(reply.getCommentNumber());
+
+                } catch (Exception e) {
+                    log.error("Failed to delete reply comment: {}", reply.getCommentNumber(), e);
+                    // 추가적인 예외 처리 로직이 필요할 경우 여기에 구현
+                }
+            }
+
+            // 좋아요 기록 삭제
+            commentLikeRepository.deleteByCommentNumber(commentNumber);
+            // 부모 댓글 삭제
+            commentRepository.deleteByCommentNumber(commentNumber);
+        } catch (Exception e) {
+            log.error("댓글 삭제 중 오류 발생: {}", e.getMessage());
+            throw new RuntimeException("댓글 삭제 실패: " + e.getMessage());
+        }
     }
 
-    // 댓글 작성자인지 검증하는 메소드
+
+    // 댓글 작성자 혹은 게시글 작성자인지 검증하는 메소드
     @Transactional(readOnly = true)
     public void validateCommentWriter(int commentNumber, int userNumber) {
+
+        //존재하는 댓글인지 확인
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
 
-        // 댓글의 작성자와 요청한 사용자의 번호를 비교
-        if (comment.getUserNumber() != userNumber) {
-            throw new IllegalArgumentException("댓글 작성자만 수정할 수 있습니다.");
+        // 댓글 번호로 게시글 번호 가져오기
+        int travelNumber = comment.getRelatedNumber();
+
+        // 게시글 번호로 작성자 회원 번호 가져오기
+        int travelWriterNumber = travelRepository.findByNumber(travelNumber).get().getUserNumber();
+
+
+        // 요청한 사용자(=로그인 중인 사용자)가 댓글 작성자 혹은 게시글 작성자인지 확인
+        if (comment.getUserNumber() != userNumber | travelWriterNumber != userNumber) {
+            throw new IllegalArgumentException("댓글 작성자 혹은 게시글 작성자에게만 유효한 동작입니다.");
         }
     }
+
 
 }

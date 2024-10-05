@@ -17,11 +17,10 @@ import java.util.List;
 @Getter
 public class TravelRecentDto {
 
-    private static final int TAG_MAX_NUMBER = 3;
-
     @NotNull
     private int travelNumber;
     private String title;
+    private String location;
     private int userNumber;
     private String userName;
     private List<String> tags;
@@ -31,16 +30,19 @@ public class TravelRecentDto {
     private LocalDateTime createdAt;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
+    private boolean bookmarked;
+
 
 
     @Builder
     public TravelRecentDto(
-            int travelNumber, String title, int userNumber, String userName,
+            int travelNumber, String title, String location, int userNumber, String userName,
             List<String> tags, int nowPerson, int maxPerson,
             LocalDateTime createdAt, LocalDate registerDue
     ) {
         this.travelNumber = travelNumber;
         this.title = title;
+        this.location = location;
         this.userNumber = userNumber;
         this.userName = userName;
         this.tags = tags;
@@ -53,17 +55,19 @@ public class TravelRecentDto {
     @QueryProjection
     public TravelRecentDto(
             Travel travel, int userNumber, String userName,
-            int companionCount, List<String> tags
+            int companionCount, List<String> tags, boolean isBookmarked
     ) {
         this.travelNumber = travel.getNumber();
         this.title = travel.getTitle();
+        this.location = travel.getLocationName();
         this.userNumber = userNumber;
         this.userName = userName;
-        this.tags = tags.stream().limit(TAG_MAX_NUMBER).toList();
+        this.tags = tags;
         this.nowPerson = companionCount;
         this.maxPerson = travel.getMaxPerson();
         this.createdAt = travel.getCreatedAt();
         this.registerDue = travel.getDueDate();
+        this.bookmarked = isBookmarked;
     }
 
 }

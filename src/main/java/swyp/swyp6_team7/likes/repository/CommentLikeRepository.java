@@ -14,6 +14,9 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Intege
     // 특정 댓글의 좋아요 수
     long countByCommentNumber(int commentNumber);
 
+    //댓글 번호로 좋아요 기록 삭제
+    void deleteByCommentNumber(int commentNumber);
+
     //좋아요 행 조회
     Optional<CommentLike> findByCommentNumberAndUserNumber(int commentNumber, int userNumber);
 }

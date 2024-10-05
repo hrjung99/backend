@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -18,6 +19,9 @@ import org.springframework.web.context.WebApplicationContext;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
+import swyp.swyp6_team7.location.repository.LocationRepository;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.UserStatus;
@@ -31,6 +35,7 @@ import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -54,6 +59,8 @@ class TravelEnrollmentControllerTest {
     UserRepository userRepository;
     @Autowired
     EnrollmentRepository enrollmentRepository;
+    @Autowired
+    LocationRepository locationRepository;
 
     Travel travel;
     Users host;
@@ -81,6 +88,11 @@ class TravelEnrollmentControllerTest {
 
     @BeforeEach
     void setTravel() {
+        Location travelLocation = Location.builder()
+                .locationName("Seoul"+ UUID.randomUUID().toString())
+                .locationType(LocationType.DOMESTIC)
+                .build();
+        Location savedLocation = locationRepository.save(travelLocation);
         travel = travelRepository.save(Travel.builder()
                 .title("기본 여행")
                 .userNumber(host.getUserNumber())
@@ -89,6 +101,7 @@ class TravelEnrollmentControllerTest {
                 .dueDate(LocalDate.now().plusDays(5))
                 .periodType(PeriodType.NONE)
                 .status(TravelStatus.IN_PROGRESS)
+                        .location(savedLocation)
                 .build()
         );
     }
@@ -96,6 +109,7 @@ class TravelEnrollmentControllerTest {
 
     @DisplayName("findElements: 주최자는 특정 여행에 대한 참가 신청서 목록을 조회할 수 있다")
     @Test
+    @DirtiesContext
     public void findElementsWithHost() throws Exception {
         // given
         String url = "/api/travel/{travelNumber}/enrollments";

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import swyp.swyp6_team7.auth.dto.LoginRequestDto;
@@ -74,7 +75,7 @@ class LoginServiceTest {
 
         // When
 
-        Map<String, String> tokens = loginService.login(loginRequestDto, response);
+        Map<String, String> tokens = loginService.login(loginRequestDto);
         String accessToken = tokens.get("accessToken");
 
 
@@ -94,7 +95,7 @@ class LoginServiceTest {
 
         // When & Then
         UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
-            loginService.login(loginRequestDto, response);
+            loginService.login(loginRequestDto);
         });
         assertEquals("사용자 이메일을 찾을 수 없습니다.", exception.getMessage());
     }
@@ -118,7 +119,7 @@ class LoginServiceTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false); // 비밀번호가 일치하지 않음
 
         // When & Then
-        assertThrows(IllegalArgumentException.class, () -> loginService.login(loginRequestDto, response));
+        assertThrows(BadCredentialsException.class, () -> loginService.login(loginRequestDto));
     }
 }
 

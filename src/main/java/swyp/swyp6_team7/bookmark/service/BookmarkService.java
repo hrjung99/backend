@@ -92,8 +92,8 @@ public class BookmarkService {
                     Travel travel = travelRepository.findById(travelNumber)
                             .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
 
-                    Users user = userRepository.findById(userNumber)
-                            .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                    Users host = userRepository.findByUserNumber(travel.getUserNumber())
+                            .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
 
                     int currentApplicants = travel.getCompanions().size();
 
@@ -104,19 +104,24 @@ public class BookmarkService {
                     return new BookmarkResponse(
                             travel.getNumber(),
                             travel.getTitle(),
-                            user.getUserNumber(),
-                            user.getUserName(),
+                            travel.getLocationName(),
+                            host.getUserNumber(),
+                            host.getUserName(),
                             tags,
                             currentApplicants,
                             travel.getMaxPerson(),
-                            formatDate(travel.getCreatedAt().toLocalDate()),
-                            formatDate(travel.getDueDate()),
+                            travel.getCreatedAt(),
+                            travel.getDueDate(),
                             true
                     );
                 }).collect(Collectors.toList());
 
         int start = Math.min(currentPage * currentSize, responses.size());
         int end = Math.min((currentPage + 1) * currentSize, responses.size());
+
+        if (start > end) {
+            start = end; // 잘못된 범위를 방지하기 위한 추가적인 안전 처리
+        }
 
         return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }
