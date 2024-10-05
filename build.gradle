@@ -61,6 +61,12 @@ dependencies {
     implementation 'io.lettuce.core:lettuce-core'
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:3.3.3"
+    }
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }
