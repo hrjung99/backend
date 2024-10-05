@@ -2,6 +2,7 @@ package swyp.swyp6_team7.member.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
@@ -49,5 +50,15 @@ public class MemberController {
         memberService.createAdmin(userRequestDto);
         return new ResponseEntity<>("Admin successfully registered", HttpStatus.CREATED);
     }
-
+    // 회원 탈퇴
+    @DeleteMapping("/{userNumber}")
+    public ResponseEntity<Void> deleteUser(Authentication authentication) {
+        try {
+            Integer authenticatedUserNumber = Integer.parseInt(authentication.getName());
+            memberService.deleteUser(authenticatedUserNumber);
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
+    }
 }

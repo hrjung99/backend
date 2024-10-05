@@ -1,10 +1,7 @@
 package swyp.swyp6_team7.travel.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import swyp.swyp6_team7.companion.domain.Companion;
@@ -19,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Table(name = "travels")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)

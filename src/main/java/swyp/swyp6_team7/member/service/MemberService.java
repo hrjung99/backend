@@ -32,7 +32,7 @@ public class MemberService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
-
+    private final MemberDeletedService memberDeletedService;
     private final ProfileService profileService;
     private final TagService tagService;
     private final UserTagPreferenceRepository userTagPreferenceRepository;
@@ -48,7 +48,8 @@ public class MemberService {
                          ProfileService profileService,
                          @Lazy JwtProvider jwtProvider,
                          TagService tagService,
-                         UserTagPreferenceRepository userTagPreferenceRepository){
+                         UserTagPreferenceRepository userTagPreferenceRepository,
+                         MemberDeletedService memberDeletedService){
 
 
         this.userRepository = userRepository;
@@ -57,6 +58,7 @@ public class MemberService {
         this.profileService = profileService;
         this.tagService = tagService;
         this.userTagPreferenceRepository = userTagPreferenceRepository;
+        this.memberDeletedService = memberDeletedService;
     }
 
     @Transactional(readOnly = true)
@@ -249,5 +251,18 @@ public class MemberService {
     public Users getUserByEmail(String email) {
         return userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 사용자를 찾을 수 없습니다: " + email));
+    }
+    @Transactional
+    public void deleteUser(Integer userNumber) {
+        // 회원 정보 조회
+        Users user = findUserById(userNumber);
+
+        // 회원 삭제 로직 위임
+        memberDeletedService.deleteUserData(user);
+    }
+
+    private Users findUserById(Integer userNumber) {
+        return userRepository.findById(userNumber)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
     }
 }
