@@ -3,6 +3,7 @@ package swyp.swyp6_team7.travel.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,7 +88,16 @@ public class TravelService {
             detailResponse.setEnrollmentNumber(enrollmented);
         }
 
+        //조회수 update
+        addViewCount(travel);
+
         return detailResponse;
+    }
+
+    @Async
+    @Transactional
+    public void addViewCount(Travel targetTravel) {
+        travelRepository.updateViewCountPlusOneByTravelNumber(targetTravel.getNumber());
     }
 
     @Transactional
@@ -125,9 +135,6 @@ public class TravelService {
     public Page<TravelSearchDto> search(TravelSearchCondition condition) {
         Integer requestUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
         Page<TravelSearchDto> result = travelRepository.search(condition, requestUserNumber);
-        for (TravelSearchDto travelSearchDto : result) {
-            log.info("service: " + travelSearchDto.toString());
-        }
         return result;
     }
 
