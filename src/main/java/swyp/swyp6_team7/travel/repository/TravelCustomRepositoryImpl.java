@@ -254,9 +254,6 @@ public class TravelCustomRepositoryImpl implements TravelCustomRepository {
                                 list(tag.name),
                                 bookmark.userNumber.eq(loginUserNumber))
                 ));
-        for (TravelSearchDto travelSearchDto : content) {
-            log.info("searchDto = " + travelSearchDto.toString());
-        }
 
         JPAQuery<Long> countQuery = queryFactory
                 .select(travel.number.countDistinct())
