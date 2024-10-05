@@ -96,13 +96,13 @@ public class TravelAppliedServiceTest {
                 travel.getNumber(),
                 travel.getTitle(),
                 travel.getLocationName(),
-                travel.getMaxPerson(),
-                travel.getLocationName(),
-                Collections.emptyList(), // 태그 리스트
-                travel.getViewCount(),
-                travel.getCompanions().size(),
-                travel.getStatus().name(),
+                travel.getUserNumber(),
                 user.getUserName(),
+                Collections.emptyList(), // 태그 리스트
+                0,  //현재참여인원
+                travel.getMaxPerson(),
+                travel.getCreatedAt(),
+                travel.getDueDate(),
                 true // 북마크 여부
         );
         List<TravelListResponseDto> travelList = List.of(travelListResponseDto);
