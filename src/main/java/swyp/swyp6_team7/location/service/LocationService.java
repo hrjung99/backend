@@ -24,7 +24,9 @@ public class LocationService {
 
     public void importCities(String filename, LocationType locationType) throws IOException {
         List<Location> cities = csvReader.readByLine(filename, cityParser, locationType);
-        cities.forEach(city -> locationDao.addCity(city));
+        cities.stream()
+                .filter(city -> city != null && city.getLocationName() != null) // null 체크 추가
+                .forEach(city -> locationDao.addCity(city));
     }
 
 }

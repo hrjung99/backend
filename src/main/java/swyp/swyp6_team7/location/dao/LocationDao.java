@@ -15,6 +15,16 @@ public class LocationDao {
     }
 
     public void addCity(Location location) {
+        if (location == null || location.getLocationName() == null) {
+            throw new IllegalArgumentException("Invalid location data: location or locationName is null");
+        }
+
+        // 중복 데이터 체크
+        if (isLocationExists(location.getLocationName(), location.getLocationType())) {
+            System.out.println("Duplicate entry found for: " + location.getLocationName());
+            return; // 이미 존재하는 경우 삽입하지 않음
+        }
+
         String sql = "INSERT INTO locations (location_name, location_type) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sql, location.getLocationName(), location.getLocationType().name());
