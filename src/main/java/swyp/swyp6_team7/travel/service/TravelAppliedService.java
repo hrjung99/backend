@@ -15,6 +15,7 @@ import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,9 @@ public class TravelAppliedService {
 
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
+        if (start > dtos.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, dtos.size());
+        }
         return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 

@@ -24,6 +24,7 @@ import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -150,5 +151,22 @@ public class TravelAppliedServiceTest {
 
         // then
         verify(companionRepository, times(1)).deleteByTravelAndUserNumber(travel, userNumber);
+    }
+    @Test
+    public void testSubListPaging() {
+        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+        int fromIndex = 10;
+        int toIndex = 0;
+
+        try {
+            if (fromIndex <= toIndex && toIndex <= list.size()) {
+                List<Integer> subList = list.subList(fromIndex, toIndex);
+            } else {
+                throw new IllegalArgumentException("Invalid subList range: fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
+            }
+        } catch (IllegalArgumentException e) {
+            assertEquals("Invalid subList range: fromIndex(10) > toIndex(0)", e.getMessage());
+        }
     }
 }
