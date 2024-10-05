@@ -32,8 +32,8 @@ public class LocationInitService {
         if (locationRepository.count() == 0) {
             try {
                 // CSV 파일에서 도시 정보를 읽어와서 Location 테이블에 삽입
-                locationService.importCities("파일명.csv", LocationType.DOMESTIC);
-                locationService.importCities("파일명.csv", LocationType.INTERNATIONAL);
+                locationService.importCities("korea_cities.csv", LocationType.DOMESTIC);
+                locationService.importCities("foregin_cities.csv", LocationType.INTERNATIONAL);
             } catch (IOException e) {
                 // 에러 핸들링 로직 추가
                 e.printStackTrace();
