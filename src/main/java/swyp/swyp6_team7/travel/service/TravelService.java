@@ -89,16 +89,16 @@ public class TravelService {
         }
 
         //조회수 update
-        addViewCount(travel);
+        travelRepository.updateViewCountPlusOneByTravelNumber(travel.getNumber());
 
         return detailResponse;
     }
 
-    @Async
-    @Transactional
-    public void addViewCount(Travel targetTravel) {
-        travelRepository.updateViewCountPlusOneByTravelNumber(targetTravel.getNumber());
-    }
+//    @Async
+//    @Transactional
+//    public void addViewCount(Travel targetTravel) {
+//        travelRepository.updateViewCountPlusOneByTravelNumber(targetTravel.getNumber());
+//    }
 
     @Transactional
     public void update(int travelNumber, TravelUpdateRequest travelUpdate) {
