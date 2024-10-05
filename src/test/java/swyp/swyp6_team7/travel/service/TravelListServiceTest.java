@@ -10,18 +10,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
-import swyp.swyp6_team7.travel.domain.GenderType;
-import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
-import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
-import swyp.swyp6_team7.travel.service.TravelListService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -58,6 +56,10 @@ class TravelListServiceTest {
         // Given
         Integer userNumber = 1;
         Pageable pageable = PageRequest.of(0, 2);
+        Location travelLocation = Location.builder()
+                .locationName("Seoul")
+                .locationType(LocationType.DOMESTIC)
+                .build();
 
         Travel travel1 = Travel.builder()
                 .number(1)
@@ -66,6 +68,7 @@ class TravelListServiceTest {
                 .title("Title 1")
                 .maxPerson(5)
                 .dueDate(LocalDate.now().plusDays(3))
+                .location(travelLocation)
                 .build();
 
         Travel travel2 = Travel.builder()
@@ -75,6 +78,7 @@ class TravelListServiceTest {
                 .title("Title 2")
                 .maxPerson(10)
                 .dueDate(LocalDate.now().minusDays(1))
+                .location(travelLocation)
                 .build();
 
         // 태그 설정
@@ -101,6 +105,7 @@ class TravelListServiceTest {
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
+                    travel.getLocationName(),
                     travel.getUserNumber(),
                     user.getUserName(),
                     tags,

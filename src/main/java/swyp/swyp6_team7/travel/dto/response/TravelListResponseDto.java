@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class TravelListResponseDto {
     private int travelNumber;           // 여행 번호
     private String title;               // 여행 제목
+    private String location;            // 여행지
     private int userNumber;             // 사용자 번호
     private String userName;            // 사용자 이름
     private List<String> tags;          // 태그 리스트
@@ -37,6 +38,7 @@ public class TravelListResponseDto {
         return new TravelListResponseDto(
                 travel.getNumber(),
                 travel.getTitle(),
+                travel.getLocationName(),
                 user.getUserNumber(),
                 user.getUserName(),
                 travel.getTravelTags().stream().map(tag -> tag.getTag().getName()).collect(Collectors.toList()),

@@ -104,6 +104,7 @@ public class BookmarkService {
                     return new BookmarkResponse(
                             travel.getNumber(),
                             travel.getTitle(),
+                            travel.getLocationName(),
                             user.getUserNumber(),
                             user.getUserName(),
                             tags,

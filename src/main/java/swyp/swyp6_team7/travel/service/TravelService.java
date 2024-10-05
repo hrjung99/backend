@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
+import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.repository.LocationRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
 import swyp.swyp6_team7.member.util.MemberAuthorizeUtil;
@@ -37,13 +39,16 @@ public class TravelService {
     private final BookmarkRepository bookmarkRepository;
     private final TravelTagService travelTagService;
     private final MemberService memberService;
+    private final LocationRepository locationRepository;
 
     @Transactional
     public Travel create(TravelCreateRequest request, String email) {
 
         Users user = memberService.findByEmail(email);
+        Location location = locationRepository.findByLocationName(request.getLocationName())
+                .orElseThrow(() -> new IllegalArgumentException("city not found: " + request.getLocationName()));
 
-        Travel savedTravel = travelRepository.save(request.toTravelEntity(user.getUserNumber()));
+        Travel savedTravel = travelRepository.save(request.toTravelEntity(user.getUserNumber(), location));
         List<String> tags = travelTagService.create(savedTravel, request.getTags()).stream()
                 .map(tag -> tag.getName())
                 .toList();
@@ -92,7 +97,10 @@ public class TravelService {
 
         authorizeTravelOwner(travel);
 
-        Travel updatedTravel = travel.update(travelUpdate);
+        Location location = locationRepository.findByLocationName(travelUpdate.getLocationName())
+                .orElseThrow(() -> new IllegalArgumentException("city not found: " + travelUpdate.getLocationName()));
+
+        Travel updatedTravel = travel.update(travelUpdate, location);
         List<String> updatedTags = travelTagService.update(updatedTravel, travelUpdate.getTags());
     }
 

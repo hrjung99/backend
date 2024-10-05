@@ -11,6 +11,7 @@ import swyp.swyp6_team7.bookmark.dto.BookmarkRequest;
 import swyp.swyp6_team7.bookmark.dto.BookmarkResponse;
 import swyp.swyp6_team7.bookmark.entity.Bookmark;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -25,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+import swyp.swyp6_team7.location.domain.LocationType;
 
 public class BookmarkServiceTest {
 
@@ -51,8 +54,13 @@ public class BookmarkServiceTest {
         BookmarkRequest request = new BookmarkRequest(1, 101);
         Users user = new Users();
         user.setUserNumber(1);
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("제주");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
         Bookmark oldestBookmark = new Bookmark(1, 1, LocalDateTime.now().minusDays(10));
@@ -77,8 +85,13 @@ public class BookmarkServiceTest {
         BookmarkRequest request = new BookmarkRequest(1, 101);
         Users user = new Users();
         user.setUserNumber(1);
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("제주");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .dueDate(LocalDate.now().plusDays(5))
                 .build();
 
@@ -117,8 +130,13 @@ public class BookmarkServiceTest {
         // given
         Integer userNumber = 1;
         Bookmark bookmark = new Bookmark(userNumber, 101, LocalDateTime.now());
+        Location travelLocation = new Location();
+        travelLocation.setLocationName("제주");
+        travelLocation.setLocationType(LocationType.DOMESTIC);
         Travel travel = Travel.builder()
                 .number(101)
+                .location(travelLocation)
+                .locationName(travelLocation.getLocationName())
                 .title("Sample Travel")
                 .createdAt(LocalDateTime.now().minusDays(5))
                 .dueDate(LocalDate.now().plusDays(5))
