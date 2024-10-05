@@ -38,13 +38,13 @@ public class TravelAppliedService {
 
         List<TravelListResponseDto> dtos = companions.stream().map(companion -> {
             Travel travel = companion.getTravel();
-            Users user = userRepository.findById(userNumber)
-                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            Users host = userRepository.findByUserNumber(travel.getUserNumber())
+                    .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
             int currentApplicants = travel.getCompanions().size();
 
             boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
 
-            return TravelListResponseDto.fromEntity(travel, user, currentApplicants, isBookmarked);
+            return TravelListResponseDto.fromEntity(travel, host, currentApplicants, isBookmarked);
         }).collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();
