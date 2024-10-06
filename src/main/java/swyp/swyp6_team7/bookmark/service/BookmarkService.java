@@ -91,41 +91,40 @@ public class BookmarkService {
             return new PageImpl<>(List.of(), pageable, 0);
         }
 
-        // 북마크 목록을 조회하면서 각 여행 정보 가져오기
+        // 삭제된 여행을 필터링합니다.
         List<BookmarkResponse> responses = bookmarks.stream()
                 .map(bookmark -> {
                     Integer travelNumber = bookmark.getTravelNumber();
-                    System.out.println("Travel Number: " + travelNumber); // 로그 추가
-                    
 
-                    Travel travel = travelRepository.findById(travelNumber)
+                    // 여행 정보를 조회하면서, 삭제된 여행은 필터링합니다.
+                    return travelRepository.findById(travelNumber)
                             .filter(t -> t.getStatus() != TravelStatus.DELETED)
-                            .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
+                            .map(travel -> {
+                                Users host = userRepository.findByUserNumber(travel.getUserNumber())
+                                        .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
 
-                    Users host = userRepository.findByUserNumber(travel.getUserNumber())
-                            .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
+                                int currentApplicants = travel.getCompanions().size();
 
-                    int currentApplicants = travel.getCompanions().size();
+                                List<String> tags = travel.getTravelTags().stream()
+                                        .map(travelTag -> travelTag.getTag().getName())
+                                        .collect(Collectors.toList());
 
-                    List<String> tags = travel.getTravelTags().stream()
-                            .map(travelTag -> travelTag.getTag().getName())
-                            .collect(Collectors.toList());
-
-                    return new BookmarkResponse(
-                            travel.getNumber(),
-                            travel.getTitle(),
-                            travel.getLocationName(),
-                            host.getUserNumber(),
-                            host.getUserName(),
-                            tags,
-                            currentApplicants,
-                            travel.getMaxPerson(),
-                            travel.getCreatedAt(),
-                            travel.getDueDate(),
-                            true
-                    );
+                                return new BookmarkResponse(
+                                        travel.getNumber(),
+                                        travel.getTitle(),
+                                        travel.getLocationName(),
+                                        host.getUserNumber(),
+                                        host.getUserName(),
+                                        tags,
+                                        currentApplicants,
+                                        travel.getMaxPerson(),
+                                        travel.getCreatedAt(),
+                                        travel.getDueDate(),
+                                        true
+                                );
+                            }).orElse(null); // 삭제된 여행에 대한 북마크는 null 반환
                 })
-                .filter(response -> response != null)
+                .filter(response -> response != null) // 삭제된 여행에 대한 북마크는 제외
                 .collect(Collectors.toList());
 
         int start = Math.min(currentPage * currentSize, responses.size());
