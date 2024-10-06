@@ -15,6 +15,7 @@ import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDateTime;
@@ -66,6 +67,14 @@ public class BookmarkService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("북마크를 찾을 수 없습니다."));
 
+        Travel travel = travelRepository.findById(travelNumber)
+                .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
+
+        if (travel.getStatus() == TravelStatus.DELETED) {
+            // 삭제된 여행에 대한 북마크라면 그냥 삭제 진행
+            bookmarkRepository.delete(bookmark);
+            return;
+        }
         bookmarkRepository.delete(bookmark);
     }
 
@@ -90,6 +99,7 @@ public class BookmarkService {
                     
 
                     Travel travel = travelRepository.findById(travelNumber)
+                            .filter(t -> t.getStatus() != TravelStatus.DELETED)
                             .orElseThrow(() -> new IllegalArgumentException("여행 정보를 찾을 수 없습니다."));
 
                     Users host = userRepository.findByUserNumber(travel.getUserNumber())
@@ -114,7 +124,9 @@ public class BookmarkService {
                             travel.getDueDate(),
                             true
                     );
-                }).collect(Collectors.toList());
+                })
+                .filter(response -> response != null)
+                .collect(Collectors.toList());
 
         int start = Math.min(currentPage * currentSize, responses.size());
         int end = Math.min((currentPage + 1) * currentSize, responses.size());
