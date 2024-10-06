@@ -25,10 +25,12 @@ public class ImageDetailResponseDto {
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH시 MM분")
     private LocalDateTime uploadDate;
 
+    private String url;
+
     @Builder
     public ImageDetailResponseDto(
             Long imageNumber, String originalName, Long size, String relatedType,
-            Integer relatedNumber, String path, LocalDateTime uploadDate)
+            Integer relatedNumber, String path, LocalDateTime uploadDate,  String url)
     {
         this.imageNumber = imageNumber;
         this.originalName = originalName;
@@ -37,9 +39,10 @@ public class ImageDetailResponseDto {
         this.relatedNumber = relatedNumber;
         this.path = path;
         this.uploadDate = uploadDate;
+        this.url = url;
     }
 
-    public ImageDetailResponseDto(Image image) {
+    public ImageDetailResponseDto(Image image, String url) {
         this.imageNumber = image.getImageNumber();
         this.originalName = image.getOriginalName();
         this.size = image.getSize();
@@ -47,6 +50,7 @@ public class ImageDetailResponseDto {
         this.relatedNumber = image.getRelatedNumber();
         this.path = image.getPath();
         this.uploadDate = image.getUploadDate();
+        this.url = url;
     }
 
     @Override
@@ -59,6 +63,7 @@ public class ImageDetailResponseDto {
                 ", relatedNumber=" + relatedNumber +
                 ", path='" + path + '\'' +
                 ", uploadDate=" + uploadDate +
+                ", url='" + url + '\'' +
                 '}';
     }
 

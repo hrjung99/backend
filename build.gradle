@@ -62,8 +62,8 @@ dependencies {
 
     //S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.300' // 버전은 최신으로 수정 가능
-    implementation 'com.amazonaws:aws-java-sdk-core:1.12.300'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.560'
+    implementation 'com.amazonaws:aws-java-sdk-core:1.12.500'
 
 
 

@@ -1,8 +1,9 @@
 package swyp.swyp6_team7.image.s3;
 
 import lombok.Getter;
-import lombok.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+
 
 @Component
 @Getter

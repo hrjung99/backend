@@ -48,7 +48,7 @@ public class Image {
 
 
     //**upload하고 가져오는 데이터
-    //S3에 저장 된 이미지 경로
+    //S3에 저장 된 이미지 폴더 경로
     @Column(name = "image_path", nullable = false)
     private String path;
 
