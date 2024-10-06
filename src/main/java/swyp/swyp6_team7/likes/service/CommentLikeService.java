@@ -48,7 +48,7 @@ public class CommentLikeService {
             CommentLike commentLike = new CommentLike(commentNumber, userNumber);
             commentLikeRepository.save(commentLike);
         }
-        return commentService.getListByrelatedNumber(comment.getRelatedType(), comment.getRelatedNumber(), userNumber);
+        return commentService.getList(comment.getRelatedType(), comment.getRelatedNumber(), userNumber);
     }
 
 }

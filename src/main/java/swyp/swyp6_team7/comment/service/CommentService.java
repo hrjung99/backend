@@ -11,7 +11,6 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
-import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.likes.dto.response.CommentLikeReadResponseDto;
 import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
@@ -19,6 +18,7 @@ import swyp.swyp6_team7.likes.service.CommentLikeService;
 import swyp.swyp6_team7.likes.util.CommentLikeStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.travel.service.TravelService;
@@ -97,9 +97,9 @@ public class CommentService {
         }
     }
 
-
+    //댓글 목록 조회
     @Transactional
-    public List<CommentListReponseDto> getListByrelatedNumber(String relatedType, int relatedNumber, int userNumber) {
+    public List<CommentListReponseDto> getList(String relatedType, int relatedNumber, int userNumber) {
 
         if (relatedType.equals("travel")) {
             List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
@@ -109,13 +109,26 @@ public class CommentService {
             List<CommentListReponseDto> listReponse = new ArrayList<>();
             for (Comment comment : sortedComments) {
 
-                //작성자 조회
+                //댓글 작성자 조회
                 Optional<Users> user = userRepository.findByUserNumber(comment.getUserNumber());
-                String writer = user.map(Users::getUserName).orElse("unknown");
+                String commentWriter = user.map(Users::getUserName).orElse("unknown");
 
-                //답글 수 계산
-                long repliesCount = commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getParentNumber());
+                // 댓글 작성자 프로필 이미지 URL
+                String imageUrl = "";
+                try {
+                    imageUrl = s3Uploader.getImageUrl("profile", comment.getUserNumber());
+                } catch (IllegalArgumentException e) {
+                    // 이미지 URL을 빈 문자열로 설정
+                    imageUrl = "";
+                }
 
+                // 답글 수 계산: 부모 댓글일 때만 계산
+                long repliesCount = 0;
+                if (comment.getParentNumber() == 0) {// 부모일 경우
+                    repliesCount = commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getCommentNumber()); // 답글 계산
+                } else {
+                    repliesCount = 0; //답글일 경우 답글 개수 0개
+                }
                 //좋아요 상태 가져오기
                 CommentLikeReadResponseDto likeStatus = CommentLikeStatus.getCommentLikeStatus(commentLikeRepository, comment.getCommentNumber(), userNumber);
                 //좋아요 개수
@@ -123,13 +136,13 @@ public class CommentService {
                 //좋아요 여부, true = 좋아요 누름
                 boolean liked = likeStatus.isLiked();
 
-                //게시글 작성자 회원번호
-                int travelWriterNumber = travelRepository.findByNumber(relatedNumber).get().getUserNumber();
+                //게시글 작성자 회원번보
+                //게시글 정보 가져오기
+                Optional<Travel> travelInfo = travelRepository.findByNumber(relatedNumber);
+                int travelWriterNumber= travelInfo.get().getUserNumber();
 
-                //게시글 작성자 프로필 이미지 url
-                String imageUrl = s3Uploader.getImageUrl("profile", travelWriterNumber);
                 //DTO
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked, travelWriterNumber, imageUrl);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, travelWriterNumber, imageUrl);
                 listReponse.add(dto);
             }
             return listReponse;
