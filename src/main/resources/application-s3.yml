@@ -1,0 +1,9 @@
+cloud:
+aws:
+  s3:
+    bucket: moing-hosted-contents
+    base-folder: images/
+  region:
+    static: ap-northeast-2
+  stack:
+    auto: falseg
