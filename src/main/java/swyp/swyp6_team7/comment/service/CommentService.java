@@ -11,6 +11,8 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
+import swyp.swyp6_team7.image.repository.ImageRepository;
+import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.likes.dto.response.CommentLikeReadResponseDto;
 import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
 import swyp.swyp6_team7.likes.service.CommentLikeService;
@@ -35,6 +37,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final TravelRepository travelRepository;
+    private final S3Uploader s3Uploader;
 
     // Create
     @Transactional
@@ -123,8 +126,10 @@ public class CommentService {
                 //게시글 작성자 회원번호
                 int travelWriterNumber = travelRepository.findByNumber(relatedNumber).get().getUserNumber();
 
+                //게시글 작성자 프로필 이미지 url
+                String imageUrl = s3Uploader.getImageUrl("profile", travelWriterNumber);
                 //DTO
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked, travelWriterNumber);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, writer, repliesCount, likes, liked, travelWriterNumber, imageUrl);
                 listReponse.add(dto);
             }
             return listReponse;
