@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 "/login/oauth/kakao/**",
                                 "/error",
                                 "/api/users-email",
-                                "/actuator/health" // Health check endpoint permission
+                                "/actuator/health", // Health check endpoint permission
+                                "/api/image/**"
                         ).permitAll()
 
                         .requestMatchers(
