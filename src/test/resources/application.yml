@@ -4,7 +4,7 @@ spring:
     url: jdbc:h2:mem:test;mode=mysql
     username: sa
     password:
-      sql:d
+  sql:
     init:
       data-locations: classpath:data.sql
       mode: never
@@ -23,3 +23,5 @@ custom:
 app:
   data-loader:
     enabled: false
+s3:
+  enabled: false
