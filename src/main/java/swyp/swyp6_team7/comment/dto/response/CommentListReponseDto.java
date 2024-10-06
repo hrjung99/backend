@@ -28,6 +28,7 @@ public class CommentListReponseDto {
     private long likes;             //좋아요 수
     private boolean liked;          // 좋아요 눌렀는지 여부
     private int travelWriterNumber; //게시글의 작성자 회원 번호
+    private String imageUrl;        //댓글 작성자의 프로필 이미지
 
 
     public static String formatDate(LocalDateTime date) {
@@ -36,7 +37,7 @@ public class CommentListReponseDto {
 
 
 
-    public static CommentListReponseDto fromEntity(Comment comment, String writer, long repliesCount, long likes, boolean liked, int travelWriterNumber) {
+    public static CommentListReponseDto fromEntity(Comment comment, String writer, long repliesCount, long likes, boolean liked, int travelWriterNumber, String imageUrl) {
         return new CommentListReponseDto(
                 comment.getCommentNumber(),
                 comment.getUserNumber(),
@@ -50,6 +51,7 @@ public class CommentListReponseDto {
                 likes,
                 liked,
                 travelWriterNumber
+                ,imageUrl
         );
     }
 
@@ -68,6 +70,7 @@ public class CommentListReponseDto {
                 ", likes=" + likes +
                 ", liked=" + liked + '\'' +
                 ", travelWriterNumber=" + travelWriterNumber +
+                ", imageUrl='" + imageUrl + '\'' +
                 '}';
     }
 
