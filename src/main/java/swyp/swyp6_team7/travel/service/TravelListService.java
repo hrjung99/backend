@@ -30,6 +30,7 @@ public class TravelListService {
     public Page<TravelListResponseDto> getTravelListByUser(Integer userNumber, Pageable pageable) {
         // 사용자 번호를 통해 여행 게시글 조회 (최신 등록순으로 정렬)
         List<Travel> travels = travelRepository.findByUserNumber(userNumber).stream()
+                .filter(travel -> travel.getStatus() != TravelStatus.DELETED) // 삭제된 여행 제외
                 .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt())) // 최신순으로 정렬
                 .collect(Collectors.toList());
 

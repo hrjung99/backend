@@ -57,7 +57,7 @@ public class CommentController {
         Users user = memberService.findByEmail(userEmail);
         int userNumber = user.getUserNumber();
 
-        List<CommentListReponseDto> comments = commentService.getListByrelatedNumber(relatedType, relatedNumber, userNumber);
+        List<CommentListReponseDto> comments = commentService.getList(relatedType, relatedNumber, userNumber);
         return ResponseEntity.ok(comments);
     }
 

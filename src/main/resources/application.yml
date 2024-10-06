@@ -1,8 +1,9 @@
 spring:
   profiles:
     active: local-db
-    include: s3, credentials
-
+    include:
+      - credentials
+      - s3
 ---
 #spring:
 #  datasource:
