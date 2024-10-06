@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
+import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentCreateRequest;
 import swyp.swyp6_team7.enrollment.dto.EnrollmentResponse;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
@@ -68,6 +69,10 @@ public class EnrollmentService {
 
         List<EnrollmentResponse> enrollments = enrollmentRepository.findEnrollmentsByTravelNumber(travelNumber);
         return TravelEnrollmentsResponse.from(enrollments);
+    }
+
+    public long getPendingEnrollmentsCountByTravelNumber(int travelNumber) {
+        return enrollmentRepository.countByTravelNumberAndStatus(travelNumber, EnrollmentStatus.PENDING);
     }
 
     @Transactional
