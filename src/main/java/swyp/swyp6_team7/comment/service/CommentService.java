@@ -153,13 +153,13 @@ public class CommentService {
 
     // update
     @Transactional
-    public CommentDetailResponseDto update(CommentUpdateRequestDto request, int commentNumber, int userNumber) {
+    public CommentDetailResponseDto update(CommentUpdateRequestDto request, int commentWriter, int commentNumber) {
         // 댓글 존재 여부 검증 검증
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다: " + commentNumber));
 
-        // 댓글 작성자 혹은 게시글 작성자인지 확인
-        validateCommentWriter(commentNumber, userNumber);
+        // 댓글 작성자인지 확인
+        validateCommentWriter(commentNumber, commentWriter);
 
         // 업데이트 동작
         comment.update(request.getContent()); // 수정할 내용을 설정
@@ -180,7 +180,7 @@ public class CommentService {
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
 
-        validateCommentWriter(commentNumber, userNumber);
+        validateCommentWriterOrTravelWriter(commentNumber, userNumber);
 
         try {
             // 답글 삭제
@@ -209,7 +209,7 @@ public class CommentService {
 
     // 댓글 작성자 혹은 게시글 작성자인지 검증하는 메소드
     @Transactional(readOnly = true)
-    public void validateCommentWriter(int commentNumber, int userNumber) {
+    public void validateCommentWriterOrTravelWriter(int commentNumber, int userNumber) {
 
         //존재하는 댓글인지 확인
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
@@ -227,6 +227,36 @@ public class CommentService {
             throw new IllegalArgumentException("댓글 작성자 혹은 게시글 작성자에게만 유효한 동작입니다.");
         }
     }
+    
+    //게시글 작성자 인지 확인
+    @Transactional(readOnly = true)
+    public void validateTravelWriter(int travelNumber, int userNumber) {
+
+        // 존재하는 게시글인지 확인
+        Travel travel = travelRepository.findByNumber(travelNumber)
+                .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
+
+        // 요청한 사용자(=로그인 중인 사용자)가 게시글 작성자인지 확인
+        if (travel.getUserNumber() != userNumber) {
+            throw new IllegalArgumentException("해당 게시글 작성자가 아닙니다.");
+        }
+    }
+    
+    
+    //댓글 작성자인지 확인
+    @Transactional(readOnly = true)
+    public void validateCommentWriter(int commentNumber, int userNumber) {
+
+        // 존재하는 댓글인지 확인
+        Comment comment = commentRepository.findByCommentNumber(commentNumber)
+                .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
+
+        // 요청한 사용자(=로그인 중인 사용자)가 댓글 작성자인지 확인
+        if (comment.getUserNumber() != userNumber) {
+            throw new IllegalArgumentException("해당 댓글 작성자가 아닙니다.");
+        }
+    }
+
 
     // 댓글을 정렬하는 메소드
     private List<Comment> sortComments(List<Comment> allComments) {
