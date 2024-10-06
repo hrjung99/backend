@@ -15,6 +15,7 @@ import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
@@ -116,6 +117,14 @@ public class BookmarkServiceTest {
         Bookmark bookmark = new Bookmark(userNumber, travelNumber, LocalDateTime.now());
 
         when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of(bookmark));
+
+        // 모킹: 여행 정보를 조회
+        Travel travel = Travel.builder()
+                .number(travelNumber)
+                .status(TravelStatus.IN_PROGRESS) // 삭제되지 않은 여행 상태 설정
+                .build();
+
+        when(travelRepository.findById(travelNumber)).thenReturn(Optional.of(travel));
 
         // when
         bookmarkService.removeBookmark(travelNumber, userNumber);

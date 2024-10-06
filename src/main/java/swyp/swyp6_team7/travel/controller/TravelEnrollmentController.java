@@ -34,6 +34,12 @@ public class TravelEnrollmentController {
                 .body(response);
     }
 
+    @GetMapping("/api/travel/{travelNumber}/enrollmentCount")
+    public ResponseEntity getEnrollmentsCount(@PathVariable("travelNumber") int travelNumber) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(enrollmentService.getPendingEnrollmentsCountByTravelNumber(travelNumber));
+    }
+
     @PutMapping("/api/travel/{travelNumber}/enrollments/last-viewed")
     public ResponseEntity updateEnrollmentsLastViewedTime(
             @PathVariable("travelNumber") int travelNumber,
