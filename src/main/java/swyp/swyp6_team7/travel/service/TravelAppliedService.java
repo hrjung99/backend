@@ -12,6 +12,7 @@ import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
@@ -35,16 +36,17 @@ public class TravelAppliedService {
         // 사용자가 승인된 동반자 목록 조회
         List<Companion> companions = companionRepository.findByUserNumber(userNumber);
 
-        List<TravelListResponseDto> dtos = companions.stream().map(companion -> {
-            Travel travel = companion.getTravel();
-            Users host = userRepository.findByUserNumber(travel.getUserNumber())
-                    .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
-            int currentApplicants = travel.getCompanions().size();
-
-            boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
-
-            return TravelListResponseDto.fromEntity(travel, host, currentApplicants, isBookmarked);
-        }).collect(Collectors.toList());
+        List<TravelListResponseDto> dtos = companions.stream()
+                .map(Companion::getTravel)
+                .filter(travel -> travel.getStatus() != TravelStatus.DELETED) // 삭제된 여행 제외
+                .map(travel -> {
+                    Users host = userRepository.findByUserNumber(travel.getUserNumber())
+                            .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
+                    int currentApplicants = travel.getCompanions().size();
+                    boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
+                    return TravelListResponseDto.fromEntity(travel, host, currentApplicants, isBookmarked);
+                })
+                .collect(Collectors.toList());
 
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
@@ -56,6 +58,10 @@ public class TravelAppliedService {
     public void cancelApplication(Integer userNumber, int travelNumber) {
         Travel travel = travelRepository.findById(travelNumber)
                 .orElseThrow(() -> new IllegalArgumentException("여행을 찾을 수 없습니다."));
+
+        if (travel.getStatus() == TravelStatus.DELETED) {
+            throw new IllegalArgumentException("삭제된 여행에 대한 신청은 취소할 수 없습니다.");
+        }
 
         // 사용자가 신청자인지 확인하고 신청 정보 삭제
         Companion companion = companionRepository.findByTravelAndUserNumber(travel, userNumber)
