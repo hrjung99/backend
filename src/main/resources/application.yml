@@ -1,19 +1,22 @@
 spring:
   profiles:
-    include: local-db
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-  server:
-    port: 8080
-custom:
-  jwt:
-    secretKey: oRzn5UpJmgRXxtOLMBG+jNhz2aAjPXHESKdjz4hFea5GNLnB9bVeVXKxKcZtxU+DlGZ4nHGO7xrXYhTkEhe2Zg==
-    expirationMs: 3600000 # 토큰 만료 시간 (1시간 = 3600000ms)
-
-
+    active: local-db
+    include:
+      - credentials
+      - s3
+#spring:
+#  datasource:
+#    driver-class-name: org.mariadb.jdbc.Driver
+#    url: jdbc:mariadb://localhost:3306/moing
+#    username: root
+#    password: 2478
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      jakarta.persistence.jdbc.url: jdbc:mariadb://localhost:3306/moing
+#      hibernate:
+#        dialect: org.hibernate.dialect.MariaDBDialect
+#    show-sql: true
 

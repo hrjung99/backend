@@ -3,16 +3,22 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
+import swyp.swyp6_team7.tag.domain.Tag;
+import swyp.swyp6_team7.tag.domain.UserTagPreference;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
 @Data
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "Users")
@@ -30,20 +36,15 @@ public class Users {
     @Column(nullable = false, length = 50)
     private String userName;
 
-    // 성별 ENUM으로 관리
-    public enum Gender{
-        M,F
-    }
-
     @Column(nullable = false, length = 2)
     @Enumerated(EnumType.STRING)
     private Gender userGender;
 
-    @Column(nullable = false, length = 5)
-    private String userBirthYear;
 
-    @Column(nullable = false, length = 15)
-    private String userPhone;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AgeGroup userAgeGroup;
+
 
     @Builder.Default
     @Column(nullable = false)
@@ -52,32 +53,50 @@ public class Users {
     private LocalDateTime userLoginDate;
     private LocalDateTime userLogoutDate;
 
-    @Builder.Default
-    @Column(nullable = false, length = 10)
-    private String userRole = "user";
 
-    // 회원 상태 enum으로 관리
-    public enum MemberStatus{
-        ABLE, DELETED, SLEEP
-    }
+
     @Column(nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
-    private MemberStatus userStatus;
+    private UserStatus userStatus;
 
     @Builder.Default
     @Column(nullable = false)
     private Boolean userSocialTF = false;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "userNumber"))
-    @Column(name = "role")
-    private List<String> roles;
 
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_role",nullable = false)
+    private UserRole role = UserRole.USER;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> (GrantedAuthority) () -> role) // Lambda expression for GrantedAuthority
-                .collect(Collectors.toList());
+        return List.of((GrantedAuthority) () -> role.name());  // 권한을 GrantedAuthority로 변환
+    }
+    @ManyToMany
+    @JoinTable(
+            name = "user_tags",
+            joinColumns = @JoinColumn(name = "user_number"),
+            inverseJoinColumns = @JoinColumn(name = "tag_number")
+    )
+    private Set<Tag> preferredTags;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    private Set<UserTagPreference> tagPreferences;  // user_tagpreferences 참조
+
+    @Builder
+    public Users(String userEmail, String userPw, String userName, Gender userGender, AgeGroup userAgeGroup, Set<Tag> preferredTags) {
+        this.userEmail = userEmail;
+        this.userPw = userPw;
+        this.userName = userName;
+        this.userGender = userGender;
+        this.userAgeGroup = userAgeGroup;
+        this.preferredTags = (preferredTags != null) ? preferredTags : Set.of(); // 태그가 없으면 빈 리스트
+    }
+
+    // 선호 태그 설정 메서드
+    public void setPreferredTags(Set<Tag> preferredTags) {
+        this.preferredTags = preferredTags;
     }
 
     // Setters and Getters
