@@ -18,16 +18,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")  // 모든 헤더 허용
                 .allowCredentials(true);  // 쿠키나 인증 정보 허용
     }
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*"); // 모든 출처 허용
-        configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용 (GET, POST 등)
-        configuration.addAllowedHeader("*"); // 모든 헤더 허용
-        configuration.setAllowCredentials(true); // 자격 증명 허용
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+
 
 }
