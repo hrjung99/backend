@@ -1,76 +1,20 @@
 package swyp.swyp6_team7.auth.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import swyp.swyp6_team7.member.entity.SocialProvider;
+
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class SocialUserDTO {
+    private String socialNumber; // 소셜 고유 ID
     private String email;
     private String name;
     private String gender;
-    private String birthYear;
-    private String phoneNumber;
+    private String ageGroup;
     private String provider; // kakao, naver, google
-    private String socialNumber; // 소셜 고유 ID 추가
-    private String socialEmail; // 소셜 로그인에 연동된 이메일
 
-    public String getEmail() {
-        return email;
-    }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getBirthYear() {
-        return birthYear;
-    }
-
-    public void setBirthYear(String birthYear) {
-        this.birthYear = birthYear;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public String getSocialNumber() {
-        return socialNumber;
-    }
-
-    public void setSocialNumber(String socialNumber) {
-        this.socialNumber = socialNumber;
-    }
-
-    public String getSocialEmail() {
-        return socialEmail;
-    }
-
-    public void setSocialEmail(String socialEmail) {
-        this.socialEmail = socialEmail;
-    }
 }

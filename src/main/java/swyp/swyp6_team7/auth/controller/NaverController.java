@@ -1,6 +1,9 @@
 package swyp.swyp6_team7.auth.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -9,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import swyp.swyp6_team7.auth.service.NaverService;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.UUID;
@@ -22,45 +26,50 @@ public class NaverController {
         this.naverService = naverService;
     }
 
+    @Value("${naver.client-id}")
+    private String clientId;
+
+    @Value("${naver.redirect-uri}")
+    private String redirectUri;
+
     // 네이버 로그인 리다이렉트 URL
     @GetMapping("/login/oauth/naver")
-    public void naverLoginRedirect(HttpServletResponse response) throws IOException {
-        String clientId = "kSCqWxTinQzYy5tipaNp"; // 네이버 클라이언트 ID
-        String redirectUri = "http://localhost:8080/login/oauth/naver/callback";
-        String state = "RANDOM_STATE"; // CSRF 방지용 state 값
+    public ResponseEntity<Void> naverLoginRedirect(HttpServletResponse response, HttpSession session) throws IOException {
+        String state = UUID.randomUUID().toString(); // CSRF 방지용 state 값
+        session.setAttribute("oauth_state", state); // 세션에 state 값 저장
 
         String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize?client_id=" + clientId
                 + "&response_type=code"
                 + "&redirect_uri=" + redirectUri
                 + "&state=" + state;
-        response.sendRedirect(naverAuthUrl);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(naverAuthUrl));
+
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     // 네이버 콜백 처리
     @GetMapping("/login/oauth/naver/callback")
-    public ResponseEntity<?> naverCallback(@RequestParam String code, @RequestParam String state) {
-        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
-        RestTemplate restTemplate = new RestTemplate();
+    public ResponseEntity<?> naverCallback(
+            @RequestParam("code") String code,
+            @RequestParam("state") String state,
+            HttpSession session) {
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "authorization_code");
-        params.add("client_id", "YOUR_CLIENT_ID");
-        params.add("client_secret", "YOUR_CLIENT_SECRET");
-        params.add("code", code);
-        params.add("state", state);
+        // 세션에서 저장한 state 값 가져와서 비교
+        String sessionState = (String) session.getAttribute("oauth_state");
+        if (sessionState == null || !sessionState.equals(state)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid state parameter");
+        }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-
-        ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            // 네이버로부터 액세스 토큰을 받아 처리
-            return ResponseEntity.ok(response.getBody());
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to get access token");
+        try {
+            String accessToken = naverService.getAccessToken(code, state, session); // 세션도 함께 전달
+            Map<String, Object> userInfo = naverService.fetchNaverUserInfo(accessToken);
+            return ResponseEntity.ok(userInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to process Naver login: " + e.getMessage());
         }
     }
+
 }

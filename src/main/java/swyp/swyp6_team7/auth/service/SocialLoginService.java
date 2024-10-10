@@ -1,17 +1,12 @@
 package swyp.swyp6_team7.auth.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.*;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import swyp.swyp6_team7.auth.dto.SocialUserDTO;
 import swyp.swyp6_team7.auth.provider.SocialLoginProvider;
-import swyp.swyp6_team7.member.entity.SocialUsers;
-import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.entity.*;
 import swyp.swyp6_team7.member.repository.SocialUserRepository;
 import swyp.swyp6_team7.member.repository.UserRepository;
 
@@ -20,10 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static java.security.Security.getProvider;
 
 @Service
 public class SocialLoginService {
@@ -70,8 +61,8 @@ public class SocialLoginService {
         if (!existingSocialUser.isPresent()) {
             SocialUsers socialUser = new SocialUsers();
             socialUser.setUser(user);
-            socialUser.setSocialLoginId(socialUserDTO.getSocialNumber());// 소셜 ID 설정
-            socialUser.setSocialProvider(socialUserDTO.getProvider());    // 소셜 제공자 설정
+            socialUser.setSocialLoginId(socialUserDTO.getSocialNumber()); // 소셜 ID 설정
+            socialUser.setSocialProvider(SocialProvider.fromString(socialUserDTO.getProvider())); // 문자열을 SocialProvider Enum으로 변환
             socialUser.setSocialEmail(socialUserDTO.getEmail());          // 소셜 이메일 설정
 
             socialUserRepository.save(socialUser);
@@ -84,12 +75,11 @@ public class SocialLoginService {
         Users newUser = new Users();
         newUser.setUserEmail(socialUserDTO.getEmail());
         newUser.setUserName(socialUserDTO.getName() != null ? socialUserDTO.getName() : "Unknown");
-        newUser.setUserGender(socialUserDTO.getGender() != null ? Users.Gender.valueOf(socialUserDTO.getGender().toUpperCase()) : Users.Gender.F);
-        newUser.setUserBirthYear(socialUserDTO.getBirthYear() != null ? socialUserDTO.getBirthYear() : "0000");
-        newUser.setUserPhone(socialUserDTO.getPhoneNumber() != null ? socialUserDTO.getPhoneNumber() : "000-0000-0000");
+        newUser.setUserGender(Gender.valueOf(socialUserDTO.getGender().toUpperCase()));
+        newUser.setUserAgeGroup(AgeGroup.valueOf(socialUserDTO.getAgeGroup().toUpperCase()));
         newUser.setUserPw("social-login"); // 소셜 로그인 유저는 패스워드 생성 불필요
-        newUser.setUserStatus(Users.MemberStatus.ABLE);
-        newUser.setUserRole("user");
+        newUser.setUserStatus(UserStatus.ABLE);
+        newUser.setRole(UserRole.USER);
         newUser.setUserSocialTF(true);
         newUser.setUserRegDate(LocalDateTime.now());
         return newUser;

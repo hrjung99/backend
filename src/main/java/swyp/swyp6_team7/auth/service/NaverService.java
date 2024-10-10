@@ -1,6 +1,7 @@
 package swyp.swyp6_team7.auth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class NaverService {
@@ -22,20 +24,18 @@ public class NaverService {
     @Value("${naver.redirect-uri}")
     private String redirectUri;
 
-    public String naverLogin() {
-        // 네이버 로그인 요청 URL 생성
-        String state = "RANDOM_STATE"; // CSRF 방지용 state 값
-        String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id="
-                + clientId + "&redirect_uri=" + redirectUri + "&state=" + state;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-        return naverAuthUrl;
+    public NaverService(RestTemplate restTemplate, ObjectMapper objectMapper) {
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     // 네이버에서 Access Token 요청
-    public String getAccessToken(String code, String state) {
-        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
+    public String getAccessToken(String code, String state, HttpSession session) {
 
-        RestTemplate restTemplate = new RestTemplate();
+        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
@@ -54,7 +54,7 @@ public class NaverService {
         if (response.getStatusCode() == HttpStatus.OK) {
             try {
                 // 액세스 토큰 추출
-                Map<String, Object> result = new ObjectMapper().readValue(response.getBody(), Map.class);
+                Map<String, Object> result = objectMapper.readValue(response.getBody(), Map.class);
                 return (String) result.get("access_token");
             } catch (Exception e) {
                 throw new RuntimeException("Failed to parse access token", e);
@@ -64,11 +64,10 @@ public class NaverService {
         }
     }
 
-    // 액세스 토큰을 사용해 네이버에서 사용자 정보를 가져오는 메서드
-    public Map<String, Object> getUserInfo(String accessToken) {
-        String userInfoUrl = "https://openapi.naver.com/v1/nid/me";
 
-        RestTemplate restTemplate = new RestTemplate();
+    // 액세스 토큰을 사용해 네이버에서 사용자 정보를 가져오는 메서드
+    public Map<String, Object> fetchNaverUserInfo(String accessToken) {
+        String userInfoUrl = "https://openapi.naver.com/v1/nid/me";
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -79,13 +78,13 @@ public class NaverService {
 
         if (response.getStatusCode() == HttpStatus.OK) {
             try {
-                // 사용자 정보를 JSON 형태로 변환하여 반환
-                return new ObjectMapper().readValue(response.getBody(), Map.class);
+                Map<String, Object> result = objectMapper.readValue(response.getBody(), Map.class);
+                return (Map<String, Object>) result.get("response");
             } catch (Exception e) {
-                throw new RuntimeException("Failed to parse user info", e);
+                throw new RuntimeException("Failed to parse user info from Naver", e);
             }
         } else {
-            throw new RuntimeException("Failed to get user info");
+            throw new RuntimeException("Failed to get user info from Naver");
         }
     }
 }
