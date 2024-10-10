@@ -24,7 +24,6 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
-    private final LikeService commentLikeService;
     private final MemberService memberService;
 
     //Create

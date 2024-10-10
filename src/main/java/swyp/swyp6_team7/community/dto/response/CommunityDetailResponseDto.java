@@ -17,18 +17,23 @@ public class CommunityDetailResponseDto {
 
     private int postNumber;         //게시글 번호
     private int userNumber;         //게시글 작성자 유저 번호
-    private int categoryNumber;    //카테고리명
+    private String postWriter;      //게시글 작성자명
+
+    private int categoryNumber;     //카테고리 번호
+    private String categoryName;    //카테고리명
 
     private String title;           //게시글 제목
     private String content;         //게시글 내용
     private String regDate;         //게시글 등록 일시
 
-    private int commentCount;       //해당 게시글의 댓글 수
-    private int likeCount;          //해당 게시글의 좋아요 수
+    private long commentCount;       //해당 게시글의 댓글 수
     private int viewCount;          //해당 게시글의 조회수
 
-    private String[] postImageUrls;  //해당 게시글의 이미지 url들 (최대 3개)
-    private String profileImageUrl;     //게시글 작성자의 프로필 이미지
+    private long likeCount;          //해당 게시글의 좋아요 수
+    private boolean liked;          //해당 게시글에 좋아요를 눌렀는지 여부
+
+    private String[] postImageUrls; //해당 게시글의 이미지 url들 (최대 3개)
+    private String profileImageUrl; //게시글 작성자의 프로필 이미지
 
     //날짜 포맷 변경
     public static String formatDate(LocalDateTime date) {
@@ -37,37 +42,50 @@ public class CommunityDetailResponseDto {
 
     @Builder
     public CommunityDetailResponseDto(
-            int postNumber, int userNumber, int categoryNumber, String title, String content,
-            LocalDateTime regDate, int commentCount, int likeCount, int viewCount,
+            int postNumber, int userNumber, String postWriter,
+            int categoryNumber, String categoryName,
+            String title, String content, LocalDateTime regDate,
+            long commentCount, int viewCount, long likeCount, boolean liked,
             String[] postImageUrls, String profileImageUrl
     ) {
         this.postNumber = postNumber;
         this.userNumber = userNumber;
+        this.postWriter = postWriter;
+
         this.categoryNumber = categoryNumber;
+        this.categoryName = categoryName;
+
         this.title = title;
         this.content = content;
         this.regDate = formatDate(regDate);
+
         this.commentCount = commentCount;
-        this.likeCount = likeCount;
         this.viewCount = viewCount;
+
+        this.likeCount = likeCount;
+        this.liked = liked;
+
         this.postImageUrls = postImageUrls;
         this.profileImageUrl = profileImageUrl;
     }
 
-    public static CommunityDetailResponseDto fromEntity(Community community, int commentCount, int likeCount, String[] postImageUrls, String profileImageUrl) {
-        return CommunityDetailResponseDto.builder()
-                .postNumber(community.getPostNumber())
-                .userNumber(community.getUserNumber())
-                .categoryNumber(community.getCategoryNumber())
-                .title(community.getTitle())
-                .content(community.getContent())
-                .regDate(community.getRegDate())
-                .commentCount(commentCount)
-                .likeCount(likeCount)
-                .viewCount(community.getViewCount())
-                .postImageUrls(postImageUrls)
-                .profileImageUrl(profileImageUrl)
-                .build();
+    public static CommunityDetailResponseDto fromEntity(Community community, String postWriter, String categoryName, long commentCount, long likeCount, boolean liked, String[] postImageUrls, String profileImageUrl) {
+        return new CommunityDetailResponseDto(
+                community.getPostNumber(),
+                community.getUserNumber(),
+                postWriter,
+                community.getCategoryNumber(),
+                categoryName,
+                community.getTitle(),
+                community.getContent(),
+                community.getRegDate(),
+                commentCount,
+                community.getViewCount(),
+                likeCount,
+                liked,
+                postImageUrls,
+                profileImageUrl
+                );
     }
 }
 

@@ -29,7 +29,7 @@ public class ImageService {
 
         if ("profile".equals(relatedType)) { //profile 이미지 일 경우
             handleProfileImages(imageFiles, relatedType, relatedNumber, responseDtos);
-            
+
         } else if ("community".equals(relatedType)) { //community 이미지 일 경우
             handleCommunityImages(imageFiles, relatedType, relatedNumber, responseDtos);
         } else {
@@ -55,7 +55,7 @@ public class ImageService {
             });
 
             // S3에 이미지 파일 업로드 후 폴더 path 받아오기
-            String folderPath = s3Uploader.upload(imageFile, relatedType, relatedNumber,0);
+            String folderPath = s3Uploader.upload(imageFile, relatedType, relatedNumber, 0);
 
             // 메타 데이터 뽑아서 create dto에 담기
             ImageCreateRequestDto imageCreateDto = ImageCreateRequestDto.builder()
@@ -98,7 +98,7 @@ public class ImageService {
             MultipartFile imageFile = imageFiles[i];
 
             // S3에 이미지 파일 업로드 후 URL 받아오기
-            String S3url = s3Uploader.upload(imageFile, relatedType, relatedNumber, i+1);
+            String S3url = s3Uploader.upload(imageFile, relatedType, relatedNumber, i + 1);
 
             // 메타 데이터 뽑아서 create dto에 담기
             ImageCreateRequestDto imageCreateDto = ImageCreateRequestDto.builder()
@@ -138,19 +138,31 @@ public class ImageService {
     // 이미지 삭제
     @Transactional
     public void deleteImage(String relatedType, int relatedNumber) {
-        // 데이터베이스에서 이미지 정보 조회
-        Image image = imageRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber)
-                .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다. "));
+        if ("profile".equals(relatedType)) {
+            // 1대1
+            Image image = imageRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다."));
 
-        // S3에서 파일 삭제
-        s3Uploader.deleteFile(image.getPath()); // 이미지의 경로를 사용하여 S3에서 삭제
+            // S3에서 파일 삭제
+            s3Uploader.deleteFile(image.getPath()); // 이미지의 경로를 사용하여 S3에서 삭제
 
-        // 데이터베이스에서 이미지 삭제
-        imageRepository.delete(image);
+            // 데이터베이스에서 이미지 삭제
+            imageRepository.delete(image);
+
+        } else if ("community".equals(relatedType)) {
+            // 1 대 다
+            List<Image> images = imageRepository.findAllByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
+
+            for (Image image : images) {
+                // S3에서 파일 삭제
+                s3Uploader.deleteFile(image.getPath()); // 이미지의 경로를 사용하여 S3에서 삭제
+
+                // 데이터베이스에서 이미지 삭제
+                imageRepository.delete(image);
+            }
+        } else {
+            throw new IllegalArgumentException("유효하지 않는 유형입니다: " + relatedType);
+        }
+
     }
-
-//    // 이미지 URL 조회
-//    public String getImageUrl(String relatedType, int relatedNumber, int order) {
-//        return s3Uploader.getImageUrl(relatedType, relatedNumber, order);
-//    }
 }

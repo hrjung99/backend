@@ -7,12 +7,12 @@ public class LikeStatus {
 
 
     // 댓글 조회 시 필요한 좋아요 상태
-    public static LikeReadResponseDto getCommentLikeStatus(LikeRepository commentLikeRepository, String relatedType, int relatedNumber, int userNumber) {
+    public static LikeReadResponseDto getLikeStatus(LikeRepository likeRepository, String relatedType, int relatedNumber, int userNumber) {
         // 좋아요 여부 확인
-        boolean liked = commentLikeRepository.existsByRelatedTypeAndRelatedNumberAndUserNumber(relatedType, relatedNumber, userNumber);
+        boolean liked = likeRepository.existsByRelatedTypeAndRelatedNumberAndUserNumber(relatedType, relatedNumber, userNumber);
 
         // 총 좋아요 수 가져오기
-        long likes = commentLikeRepository.countByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
+        long likes = likeRepository.countByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
 
         // DTO 생성 및 반환
         return new LikeReadResponseDto(relatedType, relatedNumber, liked, likes);

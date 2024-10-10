@@ -14,7 +14,6 @@ import swyp.swyp6_team7.comment.repository.CommentRepository;
 import swyp.swyp6_team7.community.domain.Community;
 import swyp.swyp6_team7.community.dto.response.CommunityDetailResponseDto;
 import swyp.swyp6_team7.community.repository.CommunityRepository;
-import swyp.swyp6_team7.community.service.CommunityService;
 import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.likes.dto.response.LikeReadResponseDto;
@@ -42,7 +41,6 @@ public class CommentService {
     private final LikeRepository likeRepository;
     private final TravelRepository travelRepository;
     private final S3Uploader s3Uploader;
-    private final CommunityService communityService;
     private final CommunityRepository communityRepository;
     private final ImageRepository imageRepository;
 
@@ -50,7 +48,7 @@ public class CommentService {
     @Transactional
     public Comment create(CommentCreateRequestDto request, int userNumber, String relatedType, int relatedNumber) {
         // 게시물 존재 여부 검증
-        ResponseEntity<String> validationResponse = validateRelatedNumber(relatedType, relatedNumber);
+        ResponseEntity<String> validationResponse = validateRelatedNumber(relatedType, relatedNumber, userNumber);
         if (!validationResponse.getStatusCode().is2xxSuccessful()) {
             throw new IllegalArgumentException(validationResponse.getBody());
         }
@@ -86,7 +84,7 @@ public class CommentService {
 
     //해당 게시글이 존재하는지 검증하는 메소드
     @Transactional
-    public ResponseEntity<String> validateRelatedNumber(String relatedType, int relatedNumber) {
+    public ResponseEntity<String> validateRelatedNumber(String relatedType, int relatedNumber, int userNumber) {
         // 여행 게시글일 경우
         if (relatedType.equals("travel")) {
             try {
@@ -99,7 +97,7 @@ public class CommentService {
             //커뮤니티 게시글일 경우
         } else if (relatedType.equals("community")) {
             try {
-                CommunityDetailResponseDto communityDetailResponse = communityService.getDetailsByPostNumber(relatedNumber);
+                Optional<Community> community = communityRepository.findByPostNumber(relatedNumber);
                 return ResponseEntity.ok("게시물 존재 유무 검증 성공.");
             } catch (IllegalArgumentException e) {
                 // 검증 실패
@@ -147,7 +145,7 @@ public class CommentService {
                     repliesCount = 0; //답글일 경우 답글 개수 0개
                 }
                 //좋아요 상태 가져오기
-                LikeReadResponseDto likeStatus = LikeStatus.getCommentLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
+                LikeReadResponseDto likeStatus = LikeStatus.getLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
                 //좋아요 개수
                 long likes = likeStatus.getTotalLikes();
                 //좋아요 여부, true = 좋아요 누름
@@ -196,7 +194,7 @@ public class CommentService {
                 }
 
                 // 좋아요 상태 가져오기
-                LikeReadResponseDto likeStatus = LikeStatus.getCommentLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
+                LikeReadResponseDto likeStatus = LikeStatus.getLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
                 long likes = likeStatus.getTotalLikes();
                 boolean liked = likeStatus.isLiked();
 
@@ -257,7 +255,6 @@ public class CommentService {
 
                 } catch (Exception e) {
                     log.error("Failed to delete reply comment: {}", reply.getCommentNumber(), e);
-                    // 추가적인 예외 처리 로직이 필요할 경우 여기에 구현
                 }
             }
 
@@ -295,14 +292,23 @@ public class CommentService {
     
     //게시글 작성자 인지 확인
     @Transactional(readOnly = true)
-    public void validateTravelWriter(int travelNumber, int userNumber) {
+    public void validateWriter(String relatedType, int relatedNumber, int requestUserNumber) {
 
-        // 존재하는 게시글인지 확인
-        Travel travel = travelRepository.findByNumber(travelNumber)
-                .orElseThrow(() -> new IllegalArgumentException("travel not found: " + travelNumber));
+        int writerNumber = 0;
+
+        if(relatedType.equals("travel")) {
+            // 존재하는 게시글인지 확인
+            Travel travel = travelRepository.findByNumber(relatedNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("travel not found: " + relatedNumber));
+            writerNumber = travel.getUserNumber();
+        } else if (relatedType.equals("community")) {
+            Community post = communityRepository.findByPostNumber(relatedNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("community not found: " + relatedNumber));
+            writerNumber = post.getUserNumber();
+        }
 
         // 요청한 사용자(=로그인 중인 사용자)가 게시글 작성자인지 확인
-        if (travel.getUserNumber() != userNumber) {
+        if (writerNumber != requestUserNumber) {
             throw new IllegalArgumentException("해당 게시글 작성자가 아닙니다.");
         }
     }

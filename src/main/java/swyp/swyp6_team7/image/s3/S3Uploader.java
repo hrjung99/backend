@@ -1,8 +1,10 @@
 package swyp.swyp6_team7.image.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,6 +13,7 @@ import swyp.swyp6_team7.image.util.FileNameHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @Component
 public class S3Uploader {
@@ -89,4 +92,19 @@ public class S3Uploader {
             return "";
         }
     }
+
+    // S3에서 해당 경로에 있는 파일 중 첫 번째 파일의 URL을 가져오는 메소드
+    public String getSingleFileUrlFromS3(String folderPath) {
+        ObjectListing objectListing = amazonS3.listObjects(s3Component.getBucket(), folderPath);
+        List<S3ObjectSummary> s3ObjectSummaries = objectListing.getObjectSummaries();
+
+        if (!s3ObjectSummaries.isEmpty()) {
+            String filePath = s3ObjectSummaries.get(0).getKey(); // 첫 번째 파일의 Key
+            return getImageUrl(filePath); // 파일의 URL 반환
+        }
+
+        return ""; // 파일이 없으면 null 반환
+    }
+
+
 }

@@ -24,9 +24,9 @@ public class LikeController {
     private final LikeService likeService;
 
     //좋아요
-    @PostMapping("/api/comments/{commentNumber}/like")
-    public ResponseEntity<List<CommentListReponseDto>> toggleLike(
-            @PathVariable int commentNumber,
+    @PostMapping("/api/{relatedType}/{relatedNumber}/like")
+    public ResponseEntity<Object> toggleLike(
+            @PathVariable String relatedType, @PathVariable int relatedNumber,
             Principal principal) {
 
         // user number 가져오기
@@ -34,7 +34,7 @@ public class LikeController {
         Users user = memberService.findByEmail(userEmail);
         int userNumber = user.getUserNumber();
 
-        List<CommentListReponseDto> result = likeService.toggleLike("comment", commentNumber, userNumber);
+        Object result = likeService.toggleLike(relatedType, relatedNumber, userNumber);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(result);
     }

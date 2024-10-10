@@ -29,7 +29,7 @@ public class LikeService {
     private final CommunityRepository communityRepository;
     private final CommunityService communityService;
 
-    public List<CommentListReponseDto> toggleLike(String relatedType, int relatedNumber, int userNumber) {
+    public Object toggleLike(String relatedType, int relatedNumber, int userNumber) {
 
         //댓글 좋아요의 경우
         if ("comment".equals(relatedType)) {
