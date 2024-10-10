@@ -13,6 +13,7 @@ import swyp.swyp6_team7.community.repository.CommunityRepository;
 @Transactional(readOnly = true)
 @Service
 public class CommunityService {
+    private final
 
     private final CommunityRepository communityRepository;
 
@@ -24,4 +25,12 @@ public class CommunityService {
         //
 
     }
+
+    //Detail Read
+    public getDetailsByNumber() {
+
+    }
+
+    //List Read
+    public
 }

@@ -11,6 +11,7 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
+import swyp.swyp6_team7.community.service.CommunityService;
 import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.likes.dto.response.LikeReadResponseDto;
 import swyp.swyp6_team7.likes.repository.LikeRepository;
@@ -37,6 +38,7 @@ public class CommentService {
     private final LikeRepository likeRepository;
     private final TravelRepository travelRepository;
     private final S3Uploader s3Uploader;
+    private final CommunityService communityService;
 
     // Create
     @Transactional
@@ -89,8 +91,15 @@ public class CommentService {
                 return ResponseEntity.badRequest().body("존재하지 않는 게시글입니다." + e.getMessage());
             }
             //커뮤니티 게시글일 경우
-//        } else if (relatedType.equals("community")) {
-//
+        } else if (relatedType.equals("community")) {
+            try {
+                TravelDetailResponse communityDetailResponse = communityService.getDetailsByNumber(relatedNumber);
+                return ResponseEntity.ok("게시물 존재 유무 검증 성공.");
+            } catch (IllegalArgumentException e) {
+                // 검증 실패
+                return ResponseEntity.badRequest().body("존재하지 않는 게시글입니다." + e.getMessage());
+            }
+
         } else {
             return ResponseEntity.badRequest().body("유효하지 않은 게시물 종류 입니다.");
         }
@@ -142,6 +151,41 @@ public class CommentService {
 
                 //DTO
                 CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, travelWriterNumber, imageUrl);
+                listReponse.add(dto);
+            }
+            return listReponse;
+        } else if (relatedType.equals("community")) {
+            // 커뮤니티 댓글 조회 로직
+            List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
+            List<Comment> sortedComments = sortComments(comments);
+
+            List<CommentListReponseDto> listReponse = new ArrayList<>();
+            for (Comment comment : sortedComments) {
+                // 댓글 작성자 조회
+                Optional<Users> user = userRepository.findByUserNumber(comment.getUserNumber());
+                String commentWriter = user.map(Users::getUserName).orElse("unknown");
+
+                // 댓글 작성자 프로필 이미지 URL
+                String imageUrl = "";
+                try {
+                    imageUrl = s3Uploader.getImageUrl("profile", comment.getUserNumber());
+                } catch (IllegalArgumentException e) {
+                    // 이미지 URL을 빈 문자열로 설정
+                    imageUrl = "";
+                }
+
+                // 답글 수 계산
+                long repliesCount = comment.getParentNumber() == 0
+                        ? commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getCommentNumber())
+                        : 0;
+
+                // 좋아요 상태 가져오기
+                LikeReadResponseDto likeStatus = LikeStatus.getCommentLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
+                long likes = likeStatus.getTotalLikes();
+                boolean liked = likeStatus.isLiked();
+
+                // DTO 생성
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, -1, imageUrl);
                 listReponse.add(dto);
             }
             return listReponse;
