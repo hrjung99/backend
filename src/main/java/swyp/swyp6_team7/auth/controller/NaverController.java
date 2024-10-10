@@ -61,6 +61,11 @@ public class NaverController {
         if (sessionState == null || !sessionState.equals(state)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid state parameter");
         }
+        // 중복된 code 값 사용 방지
+        if (session.getAttribute("oauth_code") != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization code already used");
+        }
+        session.setAttribute("oauth_code", code);  // code 값 저장하여 중복 사용 방지
 
         try {
             String accessToken = naverService.getAccessToken(code, state, session); // 세션도 함께 전달
