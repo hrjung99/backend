@@ -64,7 +64,7 @@ public class CommunityDetailResponseDto {
                 .regDate(community.getRegDate())
                 .commentCount(commentCount)
                 .likeCount(likeCount)
-                .viewCount(community.getView())
+                .viewCount(community.getViewCount())
                 .postImageUrls(postImageUrls)
                 .profileImageUrl(profileImageUrl)
                 .build();

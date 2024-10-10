@@ -11,7 +11,11 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
+import swyp.swyp6_team7.community.domain.Community;
+import swyp.swyp6_team7.community.dto.response.CommunityDetailResponseDto;
+import swyp.swyp6_team7.community.repository.CommunityRepository;
 import swyp.swyp6_team7.community.service.CommunityService;
+import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.likes.dto.response.LikeReadResponseDto;
 import swyp.swyp6_team7.likes.repository.LikeRepository;
@@ -39,6 +43,8 @@ public class CommentService {
     private final TravelRepository travelRepository;
     private final S3Uploader s3Uploader;
     private final CommunityService communityService;
+    private final CommunityRepository communityRepository;
+    private final ImageRepository imageRepository;
 
     // Create
     @Transactional
@@ -93,7 +99,7 @@ public class CommentService {
             //커뮤니티 게시글일 경우
         } else if (relatedType.equals("community")) {
             try {
-                TravelDetailResponse communityDetailResponse = communityService.getDetailsByNumber(relatedNumber);
+                CommunityDetailResponseDto communityDetailResponse = communityService.getDetailsByPostNumber(relatedNumber);
                 return ResponseEntity.ok("게시물 존재 유무 검증 성공.");
             } catch (IllegalArgumentException e) {
                 // 검증 실패
@@ -108,6 +114,8 @@ public class CommentService {
     //댓글 목록 조회
     @Transactional
     public List<CommentListReponseDto> getList(String relatedType, int relatedNumber, int userNumber) {
+
+        //이때 userNumber는 댓글 조회 요청자
 
         if (relatedType.equals("travel")) {
             List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
@@ -124,7 +132,8 @@ public class CommentService {
                 // 댓글 작성자 프로필 이미지 URL
                 String imageUrl = "";
                 try {
-                    imageUrl = s3Uploader.getImageUrl("profile", comment.getUserNumber());
+                    String folderPath = imageRepository.findByRelatedTypeAndRelatedNumber("profile", comment.getUserNumber()).get().getPath();
+                    imageUrl = s3Uploader.getImageUrl(folderPath);
                 } catch (IllegalArgumentException e) {
                     // 이미지 URL을 빈 문자열로 설정
                     imageUrl = "";
@@ -154,6 +163,9 @@ public class CommentService {
                 listReponse.add(dto);
             }
             return listReponse;
+
+
+
         } else if (relatedType.equals("community")) {
             // 커뮤니티 댓글 조회 로직
             List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
@@ -168,27 +180,37 @@ public class CommentService {
                 // 댓글 작성자 프로필 이미지 URL
                 String imageUrl = "";
                 try {
-                    imageUrl = s3Uploader.getImageUrl("profile", comment.getUserNumber());
+                    String folderPath = imageRepository.findByRelatedTypeAndRelatedNumber("profile", comment.getUserNumber()).get().getPath();
+                    imageUrl = s3Uploader.getImageUrl(folderPath);
                 } catch (IllegalArgumentException e) {
                     // 이미지 URL을 빈 문자열로 설정
                     imageUrl = "";
                 }
 
-                // 답글 수 계산
-                long repliesCount = comment.getParentNumber() == 0
-                        ? commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getCommentNumber())
-                        : 0;
+                // 답글 수 계산: 부모 댓글일 때만 계산
+                long repliesCount = 0;
+                if (comment.getParentNumber() == 0) {// 부모일 경우
+                    repliesCount = commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getCommentNumber()); // 답글 계산
+                } else {
+                    repliesCount = 0; //답글일 경우 답글 개수 0개
+                }
 
                 // 좋아요 상태 가져오기
                 LikeReadResponseDto likeStatus = LikeStatus.getCommentLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
                 long likes = likeStatus.getTotalLikes();
                 boolean liked = likeStatus.isLiked();
 
+                //게시글 작성자 조회
+                Optional<Community> postInfo = communityRepository.findByPostNumber(relatedNumber);
+                int communityWritreNumber= postInfo.get().getUserNumber();
+
                 // DTO 생성
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, -1, imageUrl);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked,communityWritreNumber, imageUrl);
                 listReponse.add(dto);
             }
             return listReponse;
+
+            //travel도 community도 아닐 경우
         } else {
             throw new IllegalArgumentException("유효하지 않은 게시물 종류입니다: " + relatedType);
         }

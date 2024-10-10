@@ -23,14 +23,14 @@ public class CommunityCreateRequestDto {
         this.content = content;
     }
 
-    public Community toCommunityEntity(int userNumber, int categoryNumber, String title, String content, LocalDateTime regDate, int view) {
+    public Community toCommunityEntity(int userNumber, int categoryNumber, String title, String content, LocalDateTime regDate, int viewCount) {
         return Community.builder()
                 .userNumber(userNumber)
                 .categoryNumber(categoryNumber)
                 .title(title)
                 .content(content)
                 .regDate(LocalDateTime.now())
-                .view(0)
+                .viewCount(0)
                 .build();
     }
 }

@@ -25,18 +25,20 @@ public class ImageController {
     public ResponseEntity<ImageDetailResponseDto> uploadImage(
             @PathVariable String relatedType,
             @PathVariable int relatedNumber,
-            @RequestParam("file") MultipartFile imageFile,
+            @RequestParam("file") MultipartFile image,
             Principal principal) throws IOException {
         if (!"profile".equals(relatedType)) {
             return ResponseEntity.badRequest().body(null); // 관련 타입이 profile이 아닌 경우 에러 처리
         }
 
+        MultipartFile[] images = new MultipartFile[1];
+        images[0] = image; // 배열에 이미지 추가
         try {
             // 이미지 업로드
-            Image createdImage = imageService.uploadImage(imageFile, relatedType, relatedNumber);
+            ImageDetailResponseDto[] createdImages = imageService.uploadImage(images, relatedType, relatedNumber);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(imageService.getImageDetailByNumber(createdImage.getRelatedType(), createdImage.getRelatedNumber()));
+                    .body(createdImages[0]);
         } catch (IOException e) {
             log.error("Image upload failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -57,10 +59,8 @@ public class ImageController {
             imageService.deleteImage(relatedType, relatedNumber);
             return ResponseEntity.noContent().build(); // 성공적으로 삭제된 경우
         } catch (IllegalArgumentException e) {
-            log.error("Image deletion failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 이미지가 존재하지 않는 경우
         } catch (Exception e) {
-            log.error("Image deletion failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 기타 에러 처리
         }
     }
@@ -74,10 +74,9 @@ public class ImageController {
             ImageDetailResponseDto imageDetail = imageService.getImageDetailByNumber(relatedType, relatedNumber);
             return ResponseEntity.ok(imageDetail); // 조회 성공
         } catch (IllegalArgumentException e) {
-            log.error("Image detail retrieval failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 이미지가 존재하지 않는 경우
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ImageDetailResponseDto(null, "해당 프로필 사진이 존재하지 않습니다.")); // 이미지가 존재하지 않는 경우
         } catch (Exception e) {
-            log.error("Image detail retrieval failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 기타 에러 처리
         }
     }

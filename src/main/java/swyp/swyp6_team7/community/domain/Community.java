@@ -42,17 +42,17 @@ public class Community {
     private LocalDateTime regDate;
 
     @Column(name = "community_post_view_count", nullable = false)
-    private int view;
+    private int viewCount;
 
     //C
     @Builder
-    public Community (int userNumber, int categoryNumber, String title, String content, LocalDateTime regDate, int view) {
+    public Community (int userNumber, int categoryNumber, String title, String content, LocalDateTime regDate, int viewCount) {
         this.userNumber = userNumber;
         this.categoryNumber = categoryNumber;
         this.title = title;
         this.content = content;
         this.regDate = regDate;
-        this.view = view;
+        this.viewCount = viewCount;
 
     }
 

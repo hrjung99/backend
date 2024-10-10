@@ -18,6 +18,8 @@ public class ImageDetailResponseDto {
     private String originalName;
     private Long size;
 
+    private String format;
+
     private String relatedType;
     private int relatedNumber;
 
@@ -29,12 +31,13 @@ public class ImageDetailResponseDto {
 
     @Builder
     public ImageDetailResponseDto(
-            Long imageNumber, String originalName, Long size, String relatedType,
+            Long imageNumber, String originalName, Long size, String format, String relatedType,
             Integer relatedNumber, String path, LocalDateTime uploadDate,  String url)
     {
         this.imageNumber = imageNumber;
         this.originalName = originalName;
         this.size = size;
+        this.format = format;
         this.relatedType = relatedType;
         this.relatedNumber = relatedNumber;
         this.path = path;
@@ -46,6 +49,7 @@ public class ImageDetailResponseDto {
         this.imageNumber = image.getImageNumber();
         this.originalName = image.getOriginalName();
         this.size = image.getSize();
+        this.format = image.getFormat();
         this.relatedType = image.getRelatedType();
         this.relatedNumber = image.getRelatedNumber();
         this.path = image.getPath();
@@ -59,6 +63,7 @@ public class ImageDetailResponseDto {
                 "imageNumber=" + imageNumber +
                 ", originalName='" + originalName + '\'' +
                 ", size=" + size +
+                ", format='" + format + '\'' +
                 ", relatedType='" + relatedType + '\'' +
                 ", relatedNumber=" + relatedNumber +
                 ", path='" + path + '\'' +

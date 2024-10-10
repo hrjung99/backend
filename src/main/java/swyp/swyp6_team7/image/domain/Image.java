@@ -68,13 +68,6 @@ public class Image {
         this.uploadDate = uploadDate;
     }
 
-//    //Update (파일 이름 및 경로 수정)
-//    public Image update(String originalName, String storageName, String path) {
-//        this.originalName = originalName;
-//        this.storageName = storageName;
-//        this.path = path;
-//        return this;
-//    }
 
     //Delete (이미지 삭제)
     public void delete(Long imageNumber) {
