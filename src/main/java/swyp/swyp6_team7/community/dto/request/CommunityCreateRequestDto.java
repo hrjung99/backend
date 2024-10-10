@@ -1,0 +1,36 @@
+package swyp.swyp6_team7.community.dto.request;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import swyp.swyp6_team7.community.domain.Community;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class CommunityCreateRequestDto {
+
+    private int categoryNumber;
+    private String title;
+    private String content;
+
+    public CommunityCreateRequestDto(int categoryNumber, String title, String content) {
+        this.categoryNumber = categoryNumber;
+        this.title = title;
+        this.content = content;
+    }
+
+    public Community toCommunityEntity(int userNumber, int categoryNumber, String title, String content, LocalDateTime regDate, int view) {
+        return Community.builder()
+                .userNumber(userNumber)
+                .categoryNumber(categoryNumber)
+                .title(title)
+                .content(content)
+                .regDate(LocalDateTime.now())
+                .view(0)
+                .build();
+    }
+}

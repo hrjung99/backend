@@ -1,4 +1,4 @@
-package swyp.swyp6_team7.community.domain;
+package swyp.swyp6_team7.category.domain;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

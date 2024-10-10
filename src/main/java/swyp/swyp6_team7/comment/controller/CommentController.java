@@ -11,7 +11,7 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.service.CommentService;
-import swyp.swyp6_team7.likes.service.CommentLikeService;
+import swyp.swyp6_team7.likes.service.LikeService;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
 
@@ -24,7 +24,7 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
-    private final CommentLikeService commentLikeService;
+    private final LikeService commentLikeService;
     private final MemberService memberService;
 
     //Create
@@ -91,23 +91,6 @@ public class CommentController {
 
         commentService.delete(commentNumber, userNumber);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-
-    //좋아요
-    @PostMapping("/api/comments/{commentNumber}/like")
-    public ResponseEntity<List<CommentListReponseDto>> toggleLike(
-            @PathVariable int commentNumber,
-            Principal principal) {
-
-        // user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
-
-        List<CommentListReponseDto> result = commentLikeService.toggleLike(commentNumber, userNumber);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(result);
     }
 }
 

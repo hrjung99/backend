@@ -12,10 +12,9 @@ import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
-import swyp.swyp6_team7.likes.dto.response.CommentLikeReadResponseDto;
-import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
-import swyp.swyp6_team7.likes.service.CommentLikeService;
-import swyp.swyp6_team7.likes.util.CommentLikeStatus;
+import swyp.swyp6_team7.likes.dto.response.LikeReadResponseDto;
+import swyp.swyp6_team7.likes.repository.LikeRepository;
+import swyp.swyp6_team7.likes.util.LikeStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -35,7 +34,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     final TravelService travelService;
     private final UserRepository userRepository;
-    private final CommentLikeRepository commentLikeRepository;
+    private final LikeRepository likeRepository;
     private final TravelRepository travelRepository;
     private final S3Uploader s3Uploader;
 
@@ -71,7 +70,7 @@ public class CommentService {
     public CommentDetailResponseDto getCommentByNumber(int commentNumber) {
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다." + commentNumber));
-        long likes = commentLikeRepository.countByCommentNumber(commentNumber);
+        long likes = likeRepository.countByRelatedTypeAndRelatedNumber("comment", commentNumber);
         CommentDetailResponseDto detailResponse = new CommentDetailResponseDto(comment, likes);
         return detailResponse;
     }
@@ -130,9 +129,9 @@ public class CommentService {
                     repliesCount = 0; //답글일 경우 답글 개수 0개
                 }
                 //좋아요 상태 가져오기
-                CommentLikeReadResponseDto likeStatus = CommentLikeStatus.getCommentLikeStatus(commentLikeRepository, comment.getCommentNumber(), userNumber);
+                LikeReadResponseDto likeStatus = LikeStatus.getCommentLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
                 //좋아요 개수
-                long likes = likeStatus.getLikes();
+                long likes = likeStatus.getTotalLikes();
                 //좋아요 여부, true = 좋아요 누름
                 boolean liked = likeStatus.isLiked();
 
@@ -168,7 +167,7 @@ public class CommentService {
         commentRepository.save(comment);
 
         // 업데이트된 댓글의 detail 리턴
-        long likes = commentLikeRepository.countByCommentNumber(commentNumber);
+        long likes = likeRepository.countByRelatedTypeAndRelatedNumber("comment", commentNumber);
         CommentDetailResponseDto result = new CommentDetailResponseDto(comment, likes);
 
         return result;
@@ -188,7 +187,7 @@ public class CommentService {
             for (Comment reply : replies) {
                 try {
                     commentRepository.deleteByCommentNumber(reply.getCommentNumber());
-                    commentLikeRepository.deleteByCommentNumber(reply.getCommentNumber());
+                    likeRepository.deleteByRelatedTypeAndRelatedNumber("comment", reply.getCommentNumber());
 
                 } catch (Exception e) {
                     log.error("Failed to delete reply comment: {}", reply.getCommentNumber(), e);
@@ -197,7 +196,7 @@ public class CommentService {
             }
 
             // 좋아요 기록 삭제
-            commentLikeRepository.deleteByCommentNumber(commentNumber);
+            likeRepository.deleteByRelatedTypeAndRelatedNumber("comment", commentNumber);
             // 부모 댓글 삭제
             commentRepository.deleteByCommentNumber(commentNumber);
         } catch (Exception e) {
