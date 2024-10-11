@@ -32,8 +32,8 @@ public class CommentController {
     public ResponseEntity<CommentDetailResponseDto> create(
             @RequestBody CommentCreateRequestDto request,
             Principal principal,
-            @PathVariable String relatedType,
-            @PathVariable int relatedNumber
+            @PathVariable(name = "relatedType") String relatedType,
+            @PathVariable(name = "relatedNumber") int relatedNumber
     ) {
         //user number 가져오기
         String userEmail = principal.getName();
