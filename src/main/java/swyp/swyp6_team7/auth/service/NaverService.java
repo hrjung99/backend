@@ -1,6 +1,7 @@
 package swyp.swyp6_team7.auth.service;
 
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import swyp.swyp6_team7.auth.provider.NaverProvider;
 import swyp.swyp6_team7.member.entity.*;
@@ -34,10 +35,32 @@ public class NaverService {
 
     public Map<String, String> getUserInfoFromNaver(String code, String state) {
         // NaverProvider에서 사용자 정보 가져오기
-        return naverProvider.getUserInfo(code, state);
+        return naverProvider.getUserInfoFromNaver(code, state);
     }
+    public Map<String, String> processNaverLogin(String code, String state) {
+        // 1. NaverProvider에서 사용자 정보 가져오기
+        Map<String, String> userInfo = naverProvider.getUserInfoFromNaver(code, state);
+
+        // 2. 사용자 정보가 성공적으로 받아졌다면 DB에 저장
+        saveSocialUser(
+                userInfo.get("email"),
+                userInfo.get("name"),
+                userInfo.get("gender"),
+                userInfo.get("socialID"),  // 네이버의 고유 소셜 ID
+                userInfo.get("ageGroup"),
+                userInfo.get("provider")
+        );
+
+        // 3. 필요한 추가 로직 처리 후 반환 (예: 토큰 생성, 사용자 세션 관리 등)
+        return userInfo;
+    }
+
     // Users와 SocialUsers에 저장하는 메서드
+    @Transactional
     private void saveSocialUser(String email, String name, String gender, String socialLoginId, String ageGroup, String provider) {
+        // 로그 추가
+        System.out.println("Saving user: " + email);
+
         // Users 테이블에서 해당 이메일로 사용자 찾기
         Optional<Users> existingUser = userRepository.findByUserEmail(email);
 
@@ -58,6 +81,7 @@ public class NaverService {
             user.setUserStatus(UserStatus.ABLE);
             user.setRole(UserRole.USER);
             userRepository.save(user);
+            System.out.println("User saved: " + user.getUserEmail());
         }
 
         // SocialUsers 테이블에 소셜 정보 저장
@@ -68,6 +92,7 @@ public class NaverService {
             socialUser.setSocialEmail(email);
             socialUser.setSocialProvider(SocialProvider.fromString(provider));
             socialUserRepository.save(socialUser);
+            System.out.println("Social user saved: " + socialLoginId);
         }
 
     }

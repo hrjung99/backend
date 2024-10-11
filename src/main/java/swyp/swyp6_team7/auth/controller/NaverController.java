@@ -57,6 +57,7 @@ public class NaverController {
             @RequestParam("state") String state,
             HttpSession session) {
 
+
         // 세션에서 저장한 state 값 가져와서 비교
         String sessionState = (String) session.getAttribute("oauth_state");
         if (sessionState == null || !sessionState.equals(state)) {
@@ -69,7 +70,7 @@ public class NaverController {
         session.setAttribute("oauth_code", code);  // code 값 저장하여 중복 사용 방지
 
         try {
-            Map<String, String> userInfo = naverService.getUserInfoFromNaver(code, state);
+            Map<String, String> userInfo = naverService.processNaverLogin(code, state);
             return ResponseEntity.ok(userInfo);
         } catch (Exception e) {
             e.printStackTrace();
