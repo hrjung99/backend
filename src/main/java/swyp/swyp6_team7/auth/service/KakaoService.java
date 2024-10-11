@@ -1,56 +1,133 @@
 package swyp.swyp6_team7.auth.service;
 
+
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import swyp.swyp6_team7.global.config.KakaoConfig;
+import org.springframework.web.bind.annotation.RequestBody;
+import swyp.swyp6_team7.auth.dto.SignupRequestDto;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.auth.provider.KakaoProvider;
+import swyp.swyp6_team7.member.entity.*;
+import swyp.swyp6_team7.member.repository.SocialUserRepository;
+import swyp.swyp6_team7.member.repository.UserRepository;
+
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class KakaoService {
-    private final KakaoConfig kakaoConfig;
-    private final RestTemplate restTemplate;
 
-    public KakaoService(KakaoConfig kakaoConfig) {
-        this.kakaoConfig = kakaoConfig;
-        this.restTemplate = new RestTemplate();
+    private final KakaoProvider kakaoProvider;
+    private final UserRepository userRepository;
+    private final SocialUserRepository socialUserRepository;
+    private final JwtProvider jwtProvider;
+
+    public KakaoService(KakaoProvider kakaoProvider, UserRepository userRepository,
+                        SocialUserRepository socialUserRepository, JwtProvider jwtProvider) {
+        this.kakaoProvider = kakaoProvider;
+        this.userRepository = userRepository;
+        this.socialUserRepository = socialUserRepository;
+        this.jwtProvider = jwtProvider;
     }
-    public KakaoConfig getKakaoConfig() {
-        return kakaoConfig;
+
+    public Map<String, String> getUserInfoFromKakao(String code) {
+        return kakaoProvider.getUserInfoFromKakao(code);
     }
 
-    // 액세스 토큰 요청
-    public String getAccessToken(String code) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    @Transactional
+    public Map<String, String> processKakaoLogin(String code) {
+        // 카카오 API에서 사용자 정보 가져오기
+        Map<String, String> userInfo = kakaoProvider.getUserInfoFromKakao(code);
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "authorization_code");
-        params.add("client_id", kakaoConfig.getClientId());
-        params.add("redirect_uri", kakaoConfig.getRedirectUri());
-        params.add("code", code);
+        String socialLoginId = userInfo.get("socialLoginId");
+        String nickname = userInfo.get("nickname");
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity(kakaoConfig.getTokenUrl(), request, Map.class);
+        // 사용자 정보 DB에 저장 (기존 사용자 없으면 새로 생성)
+        Users user = saveSocialUser(userInfo);
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            Map<String, Object> body = response.getBody();
-            return body != null ? (String) body.get("access_token") : null;
+        // 반환할 사용자 정보를 Map에 담기
+        Map<String, String> response = new HashMap<>();
+        response.put("userNumber",user.getUserNumber().toString());
+        response.put("userName", user.getUserName());
+        response.put("userEmail", user.getUserEmail());
+        response.put("userStatus", user.getUserStatus().toString());
+        response.put("socialLoginId", socialLoginId);
+
+        return response;  // 사용자 정보를 담은 Map 반환
+    }
+
+    @Transactional
+    public String completeSignup(@RequestBody SignupRequestDto signupData) {
+        if (signupData.getUserNumber() == null) {
+            throw new IllegalArgumentException("User ID must not be null");
         }
-        return null;
+        Optional<Users> optionalUser = userRepository.findById(signupData.getUserNumber());
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        Users user = optionalUser.get();
+        user.setUserEmail(signupData.getEmail());
+        user.setUserGender(Gender.valueOf(signupData.getGender().toUpperCase()));
+        user.setUserAgeGroup(AgeGroup.fromValue(signupData.getAgeGroup()));
+        user.setUserStatus(UserStatus.ABLE);  // 회원가입 완료
+
+        // 선호 태그 처리
+        if (signupData.getPreferredTags() != null) {
+            Set<String> preferredTags = signupData.getPreferredTags();
+            // 선호 태그 처리 로직 추가 (필요에 따라 태그를 User 엔티티에 저장하는 로직)
+        }
+
+        userRepository.save(user);
+
+        Optional<SocialUsers> existingSocialUser = socialUserRepository.findByUser(user);
+        if (existingSocialUser.isPresent()) {
+            SocialUsers socialUser = existingSocialUser.get();
+            socialUser.setSocialEmail(signupData.getEmail());
+            socialUserRepository.save(socialUser);
+        }
+
+        return "Signup complete";
     }
 
-    // 사용자 정보 요청
-    public Map<String, Object> getUserInfo(String accessToken) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
+    @Transactional
+    private Users saveSocialUser(Map<String, String> userInfo) {
+        String email = userInfo.getOrDefault("email", "unknown@example.com");
+        String socialLoginId = userInfo.get("socialLoginId");
+        String nickname = userInfo.get("nickname");
 
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<Map> response = restTemplate.exchange(kakaoConfig.getUserInfoUrl(), HttpMethod.GET, request, Map.class);
+        Optional<Users> existingUser = userRepository.findByUserEmail(email);
+        Users user;
 
-        return response.getBody();
+        if (existingUser.isPresent()) {
+            user = existingUser.get();  // 기존 사용자 정보
+        } else {
+            // 사용자 정보가 없으면 새로 생성
+            user = new Users();
+            user.setUserEmail(email);
+            user.setUserName(nickname != null ? nickname : "Unknown");
+            user.setUserPw("social-login");
+            user.setUserGender(Gender.NULL);  // 임시 성별
+            user.setUserAgeGroup(AgeGroup.UNKNOWN);  // 임시 연령대
+            user.setUserSocialTF(true);
+            user.setUserStatus(UserStatus.PENDING);  // 회원가입 미완료 상태
+
+            user = userRepository.save(user);  // 저장 후 반환
+        }
+
+        // SocialUsers 테이블에 소셜 정보 저장
+        if (!socialUserRepository.existsBySocialLoginId(socialLoginId)) {
+            SocialUsers socialUser = new SocialUsers();
+            socialUser.setUser(user);
+            socialUser.setSocialLoginId(socialLoginId);
+            socialUser.setSocialEmail(email);  // 임시 이메일
+            socialUser.setSocialProvider(SocialProvider.KAKAO);
+
+            socialUserRepository.save(socialUser);  // SocialUsers 엔티티 저장
+        }
+
+        return user;
     }
 }

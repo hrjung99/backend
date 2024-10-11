@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import swyp.swyp6_team7.auth.dto.SocialUserDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,8 +44,8 @@ public class NaverProvider implements SocialLoginProvider{
         return clientId;
     }
 
-    @Override
-    public Map<String, String> getUserInfo(String code, String state) {
+
+    public Map<String, String> getUserInfoFromNaver(String code, String state) {
         // 1. Access Token 가져오기
         String accessToken = getAccessToken(code, state);
 

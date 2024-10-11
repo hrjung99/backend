@@ -5,5 +5,4 @@ import java.util.Map;
 
 public interface SocialLoginProvider {
     boolean supports(String provider);
-    Map<String, String> getUserInfo(String code, String state);
 }
