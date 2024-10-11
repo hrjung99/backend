@@ -69,7 +69,7 @@ public class NaverProvider implements SocialLoginProvider{
                 userInfo.put("name", (String) responseBody.get("name"));
                 userInfo.put("gender", (String) responseBody.get("gender"));
                 userInfo.put("ageGroup", getAgeGroup((String) responseBody.get("age")));
-                userInfo.put("socialNumber", (String) responseBody.get("id")); // 네이버의 소셜 고유 ID
+                userInfo.put("socialID", (String) responseBody.get("id")); // 네이버의 소셜 고유 ID
                 userInfo.put("provider", "naver");
 
                 return userInfo;
