@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.profile.dto.PasswordChangeRequest;
 import swyp.swyp6_team7.profile.repository.UserProfileRepository;
@@ -48,7 +49,8 @@ public class ProfileService {
         Users user = userRepository.findUserWithTags(userNumber)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        user.setUserName(request.getName());  // 이름 수정 가능
+        user.setUserName(request.getName());
+        user.setUserAgeGroup(AgeGroup.fromValue(request.getAgeGroup()));
         userRepository.save(user);
 
         // UserProfile 엔티티 업데이트
