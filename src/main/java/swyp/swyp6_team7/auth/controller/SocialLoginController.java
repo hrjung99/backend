@@ -2,18 +2,22 @@ package swyp.swyp6_team7.auth.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.auth.service.SocialLoginService;
+import swyp.swyp6_team7.member.entity.SocialUsers;
 import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.repository.SocialUserRepository;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.member.service.MemberService;
+import swyp.swyp6_team7.member.service.UserLoginHistoryService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/social")
@@ -22,19 +26,28 @@ public class SocialLoginController {
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
     private final SocialLoginService socialLoginService;
+    private final UserLoginHistoryService userLoginHistoryService;
+    private final MemberService memberService;
 
-    public SocialLoginController(JwtProvider jwtProvider, UserRepository userRepository, SocialLoginService socialLoginService) {
+    public SocialLoginController(JwtProvider jwtProvider,
+                                 UserRepository userRepository,
+                                 SocialLoginService socialLoginService,
+                                 UserLoginHistoryService userLoginHistoryService,
+                                 MemberService memberService) {
         this.jwtProvider = jwtProvider;
         this.userRepository = userRepository;
         this.socialLoginService = socialLoginService;
+        this.userLoginHistoryService = userLoginHistoryService;
+        this.memberService = memberService;
     }
+
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> handleSocialLogin(String provider,
-                                                                 String code,
-                                                                 String state,
+    public ResponseEntity<Map<String, String>> handleSocialLogin(@RequestBody Map<String, String> loginRequest,
                                                                  HttpServletResponse response) {
-        // 소셜 로그인 처리 후 사용자 정보 가져오기
-        Users user = socialLoginService.handleSocialLogin(provider, code, state);
+        String socialLoginId = loginRequest.get("socialNumber");
+        String email = loginRequest.get("email");
+
+        Users user = socialLoginService.handleSocialLogin(socialLoginId, email);
 
         // JWT 토큰 생성
         String accessToken = jwtProvider.createAccessToken(
@@ -50,6 +63,10 @@ public class SocialLoginController {
         refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 1주일
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);
+
+        // 로그인 이력 저장
+        userLoginHistoryService.saveLoginHistory(user);
+        memberService.updateLoginDate(user);  // 로그인 시간 업데이트
 
         // 액세스 토큰을 JSON 응답으로 반환
         Map<String, String> responseMap = new HashMap<>();

@@ -1,90 +1,74 @@
 package swyp.swyp6_team7.auth.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import swyp.swyp6_team7.auth.provider.NaverProvider;
+import swyp.swyp6_team7.member.entity.*;
+import swyp.swyp6_team7.member.repository.SocialUserRepository;
+import swyp.swyp6_team7.member.repository.UserRepository;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class NaverService {
 
-    @Value("${naver.client-id}")
-    private String clientId;
+    private final NaverProvider naverProvider;
+    private final UserRepository userRepository;
+    private final SocialUserRepository socialUserRepository;
 
-    @Value("${naver.client-secret}")
-    private String clientSecret;
+    public NaverService(NaverProvider naverProvider, UserRepository userRepository, SocialUserRepository socialUserRepository) {
+        this.naverProvider = naverProvider;
+        this.userRepository = userRepository;
+        this.socialUserRepository = socialUserRepository;
+    }
+    // 네이버 로그인 URL 생성
+    public String naverLogin() {
+        String state = UUID.randomUUID().toString(); // 무작위 state 값 생성
+        String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id="
+                + naverProvider.getClientId() + "&redirect_uri=" + naverProvider.getRedirectUri() + "&state=" + state;
 
-    @Value("${naver.redirect-uri}")
-    private String redirectUri;
-
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
-
-    public NaverService(RestTemplate restTemplate, ObjectMapper objectMapper) {
-        this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
+        return naverAuthUrl;
     }
 
-    // 네이버에서 Access Token 요청
-    public String getAccessToken(String code, String state, HttpSession session) {
-
-        String tokenUrl = "https://nid.naver.com/oauth2.0/token";
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "authorization_code");
-        params.add("client_id", clientId);
-        params.add("client_secret", clientSecret);
-        params.add("code", code);
-        params.add("state", state);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-
-        ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            try {
-                // 액세스 토큰 추출
-                Map<String, Object> result = objectMapper.readValue(response.getBody(), Map.class);
-                return (String) result.get("access_token");
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse access token", e);
-            }
-        } else {
-            throw new RuntimeException("Failed to get access token");
-        }
+    public Map<String, String> getUserInfoFromNaver(String code, String state) {
+        // NaverProvider에서 사용자 정보 가져오기
+        return naverProvider.getUserInfo(code, state);
     }
+    // Users와 SocialUsers에 저장하는 메서드
+    private void saveSocialUser(String email, String name, String gender, String socialLoginId, String ageGroup, String provider) {
+        // Users 테이블에서 해당 이메일로 사용자 찾기
+        Optional<Users> existingUser = userRepository.findByUserEmail(email);
 
-
-    // 액세스 토큰을 사용해 네이버에서 사용자 정보를 가져오는 메서드
-    public Map<String, Object> fetchNaverUserInfo(String accessToken) {
-        String userInfoUrl = "https://openapi.naver.com/v1/nid/me";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + accessToken);
-
-        HttpEntity<String> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(userInfoUrl, HttpMethod.GET, request, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            try {
-                Map<String, Object> result = objectMapper.readValue(response.getBody(), Map.class);
-                return (Map<String, Object>) result.get("response");
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to parse user info from Naver", e);
-            }
+        Users user;
+        if (existingUser.isPresent()) {
+            user = existingUser.get();  // 기존 사용자 정보
         } else {
-            throw new RuntimeException("Failed to get user info from Naver");
+            // 사용자 정보가 없으면 새로 생성
+            user = new Users();
+            user.setUserEmail(email);
+            user.setUserName(name);
+            user.setUserPw("social-login");
+            if (gender != null && !gender.isEmpty()) {
+                user.setUserGender(Gender.valueOf(gender));
+            }  // 성별 변환 처리
+            user.setUserAgeGroup(AgeGroup.fromValue(ageGroup));
+            user.setUserSocialTF(true);  // 소셜 로그인 여부 true
+            user.setUserStatus(UserStatus.ABLE);
+            user.setRole(UserRole.USER);
+            userRepository.save(user);
         }
+
+        // SocialUsers 테이블에 소셜 정보 저장
+        if (!socialUserRepository.existsBySocialLoginId(socialLoginId)) {
+            SocialUsers socialUser = new SocialUsers();
+            socialUser.setUser(user);
+            socialUser.setSocialLoginId(socialLoginId);
+            socialUser.setSocialEmail(email);
+            socialUser.setSocialProvider(SocialProvider.fromString(provider));
+            socialUserRepository.save(socialUser);
+        }
+
     }
 }

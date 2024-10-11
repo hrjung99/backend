@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/api/logout",
                                 "/api/users/new",
                                 "/api/token/refresh",
+                                "/api/social/login",
                                 "/login/oauth/kakao/**","/login/oauth/naver/**","/login/oauth/google/**",
                                 "/error",
                                 "/api/users-email",

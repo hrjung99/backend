@@ -9,6 +9,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import swyp.swyp6_team7.auth.dto.SocialUserDTO;
 import swyp.swyp6_team7.auth.service.NaverService;
 
 import java.io.IOException;
@@ -68,8 +69,7 @@ public class NaverController {
         session.setAttribute("oauth_code", code);  // code 값 저장하여 중복 사용 방지
 
         try {
-            String accessToken = naverService.getAccessToken(code, state, session); // 세션도 함께 전달
-            Map<String, Object> userInfo = naverService.fetchNaverUserInfo(accessToken);
+            Map<String, String> userInfo = naverService.getUserInfoFromNaver(code, state);
             return ResponseEntity.ok(userInfo);
         } catch (Exception e) {
             e.printStackTrace();

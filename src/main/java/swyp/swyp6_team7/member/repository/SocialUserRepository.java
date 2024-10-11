@@ -6,6 +6,7 @@ import swyp.swyp6_team7.member.entity.SocialUsers;
 import java.util.Optional;
 
 public interface SocialUserRepository extends JpaRepository<SocialUsers, Integer> {
-    // socialNumber로 SocialUsers 찾기
-    Optional<SocialUsers> findBySocialNumber(Integer socialNumber);
+    Optional<SocialUsers> findBySocialLoginId(String socialLoginId);
+    Optional<SocialUsers> findBySocialLoginIdAndSocialEmail(String socialLoginId, String email);
+    boolean existsBySocialLoginId(String socialLoginId);
 }
