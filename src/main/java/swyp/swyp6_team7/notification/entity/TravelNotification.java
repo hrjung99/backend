@@ -4,20 +4,21 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
+@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @DiscriminatorValue("travel")
 public class TravelNotification extends Notification {
 
-    @Column(name = "travel_number", nullable = false)
+    @Column(name = "travel_number")
     private Integer travelNumber;
 
     @Column(name = "travel_title", length = 20)
@@ -27,7 +28,6 @@ public class TravelNotification extends Notification {
     private LocalDate travelDueDate;
 
 
-    @Builder
     public TravelNotification(
             Long number, LocalDateTime createdAt, Integer receiverNumber,
             String title, String content, Boolean isRead,

@@ -14,10 +14,10 @@ import swyp.swyp6_team7.comment.repository.CommentRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.likes.dto.response.CommentLikeReadResponseDto;
 import swyp.swyp6_team7.likes.repository.CommentLikeRepository;
-import swyp.swyp6_team7.likes.service.CommentLikeService;
 import swyp.swyp6_team7.likes.util.CommentLikeStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.notification.service.NotificationService;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
@@ -38,6 +38,7 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final TravelRepository travelRepository;
     private final S3Uploader s3Uploader;
+    private final NotificationService notificationService;
 
     // Create
     @Transactional
@@ -64,6 +65,10 @@ public class CommentService {
                 relatedType,
                 relatedNumber
         ));
+
+        //create notification to Host and Enrolled Users
+        notificationService.createCommentNotifications(relatedType, relatedNumber);
+
         return savedComment;
     }
 
