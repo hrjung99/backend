@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 application-local-db.yml
 application-dev.yml
+application-credentials.yml
 data.sql
 **/generated
 

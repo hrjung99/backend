@@ -3,6 +3,7 @@ package swyp.swyp6_team7.travel.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -17,6 +18,8 @@ import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
+import swyp.swyp6_team7.travel.domain.GenderType;
+import swyp.swyp6_team7.travel.domain.PeriodType;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
@@ -24,6 +27,7 @@ import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -50,77 +54,71 @@ public class TravelAppliedServiceTest {
 
     @Test
     @DisplayName("사용자가 신청한 여행 목록 조회")
-    public void getAppliedTripsByUser(){
-        // given
+    void testGetAppliedTripsByUser() {
+        // Given
         Integer userNumber = 1;
-        Pageable pageable = PageRequest.of(0, 5);
-        Location travelLocation = Location.builder()
-                .locationName("Seoul")
-                .locationType(LocationType.DOMESTIC)
-                .build();
+        Pageable pageable = PageRequest.of(0, 2);
 
-        Travel travel = Travel.builder()
+        Travel travel1 = Travel.builder()
                 .number(1)
-                .title("Trip Title")
-                .locationName("Seoul")
-                .createdAt(LocalDateTime.now().minusDays(3))
+                .userNumber(2)
+                .locationName("Location 1")
+                .title("Title 1")
+                .details("Details 1")
+                .viewCount(100)
+                .maxPerson(5)
+                .genderType(GenderType.MIXED)
                 .dueDate(LocalDate.now().plusDays(10))
-                .maxPerson(10)
+                .periodType(PeriodType.THREE_WEEKS)
                 .status(TravelStatus.IN_PROGRESS)
-                .location(travelLocation)
+                .createdAt(LocalDateTime.now())
                 .build();
 
-        Companion companion = Companion.builder()
-                .travel(travel)
-                .userNumber(userNumber)
+        Travel travel2 = Travel.builder()
+                .number(2)
+                .userNumber(2)
+                .locationName("Location 2")
+                .title("Title 2")
+                .details("Details 2")
+                .viewCount(150)
+                .maxPerson(10)
+                .genderType(GenderType.MAN_ONLY)
+                .dueDate(LocalDate.now().plusDays(15))
+                .periodType(PeriodType.THREE_WEEKS)
+                .status(TravelStatus.IN_PROGRESS)
+                .createdAt(LocalDateTime.now())
                 .build();
 
-        Users user = Users.builder()
-                .userNumber(userNumber)
-                .userName("Test User")
+        Users host = new Users(); // 사용자 객체 초기화
+        host.setUserNumber(2);
+
+
+        Companion companion1 = Companion.builder()
+                .travel(travel1)
                 .build();
 
-        // 모킹 설정: 사용자가 신청한 동반자 목록을 반환
-        when(companionRepository.findByUserNumber(userNumber))
-                .thenReturn(Collections.singletonList(companion));
+        Companion companion2 = Companion.builder()
+                .travel(travel2)
+                .build();
 
-        // 사용자를 찾기
-        when(userRepository.findById(userNumber))
-                .thenReturn(Optional.of(user));
+        List<Companion> companions = Arrays.asList(companion1, companion2);
 
-        // 북마크 여부 확인
-        when(bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber()))
-                .thenReturn(true);
-         // 여행 목록 페이지로 변환
-        TravelListResponseDto travelListResponseDto = new TravelListResponseDto(
-                travel.getNumber(),
-                travel.getTitle(),
-                travel.getLocationName(),
-                travel.getMaxPerson(),
-                travel.getLocationName(),
-                Collections.emptyList(), // 태그 리스트
-                travel.getViewCount(),
-                travel.getCompanions().size(),
-                travel.getStatus().name(),
-                user.getUserName(),
-                true // 북마크 여부
-        );
-        List<TravelListResponseDto> travelList = List.of(travelListResponseDto);
-        Page<TravelListResponseDto> travelPage = new PageImpl<>(travelList, pageable, travelList.size());
+        // 목 객체 행동 정의
+        when(companionRepository.findByUserNumber(userNumber)).thenReturn(companions);
+        when(userRepository.findByUserNumber(anyInt())).thenReturn(Optional.of(host));
+        when(bookmarkRepository.existsByUserNumberAndTravelNumber(anyInt(), anyInt())).thenReturn(false);
 
-        // when
+        // When
         Page<TravelListResponseDto> result = travelAppliedService.getAppliedTripsByUser(userNumber, pageable);
 
-        // then
+        // Then
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals("Trip Title", result.getContent().get(0).getTitle());
-        assertTrue(result.getContent().get(0).isBookmarked());
-
+        assertEquals(2, result.getTotalElements()); // 총 2개의 여행이 반환되는지 확인
         verify(companionRepository, times(1)).findByUserNumber(userNumber);
-        verify(userRepository, times(1)).findById(userNumber);
-        verify(bookmarkRepository, times(1)).existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
+        verify(userRepository, times(2)).findByUserNumber(anyInt());
+        verify(bookmarkRepository, times(2)).existsByUserNumberAndTravelNumber(anyInt(), anyInt());
     }
+
 
 
     @Test

@@ -171,10 +171,16 @@ class TravelCustomRepositoryImplTest {
     @Test
     public void findAllSortedByCreatedAt() {
         // given
+        Location travelLocation = Location.builder()
+                .locationName("Seoul"+System.currentTimeMillis())
+                .locationType(LocationType.DOMESTIC)
+                .build();
+        Location savedLocation = locationRepository.save(travelLocation);
         Travel travel = Travel.builder()
                 .title("추가 테스트 데이터")
                 .userNumber(1)
                 .viewCount(0)
+                .location(savedLocation)
                 .periodType(PeriodType.NONE)
                 .genderType(GenderType.NONE)
                 .createdAt(LocalDateTime.now().plusDays(1))

@@ -3,6 +3,7 @@ package swyp.swyp6_team7.travel.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.location.domain.LocationType;
 import swyp.swyp6_team7.location.repository.LocationRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
@@ -45,8 +47,15 @@ public class TravelService {
     public Travel create(TravelCreateRequest request, String email) {
 
         Users user = memberService.findByEmail(email);
+        // Location 정보가 없으면 새로운 Location 추가 (locationType은 UNKNOWN으로 설정)
         Location location = locationRepository.findByLocationName(request.getLocationName())
-                .orElseThrow(() -> new IllegalArgumentException("city not found: " + request.getLocationName()));
+                .orElseGet(() -> {
+                    Location newLocation = Location.builder()
+                            .locationName(request.getLocationName())
+                            .locationType(LocationType.UNKNOWN) // UNKNOWN으로 설정
+                            .build();
+                    return locationRepository.save(newLocation);
+                });
 
         Travel savedTravel = travelRepository.save(request.toTravelEntity(user.getUserNumber(), location));
         List<String> tags = travelTagService.create(savedTravel, request.getTags()).stream()
@@ -87,8 +96,17 @@ public class TravelService {
             detailResponse.setEnrollmentNumber(enrollmented);
         }
 
+        //조회수 update
+        travelRepository.updateViewCountPlusOneByTravelNumber(travel.getNumber());
+
         return detailResponse;
     }
+
+//    @Async
+//    @Transactional
+//    public void addViewCount(Travel targetTravel) {
+//        travelRepository.updateViewCountPlusOneByTravelNumber(targetTravel.getNumber());
+//    }
 
     @Transactional
     public void update(int travelNumber, TravelUpdateRequest travelUpdate) {
@@ -97,8 +115,15 @@ public class TravelService {
 
         authorizeTravelOwner(travel);
 
+        // Location 정보가 없으면 새로운 Location 추가 (locationType은 UNKNOWN으로 설정)
         Location location = locationRepository.findByLocationName(travelUpdate.getLocationName())
-                .orElseThrow(() -> new IllegalArgumentException("city not found: " + travelUpdate.getLocationName()));
+                .orElseGet(() -> {
+                    Location newLocation = Location.builder()
+                            .locationName(travelUpdate.getLocationName())
+                            .locationType(LocationType.UNKNOWN) // UNKNOWN으로 설정
+                            .build();
+                    return locationRepository.save(newLocation);
+                });
 
         Travel updatedTravel = travel.update(travelUpdate, location);
         List<String> updatedTags = travelTagService.update(updatedTravel, travelUpdate.getTags());
@@ -125,9 +150,6 @@ public class TravelService {
     public Page<TravelSearchDto> search(TravelSearchCondition condition) {
         Integer requestUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
         Page<TravelSearchDto> result = travelRepository.search(condition, requestUserNumber);
-        for (TravelSearchDto travelSearchDto : result) {
-            log.info("service: " + travelSearchDto.toString());
-        }
         return result;
     }
 

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class BookmarkResponse {
     private int travelNumber;           // 여행 번호
     private String title;               // 여행 제목
-    private String locaiton;
+    private String location;
     private int userNumber;             // 사용자 번호
     private String userName;            // 사용자 이름
     private List<String> tags;          // 태그 리스트
@@ -32,22 +32,5 @@ public class BookmarkResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate registerDue;
     private boolean isBookmarked;       // 북마크 여부
-
-
-    public static TravelListResponseDto fromEntity(Travel travel, Users user, int currentApplicants, boolean isBookmarked) {
-        return new TravelListResponseDto(
-                travel.getNumber(),
-                travel.getTitle(),
-                travel.getLocationName(),
-                user.getUserNumber(),
-                user.getUserName(),
-                travel.getTravelTags().stream().map(tag -> tag.getTag().getName()).collect(Collectors.toList()),
-                currentApplicants,
-                travel.getMaxPerson(),
-                travel.getCreatedAt(),
-                travel.getDueDate(),
-                isBookmarked
-        );
-    }
 
 }

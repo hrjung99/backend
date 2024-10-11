@@ -15,6 +15,7 @@ import swyp.swyp6_team7.location.domain.Location;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
+import swyp.swyp6_team7.travel.domain.TravelStatus;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
 import java.time.LocalDate;
@@ -117,6 +118,14 @@ public class BookmarkServiceTest {
 
         when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of(bookmark));
 
+        // 모킹: 여행 정보를 조회
+        Travel travel = Travel.builder()
+                .number(travelNumber)
+                .status(TravelStatus.IN_PROGRESS) // 삭제되지 않은 여행 상태 설정
+                .build();
+
+        when(travelRepository.findById(travelNumber)).thenReturn(Optional.of(travel));
+
         // when
         bookmarkService.removeBookmark(travelNumber, userNumber);
 
@@ -147,9 +156,13 @@ public class BookmarkServiceTest {
         user.setUserNumber(userNumber);
         user.setUserName("John Doe");
 
+        Users host = new Users();
+        host.setUserNumber(travel.getUserNumber());
+        host.setUserName("Host Name");
+
         when(bookmarkRepository.findBookmarksByUserNumber(userNumber)).thenReturn(List.of(bookmark));
         when(travelRepository.findById(101)).thenReturn(Optional.of(travel));
-        when(userRepository.findById(userNumber)).thenReturn(Optional.of(user));
+        when(userRepository.findByUserNumber(travel.getUserNumber())).thenReturn(Optional.of(host));
 
         // when
         Page<BookmarkResponse> responses = bookmarkService.getBookmarksByUser(userNumber, 0, 5);
@@ -159,7 +172,7 @@ public class BookmarkServiceTest {
         BookmarkResponse response = responses.getContent().get(0);
         assertThat(response.getTravelNumber()).isEqualTo(101);
         assertThat(response.getTitle()).isEqualTo("Sample Travel");
-        assertThat(response.getUserName()).isEqualTo("John Doe");
+        assertThat(response.getUserName()).isEqualTo("Host Name");
     }
     @Test
     @DisplayName("사용자의 북마크 목록 조회 - 빈 리스트 반환")

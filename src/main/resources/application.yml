@@ -1,7 +1,9 @@
 spring:
   profiles:
     active: local-db
----
+    include:
+      - credentials
+      - s3
 #spring:
 #  datasource:
 #    driver-class-name: org.mariadb.jdbc.Driver
@@ -17,3 +19,4 @@ spring:
 #      hibernate:
 #        dialect: org.hibernate.dialect.MariaDBDialect
 #    show-sql: true
+

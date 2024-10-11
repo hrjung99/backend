@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.dto.response.TravelListResponseDto;
 import swyp.swyp6_team7.travel.domain.Travel;
@@ -29,6 +30,7 @@ public class TravelListService {
     public Page<TravelListResponseDto> getTravelListByUser(Integer userNumber, Pageable pageable) {
         // 사용자 번호를 통해 여행 게시글 조회 (최신 등록순으로 정렬)
         List<Travel> travels = travelRepository.findByUserNumber(userNumber).stream()
+                .filter(travel -> travel.getStatus() != TravelStatus.DELETED) // 삭제된 여행 제외
                 .sorted((t1, t2) -> t2.getCreatedAt().compareTo(t1.getCreatedAt())) // 최신순으로 정렬
                 .collect(Collectors.toList());
 
@@ -47,9 +49,9 @@ public class TravelListService {
             int currentApplicants = travel.getCompanions().size();
 
             // 사용자의 이름을 가져오기 위해 userNumber로 사용자 조회
-            String username = userRepository.findByUserNumber(travel.getUserNumber())
-                    .map(users -> users.getUserName())
-                    .orElse("Unknown"); // 해당 사용자를 찾지 못할 경우 기본값
+            Users host = userRepository.findByUserNumber(travel.getUserNumber())
+                .orElseThrow(() -> new IllegalArgumentException("작성자 정보를 찾을 수 없습니다."));
+
 
             // 태그 리스트 추출
             List<String> tags = travel.getTravelTags().stream()
@@ -59,12 +61,13 @@ public class TravelListService {
             // 북마크 여부 확인
             boolean isBookmarked = bookmarkRepository.existsByUserNumberAndTravelNumber(userNumber, travel.getNumber());
 
+
             return new TravelListResponseDto(
                     travel.getNumber(),
                     travel.getTitle(),
                     travel.getLocationName(),
-                    travel.getUserNumber(),
-                    username,
+                    host.getUserNumber(),
+                    host.getUserName(),
                     tags,
                     currentApplicants,
                     travel.getMaxPerson(),

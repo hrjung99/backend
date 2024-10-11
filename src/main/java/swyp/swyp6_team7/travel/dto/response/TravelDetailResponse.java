@@ -83,7 +83,7 @@ public class TravelDetailResponse {
         this.location = travelDetail.getTravel().getLocationName();
         this.title = travelDetail.getTravel().getTitle();
         this.details = travelDetail.getTravel().getDetails();
-        this.viewCount = getViewCount();
+        this.viewCount = travelDetail.getTravel().getViewCount();
         this.enrollCount = enrollCount;
         this.bookmarkCount = bookmarkCount;
         this.nowPerson = travelDetail.getCompanionCount();

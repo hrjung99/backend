@@ -5,7 +5,8 @@ public enum AgeGroup{
     TWENTY("20대"), // 20대
     THIRTY("30대"), // 30대
     FORTY("40대"),  // 40대
-    FIFTY_PLUS("50대 이상"); // 50대 이상
+    FIFTY_PLUS("50대 이상"), // 50대 이상
+    UNKNOWN("임시");
 
     private final String value;
 
