@@ -20,18 +20,18 @@ public class DeletedUsers {
     private Long deletedNumber;
 
     @Column(nullable = false)
-    private int userNumber;
+    private Integer userNumber;
 
     @Column(nullable = false)
     private String deletedUserEmail;
 
     @Column(nullable = false)
-    private LocalDateTime deletedUserRegDate;
+    private LocalDateTime deletedUserDeleteDate; // 탈퇴한 날짜
 
-    private LocalDateTime deletedUserLoginDate;
+    private LocalDateTime deletedUserLoginDate; // 마지막 로그인한 날짜
 
     @Column(nullable = false)
-    private LocalDateTime deletedUserDeleteDate;
+    private LocalDateTime finalDeletionDate; // 최종 삭제 처리할 날짜(탈퇴 3개월 뒤)
 
 
 

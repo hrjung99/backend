@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
@@ -18,10 +19,12 @@ import java.util.Map;
 public class MemberController {
     private final MemberService memberService;
     private final UserLoginHistoryService userLoginHistoryService;
+    private final JwtProvider jwtProvider;
 
-    public MemberController(MemberService memberService,UserLoginHistoryService userLoginHistoryService) {
+    public MemberController(MemberService memberService,UserLoginHistoryService userLoginHistoryService,JwtProvider jwtProvider) {
         this.memberService = memberService;
         this.userLoginHistoryService = userLoginHistoryService;
+        this.jwtProvider =jwtProvider;
     }
 
     @PostMapping("/users/new")
@@ -51,14 +54,19 @@ public class MemberController {
         return new ResponseEntity<>("Admin successfully registered", HttpStatus.CREATED);
     }
     // 회원 탈퇴
-    @DeleteMapping("/{userNumber}")
-    public ResponseEntity<Void> deleteUser(Authentication authentication) {
+    @DeleteMapping("/user/delete")
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token) {
         try {
-            Integer authenticatedUserNumber = Integer.parseInt(authentication.getName());
-            memberService.deleteUser(authenticatedUserNumber);
+            String jwtToken = token.replace("Bearer ", "");
+            Integer userNumber = jwtProvider.getUserNumber(jwtToken);
+
+            // 회원 탈퇴 서비스 호출
+            memberService.deleteUser(userNumber);
             return ResponseEntity.noContent().build(); // 204 No Content
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build(); // 404 Not Found
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 500 Internal Server Error
         }
     }
 }

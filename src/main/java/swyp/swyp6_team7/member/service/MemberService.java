@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -254,11 +255,14 @@ public class MemberService {
     }
     @Transactional
     public void deleteUser(Integer userNumber) {
-        // 회원 정보 조회
-        Users user = findUserById(userNumber);
+        Optional<Users> optionalUser = userRepository.findById(userNumber);
 
-        // 회원 삭제 로직 위임
-        memberDeletedService.deleteUserData(user);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        Users user = optionalUser.get();
+        memberDeletedService.deleteUserData(user);  // 삭제 로직 실행
     }
 
     private Users findUserById(Integer userNumber) {
