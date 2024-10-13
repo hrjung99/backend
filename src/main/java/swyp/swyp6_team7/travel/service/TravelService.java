@@ -96,17 +96,13 @@ public class TravelService {
             detailResponse.setEnrollmentNumber(enrollmented);
         }
 
-        //조회수 update
-        travelRepository.updateViewCountPlusOneByTravelNumber(travel.getNumber());
-
         return detailResponse;
     }
 
-//    @Async
-//    @Transactional
-//    public void addViewCount(Travel targetTravel) {
-//        travelRepository.updateViewCountPlusOneByTravelNumber(targetTravel.getNumber());
-//    }
+    @Transactional
+    public void addViewCount(int travelNumber) {
+        travelRepository.updateViewCountPlusOneByTravelNumber(travelNumber);
+    }
 
     @Transactional
     public void update(int travelNumber, TravelUpdateRequest travelUpdate) {
