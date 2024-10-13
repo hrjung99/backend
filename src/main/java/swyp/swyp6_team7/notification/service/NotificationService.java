@@ -36,14 +36,12 @@ public class NotificationService {
 
 
     @Async
-    public void createEnrollNotificationToHost(Travel targetTravel) {
-        Notification newNotification = NotificationMaker.travelEnrollmentMessageToHost(targetTravel);
-        newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]여행신청 =" + newNotification.toString());
-    }
-
-    @Async
     public void createEnrollNotification(Travel targetTravel, Users user) {
+        //notification to host
+        Notification newNotificationToHost = NotificationMaker.travelEnrollmentMessageToHost(targetTravel);
+        newNotificationToHost = notificationRepository.save(newNotificationToHost);
+        log.info("[알림]여행신청 =" + newNotificationToHost.toString());
+
         Notification newNotification = NotificationMaker.travelEnrollmentMessage(targetTravel, user);
         newNotification = notificationRepository.save(newNotification);
         log.info("[알림]참가신청 =" + newNotification.toString());
