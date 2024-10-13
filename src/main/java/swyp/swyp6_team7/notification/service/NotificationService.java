@@ -77,11 +77,11 @@ public class NotificationService {
 
         // notification to each enrollment
         List<Integer> enrolledUserNumbers = enrollmentRepository.findEnrolledUserNumbersByTravelNumber(targetTravel.getNumber());
-        enrolledUserNumbers.stream()
+        List<Notification> createdNotifications = enrolledUserNumbers.stream()
                 .distinct()
-                .forEach(userNumber -> notificationRepository.save(
-                        NotificationMaker.travelNewCommentMessageToEnrollments(targetTravel, userNumber))
-                );
+                .map(userNumber -> NotificationMaker.travelNewCommentMessageToEnrollments(targetTravel, userNumber))
+                .toList();
+        notificationRepository.saveAll(createdNotifications);
     }
 
 
