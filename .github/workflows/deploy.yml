@@ -28,7 +28,9 @@ jobs:
         run: echo "${{ secrets.APPLICATION_CREDENTIALS }}" > ./src/test/resources/application-credentials.yml
 
       - name: Test and Build
-        run: ./gradlew clean build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build
 
       - name: Change build result file name
         run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
