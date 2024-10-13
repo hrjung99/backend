@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 public class HealthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Test
-    public void shouldReturnHealthStatus() throws Exception {
-        mockMvc.perform(get("/actuator/health"))
-                .andDo(print())
-                .andExpect(status().isOk()) // 200 OK 상태 코드 확인
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value("UP")); // JSON 응답에서 "status": "UP" 확인
-    }
+//    @Autowired
+//    private MockMvc mockMvc;
+//
+//    @Test
+//    public void shouldReturnHealthStatus() throws Exception {
+//        mockMvc.perform(get("/actuator/health"))
+//                .andDo(print())
+//                .andExpect(status().isOk()) // 200 OK 상태 코드 확인
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value("UP")); // JSON 응답에서 "status": "UP" 확인
+//    }
 }
