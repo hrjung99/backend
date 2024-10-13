@@ -19,7 +19,6 @@ import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.notification.service.NotificationService;
 import swyp.swyp6_team7.travel.domain.Travel;
-import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 import swyp.swyp6_team7.travel.service.TravelService;
 
@@ -88,7 +87,8 @@ public class CommentService {
         // 여행 게시글일 경우
         if (relatedType.equals("travel")) {
             try {
-                TravelDetailResponse travelDetailResponse = travelService.getDetailsByNumber(relatedNumber);
+                //TravelDetailResponse travelDetailResponse = travelService.getDetailsByNumber(relatedNumber);
+                travelRepository.findByNumber(relatedNumber);
                 return ResponseEntity.ok("게시물 존재 유무 검증 성공.");
             } catch (IllegalArgumentException e) {
                 // 검증 실패
