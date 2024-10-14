@@ -60,7 +60,7 @@ public class KakaoService {
     }
 
     @Transactional
-    public String completeSignup(@RequestBody SignupRequestDto signupData) {
+    public Map<String, String> completeSignup(@RequestBody SignupRequestDto signupData) {
         if (signupData.getUserNumber() == null) {
             throw new IllegalArgumentException("User ID must not be null");
         }
@@ -84,13 +84,21 @@ public class KakaoService {
         userRepository.save(user);
 
         Optional<SocialUsers> existingSocialUser = socialUserRepository.findByUser(user);
+        String socialLoginId = null;
+        String email = user.getUserEmail();
         if (existingSocialUser.isPresent()) {
             SocialUsers socialUser = existingSocialUser.get();
             socialUser.setSocialEmail(signupData.getEmail());
+            socialLoginId = socialUser.getSocialLoginId();
             socialUserRepository.save(socialUser);
         }
 
-        return "Signup complete";
+        // 응답 데이터 생성
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Signup complete");
+        response.put("socialLoginId", socialLoginId != null ? socialLoginId : "N/A");
+        response.put("email",email);
+        return response;
     }
 
     @Transactional

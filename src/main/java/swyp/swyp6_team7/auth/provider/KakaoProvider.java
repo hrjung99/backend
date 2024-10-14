@@ -3,6 +3,7 @@ package swyp.swyp6_team7.auth.provider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -12,7 +13,7 @@ import swyp.swyp6_team7.auth.dto.SocialUserDTO;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service
+@Component
 public class KakaoProvider implements SocialLoginProvider {
 
     @Value("${kakao.client-id}")

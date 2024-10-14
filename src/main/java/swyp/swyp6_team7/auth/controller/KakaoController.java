@@ -74,9 +74,9 @@ public class KakaoController {
 
     }
     @PutMapping("/api/social/kakao/complete-signup")
-    public ResponseEntity<String> completeKakaoSignup(@RequestBody SignupRequestDto signupData) {
+    public ResponseEntity<Map<String, String>> completeKakaoSignup(@RequestBody SignupRequestDto signupData) {
         // 클라이언트로부터 받은 추가 정보를 저장
-        String result = kakaoService.completeSignup(signupData);
+        Map<String, String> result = kakaoService.completeSignup(signupData);
         return ResponseEntity.ok(result);
     }
 }
