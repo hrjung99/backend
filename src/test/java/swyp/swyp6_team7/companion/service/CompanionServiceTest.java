@@ -1,11 +1,13 @@
 package swyp.swyp6_team7.companion.service;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.companion.dto.CompanionInfoDto;
 import swyp.swyp6_team7.companion.repository.CompanionRepository;
@@ -30,6 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
+@TestPropertySource(properties = {
+        "kakao.client-id=fake-client-id",
+        "kakao.client-secret=fake-client-secret",
+        "kakao.redirect-uri=http://localhost:8080/login/oauth2/code/kakao",
+        "kakao.token-url=https://kauth.kakao.com/oauth/token",
+        "kakao.user-info-url=https://kapi.kakao.com/v2/user/me"
+})
 class CompanionServiceTest {
 
     @Autowired

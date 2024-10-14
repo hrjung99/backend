@@ -9,10 +9,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.config.TestConfig;
 import swyp.swyp6_team7.member.entity.Gender;
 import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Users;
@@ -32,7 +36,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource(properties = {
+        "kakao.client-id=fake-client-id",
+        "kakao.client-secret=fake-client-secret",
+        "kakao.redirect-uri=http://localhost:8080/login/oauth2/code/kakao",
+        "kakao.token-url=https://kauth.kakao.com/oauth/token",
+        "kakao.user-info-url=https://kapi.kakao.com/v2/user/me"
+})
 class ProfileControllerTest {
+
+    @MockBean
+    private RestTemplate restTemplate;
 
     @Autowired
     private MockMvc mockMvc;

@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import swyp.swyp6_team7.auth.service.CustomUserDetails;
 import swyp.swyp6_team7.member.entity.Users;
@@ -22,6 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "kakao.client-id=fake-client-id",
+        "kakao.client-secret=fake-client-secret",
+        "kakao.redirect-uri=http://localhost:8080/login/oauth2/code/kakao",
+        "kakao.token-url=https://kauth.kakao.com/oauth/token",
+        "kakao.user-info-url=https://kapi.kakao.com/v2/user/me"
+})
 public class LogoutControllerTest {
 
     @Autowired

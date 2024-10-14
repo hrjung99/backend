@@ -2,6 +2,7 @@ package swyp.swyp6_team7.auth.service;
 
 
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swyp.swyp6_team7.auth.provider.NaverProvider;
 import swyp.swyp6_team7.member.entity.*;
@@ -18,7 +19,7 @@ public class NaverService {
     private final NaverProvider naverProvider;
     private final UserRepository userRepository;
     private final SocialUserRepository socialUserRepository;
-
+    @Autowired
     public NaverService(NaverProvider naverProvider, UserRepository userRepository, SocialUserRepository socialUserRepository) {
         this.naverProvider = naverProvider;
         this.userRepository = userRepository;

@@ -2,6 +2,7 @@ package swyp.swyp6_team7.auth.service;
 
 
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import swyp.swyp6_team7.auth.dto.SignupRequestDto;
@@ -23,7 +24,7 @@ public class KakaoService {
     private final UserRepository userRepository;
     private final SocialUserRepository socialUserRepository;
     private final JwtProvider jwtProvider;
-
+    @Autowired
     public KakaoService(KakaoProvider kakaoProvider, UserRepository userRepository,
                         SocialUserRepository socialUserRepository, JwtProvider jwtProvider) {
         this.kakaoProvider = kakaoProvider;
