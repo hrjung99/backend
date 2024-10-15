@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
 import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.member.service.MemberDeletedService;
 import swyp.swyp6_team7.member.service.MemberService;
 import org.springframework.web.bind.annotation.*;
 import swyp.swyp6_team7.member.service.UserLoginHistoryService;
@@ -18,19 +19,26 @@ import java.util.Map;
 @RequestMapping("/api")
 public class MemberController {
     private final MemberService memberService;
+    private final MemberDeletedService memberDeletedService;
     private final UserLoginHistoryService userLoginHistoryService;
     private final JwtProvider jwtProvider;
 
-    public MemberController(MemberService memberService,UserLoginHistoryService userLoginHistoryService,JwtProvider jwtProvider) {
+    public MemberController(MemberService memberService,
+                            UserLoginHistoryService userLoginHistoryService,
+                            JwtProvider jwtProvider,
+                            MemberDeletedService memberDeletedService) {
         this.memberService = memberService;
         this.userLoginHistoryService = userLoginHistoryService;
         this.jwtProvider =jwtProvider;
+        this.memberDeletedService = memberDeletedService;
     }
 
     @PostMapping("/users/new")
     public ResponseEntity<Map<String, Object>> signUp(@RequestBody UserRequestDto userRequestDto) {
         // DTO 객체를 사용하여 회원 가입 처리
         try {
+            // 재가입 제한 검증 (탈퇴 후 3개월 이내 재가입 불가)
+            memberDeletedService.validateReRegistration(userRequestDto.getEmail());
             Map<String, Object> response = memberService.signUp(userRequestDto);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {

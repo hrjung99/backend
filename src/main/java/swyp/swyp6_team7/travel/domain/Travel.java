@@ -94,7 +94,7 @@ public class Travel {
 
     // 기존의 Users 참조 대신 탈퇴 회원을 참조할 수 있는 필드 추가
     @ManyToOne
-    @JoinColumn(name = "deleted_user_id")
+    @JoinColumn(name = "deleted_number", referencedColumnName = "deletedNumber", nullable = true)
     private DeletedUsers deletedUser;
 
     @Builder
@@ -102,7 +102,8 @@ public class Travel {
             int number, int userNumber, LocalDateTime createdAt,
             Location location, String locationName, String title, String details, int viewCount,
             int maxPerson, GenderType genderType, LocalDate dueDate,
-            PeriodType periodType, TravelStatus status, LocalDateTime enrollmentsLastViewedAt
+            PeriodType periodType, TravelStatus status, LocalDateTime enrollmentsLastViewedAt,
+            DeletedUsers deletedUser
     ) {
         this.number = number;
         this.userNumber = userNumber;
@@ -118,6 +119,7 @@ public class Travel {
         this.periodType = periodType;
         this.status = status;
         this.enrollmentsLastViewedAt = enrollmentsLastViewedAt;
+        this.deletedUser = deletedUser;
     }
 
     public Travel update(TravelUpdateRequest travelUpdate, Location travelLocation) {

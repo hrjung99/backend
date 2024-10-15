@@ -9,8 +9,8 @@ import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class MemberDeletedService {
@@ -28,14 +28,9 @@ public class MemberDeletedService {
 
     @Transactional
     public void deleteUserData(Users user) {
-        // 탈퇴 회원 정보 저장 (비식별화 처리)
-        DeletedUsers deletedUser = saveDeletedUser(user);
-
-        // 사용자 정보 비식별화 처리
-        anonymizeUser(user);
-
-        // 사용자가 생성한 콘텐츠는 탈퇴한 사용자로 연결
-        updateUserContentReferences(user.getUserNumber(), deletedUser);
+        DeletedUsers deletedUser = saveDeletedUser(user); // 탈퇴 회원 정보 저장 (비식별화 처리)
+        anonymizeUser(user); // 사용자 정보 비식별화 처리
+        updateUserContentReferences(user.getUserNumber(), deletedUser);   // 사용자가 생성한 콘텐츠는 탈퇴한 사용자로 연결
 
         userRepository.save(user);
     }
@@ -48,7 +43,7 @@ public class MemberDeletedService {
         user.setUserStatus(UserStatus.DELETED);  // 삭제된 사용자 상태로 설정
     }
 
-    private LocalDateTime calculateFinalDeletionDate(LocalDateTime deletedUserDeleteDate) {
+    private LocalDate calculateFinalDeletionDate(LocalDate deletedUserDeleteDate) {
         return deletedUserDeleteDate.plusMonths(3);  // 3개월 뒤로 설정
     }
 
@@ -58,8 +53,8 @@ public class MemberDeletedService {
         deletedUser.setUserNumber(user.getUserNumber());
         deletedUser.setDeletedUserEmail(user.getEmail());
         deletedUser.setDeletedUserLoginDate(user.getUserLoginDate());
-        deletedUser.setDeletedUserDeleteDate(LocalDateTime.now()); // 현재 탈퇴 시간
-        deletedUser.setFinalDeletionDate(calculateFinalDeletionDate(LocalDateTime.now())); // 3개월 뒤 삭제
+        deletedUser.setDeletedUserDeleteDate(LocalDate.now()); // 현재 탈퇴 시간
+        deletedUser.setFinalDeletionDate(calculateFinalDeletionDate(LocalDate.now())); // 3개월 뒤 삭제
 
         return deletedUsersRepository.save(deletedUser);
     }
@@ -81,7 +76,7 @@ public class MemberDeletedService {
     @Scheduled(cron = "0 0 2 * * ?")  // 매일 새벽 2시에 실행
     @Transactional
     public void deleteExpiredUsers() {
-        List<DeletedUsers> expiredUsers = deletedUsersRepository.findAllByFinalDeletionDateBefore(LocalDateTime.now());
+        List<DeletedUsers> expiredUsers = deletedUsersRepository.findAllByFinalDeletionDateBefore(LocalDate.now());
 
         for (DeletedUsers deletedUser : expiredUsers) {
             // DeletedUsers와 관련된 모든 데이터 삭제
@@ -89,5 +84,19 @@ public class MemberDeletedService {
             deletedUsersRepository.delete(deletedUser);  // 탈퇴 정보 삭제
         }
     }
+    public void validateReRegistration(String email) {
+        List<DeletedUsers> deletedUsers = deletedUsersRepository.findAllByDeletedUserEmail(email)
+                .orElse(Collections.emptyList());
 
+        if (!deletedUsers.isEmpty()) {
+            LocalDate mostRecentDeletionDate = deletedUsers.stream()
+                    .map(DeletedUsers::getFinalDeletionDate)
+                    .max(LocalDate::compareTo)
+                    .orElse(LocalDate.now());
+
+            if (mostRecentDeletionDate.isAfter(LocalDate.now())) {
+                throw new IllegalArgumentException("탈퇴 후 3개월 이내에는 재가입이 불가능합니다.");
+            }
+        }
+    }
 }
