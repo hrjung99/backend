@@ -1,14 +1,12 @@
 package swyp.swyp6_team7.travel.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import swyp.swyp6_team7.companion.domain.Companion;
 import swyp.swyp6_team7.location.domain.Location;
+import swyp.swyp6_team7.member.entity.DeletedUsers;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.tag.domain.TravelTag;
 import swyp.swyp6_team7.travel.dto.request.TravelUpdateRequest;
@@ -19,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Table(name = "travels")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -93,12 +92,18 @@ public class Travel {
     @OneToMany(mappedBy = "travel", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Companion> companions = new ArrayList<>();
 
+    // 기존의 Users 참조 대신 탈퇴 회원을 참조할 수 있는 필드 추가
+    @ManyToOne
+    @JoinColumn(name = "deleted_number", referencedColumnName = "deletedNumber", nullable = true)
+    private DeletedUsers deletedUser;
+
     @Builder
     public Travel(
             int number, int userNumber, LocalDateTime createdAt,
             Location location, String locationName, String title, String details, int viewCount,
             int maxPerson, GenderType genderType, LocalDate dueDate,
-            PeriodType periodType, TravelStatus status, LocalDateTime enrollmentsLastViewedAt
+            PeriodType periodType, TravelStatus status, LocalDateTime enrollmentsLastViewedAt,
+            DeletedUsers deletedUser
     ) {
         this.number = number;
         this.userNumber = userNumber;
@@ -114,6 +119,7 @@ public class Travel {
         this.periodType = periodType;
         this.status = status;
         this.enrollmentsLastViewedAt = enrollmentsLastViewedAt;
+        this.deletedUser = deletedUser;
     }
 
     public Travel update(TravelUpdateRequest travelUpdate, Location travelLocation) {
