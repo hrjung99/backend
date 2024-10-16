@@ -67,30 +67,6 @@ public class S3KeyHandler {
         }
     }
 
-
-
-    //path 를 찾는 메소드
-    public String getPath(String relatedType, int relatedNumber, int order) {
-
-        FileFolder folderType = FileFolder.from(relatedType);
-
-        //profile 인 경우
-        if (folderType == FileFolder.PROFILE) {
-            return baseFolder + folderType.name().toLowerCase() + "/" + relatedNumber + "/";
-        }
-
-        //커뮤니티 인경우
-        else if (folderType == FileFolder.COMMUNITY) {
-            return baseFolder + folderType.name().toLowerCase() + "/" + relatedNumber + "/" + (order > 0 ? order + "/" : "");
-        }
-
-        //유효하지 않은 relatedType일 경우 예외처리
-        else {
-            throw new IllegalArgumentException("커뮤니티 게시물이 유효하지 않는 타입입니다.: " + relatedType);
-        }
-    }
-
-
     //url로 key를 추출하는 메소드
     public String getKeyByUrl(String Url) {
         String bucketName = s3Component.getBucket();

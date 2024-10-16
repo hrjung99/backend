@@ -50,7 +50,7 @@ public class S3Uploader {
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file to S3", e); //업로드 실패 시 예외 처리
         }
-        // S3Path 리턴
+        // S3Key 리턴
         return S3Key;
     }
 
@@ -71,7 +71,7 @@ public class S3Uploader {
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file to S3", e); //업로드 실패 시 예외 처리
         }
-        // S3Path 리턴
+        // S3Key 리턴
         return S3Key;
     }
 
@@ -148,7 +148,7 @@ public class S3Uploader {
         //기존 경로의 이미지 삭제
        deleteFile(sourceKey);
 
-       //경로 이동 후 path 리턴
+       //경로 이동 후 key 리턴
         return destinationKey;
     }
 

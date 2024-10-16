@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import swyp.swyp6_team7.image.dto.request.ImageDefaultRequestDto;
+import swyp.swyp6_team7.image.dto.request.ImageProfileTemporaryRequrestDto;
 import swyp.swyp6_team7.image.dto.response.ImageDetailResponseDto;
 import swyp.swyp6_team7.image.service.ImageProfileService;
 import swyp.swyp6_team7.image.service.ImageService;
@@ -13,7 +15,6 @@ import swyp.swyp6_team7.member.service.MemberService;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -47,14 +48,15 @@ public class ImageProfileController {
         return ResponseEntity.ok(response);
     }
 
+
     //default 이미지 중 하나로 프로필 이미지 수정
     @PutMapping("/default")
-    public ResponseEntity<ImageDetailResponseDto> updateDefaultImage(@RequestBody int defaultNumber, Principal principal) {
+    public ResponseEntity<ImageDetailResponseDto> updateDefaultImage(@RequestBody ImageDefaultRequestDto request, Principal principal) {
 
         //user number 가져오기
         int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
-        ImageDetailResponseDto response = imageProfileService.uploadDefaultImage(userNumber, defaultNumber);
+        ImageDetailResponseDto response = imageProfileService.uploadDefaultImage(userNumber, request.getDefaultNumber());
         return ResponseEntity.ok(response);
     }
 
@@ -73,7 +75,6 @@ public class ImageProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 
     //프로필 이미지 조회
     @GetMapping("")
