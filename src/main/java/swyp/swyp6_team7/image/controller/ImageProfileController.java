@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import swyp.swyp6_team7.image.dto.request.ImageDefaultRequestDto;
 import swyp.swyp6_team7.image.dto.response.ImageDetailResponseDto;
 import swyp.swyp6_team7.image.service.ImageProfileService;
 import swyp.swyp6_team7.image.service.ImageService;
@@ -49,12 +50,12 @@ public class ImageProfileController {
 
     //default 이미지 중 하나로 프로필 이미지 수정
     @PutMapping("/default")
-    public ResponseEntity<ImageDetailResponseDto> updateDefaultImage(@RequestBody int defaultNumber, Principal principal) {
+    public ResponseEntity<ImageDetailResponseDto> updateDefaultImage(@RequestBody ImageDefaultRequestDto request, Principal principal) {
 
         //user number 가져오기
         int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
-        ImageDetailResponseDto response = imageProfileService.uploadDefaultImage(userNumber, defaultNumber);
+        ImageDetailResponseDto response = imageProfileService.uploadDefaultImage(userNumber, request.getDefaultNumber());
         return ResponseEntity.ok(response);
     }
 
