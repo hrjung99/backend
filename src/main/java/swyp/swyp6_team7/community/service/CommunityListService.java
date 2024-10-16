@@ -70,7 +70,7 @@ public class CommunityListService {
                     // 썸네일 이미지 URL 가져오기
                     String thumbnailUrl = imageRepository.findByRelatedTypeAndRelatedNumberAndOrder("community", community.getPostNumber(), 1)
                             .map(image -> image.getUrl())  // 이미지가 존재하는 경우 URL 반환
-                            .orElse("https://moing-hosted-contents.s3.ap-northeast-2.amazonaws.com/images/profile/default/defaultProfile.png"); // 이미지가 없을 경우 기본 URL
+                            .orElse(null); // 이미지가 없을 경우 null
 
 
                     // CommunityListResponseDto 생성
