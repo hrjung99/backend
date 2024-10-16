@@ -2,6 +2,10 @@ package swyp.swyp6_team7.comment.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +16,7 @@ import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.repository.CommentRepository;
 import swyp.swyp6_team7.community.domain.Community;
-import swyp.swyp6_team7.community.dto.response.CommunityDetailResponseDto;
+
 import swyp.swyp6_team7.community.repository.CommunityRepository;
 import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
@@ -22,9 +26,7 @@ import swyp.swyp6_team7.likes.util.LikeStatus;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.travel.domain.Travel;
-import swyp.swyp6_team7.travel.dto.response.TravelDetailResponse;
 import swyp.swyp6_team7.travel.repository.TravelRepository;
-import swyp.swyp6_team7.travel.service.TravelService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,11 +38,9 @@ import java.util.*;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    final TravelService travelService;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final TravelRepository travelRepository;
-    private final S3Uploader s3Uploader;
     private final CommunityRepository communityRepository;
     private final ImageRepository imageRepository;
 
@@ -50,7 +50,7 @@ public class CommentService {
         // 게시물 존재 여부 검증
         ResponseEntity<String> validationResponse = validateRelatedNumber(relatedType, relatedNumber, userNumber);
         if (!validationResponse.getStatusCode().is2xxSuccessful()) {
-            throw new IllegalArgumentException(validationResponse.getBody());
+            throw new IllegalArgumentException("게시글이 존재하지 않습니다.");
         }
 
         // parentNumber가 0이 아닐 경우 해당 댓글이 존재하는지 검증
@@ -88,7 +88,7 @@ public class CommentService {
         // 여행 게시글일 경우
         if (relatedType.equals("travel")) {
             try {
-                TravelDetailResponse travelDetailResponse = travelService.getDetailsByNumber(relatedNumber);
+                travelRepository.findByNumber(relatedNumber);
                 return ResponseEntity.ok("게시물 존재 유무 검증 성공.");
             } catch (IllegalArgumentException e) {
                 // 검증 실패
@@ -109,6 +109,8 @@ public class CommentService {
         }
     }
 
+
+
     //댓글 목록 조회
     @Transactional
     public List<CommentListReponseDto> getList(String relatedType, int relatedNumber, int userNumber) {
@@ -128,14 +130,7 @@ public class CommentService {
                 String commentWriter = user.map(Users::getUserName).orElse("unknown");
 
                 // 댓글 작성자 프로필 이미지 URL
-                String imageUrl = "";
-                try {
-                    String folderPath = imageRepository.findByRelatedTypeAndRelatedNumber("profile", comment.getUserNumber()).get().getPath();
-                    imageUrl = s3Uploader.getImageUrl(folderPath);
-                } catch (IllegalArgumentException e) {
-                    // 이미지 URL을 빈 문자열로 설정
-                    imageUrl = "";
-                }
+                String imageUrl = imageRepository.findByRelatedTypeAndRelatedNumber("profile", comment.getUserNumber()).get().getUrl();
 
                 // 답글 수 계산: 부모 댓글일 때만 계산
                 long repliesCount = 0;
@@ -176,14 +171,7 @@ public class CommentService {
                 String commentWriter = user.map(Users::getUserName).orElse("unknown");
 
                 // 댓글 작성자 프로필 이미지 URL
-                String imageUrl = "";
-                try {
-                    String folderPath = imageRepository.findByRelatedTypeAndRelatedNumber("profile", comment.getUserNumber()).get().getPath();
-                    imageUrl = s3Uploader.getImageUrl(folderPath);
-                } catch (IllegalArgumentException e) {
-                    // 이미지 URL을 빈 문자열로 설정
-                    imageUrl = "";
-                }
+                String imageUrl = imageRepository.findByRelatedTypeAndRelatedNumber("profile", comment.getUserNumber()).get().getUrl();
 
                 // 답글 수 계산: 부모 댓글일 때만 계산
                 long repliesCount = 0;
@@ -207,6 +195,96 @@ public class CommentService {
                 listReponse.add(dto);
             }
             return listReponse;
+
+            //travel도 community도 아닐 경우
+        } else {
+            throw new IllegalArgumentException("유효하지 않은 게시물 종류입니다: " + relatedType);
+        }
+    }
+
+    //댓글 목록 조회 (페이징)
+    @Transactional
+    public Page<CommentListReponseDto> getListPage(PageRequest pageRequest, String relatedType, int relatedNumber, int userNumber) {
+
+        //이때 userNumber는 댓글 조회 요청자
+
+        if (relatedType.equals("travel")) {
+            List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
+            List<Comment> sortedComments = sortComments(comments);
+
+
+            List<CommentListReponseDto> listReponse = new ArrayList<>();
+            for (Comment comment : sortedComments) {
+
+                //댓글 작성자 조회
+                Optional<Users> user = userRepository.findByUserNumber(comment.getUserNumber());
+                String commentWriter = user.map(Users::getUserName).orElse("unknown");
+
+                // 댓글 작성자 프로필 이미지 URL
+                String imageUrl = imageRepository.findByRelatedTypeAndRelatedNumberAndOrder("profile", comment.getUserNumber(), 0).get().getUrl();
+
+                // 답글 수 계산: 부모 댓글일 때만 계산
+                long repliesCount = 0;
+                if (comment.getParentNumber() == 0) {// 부모일 경우
+                    repliesCount = commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getCommentNumber()); // 답글 계산
+                } else {
+                    repliesCount = 0; //답글일 경우 답글 개수 0개
+                }
+                //좋아요 상태 가져오기
+                LikeReadResponseDto likeStatus = LikeStatus.getLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
+                //좋아요 개수
+                long likes = likeStatus.getTotalLikes();
+                //좋아요 여부, true = 좋아요 누름
+                boolean liked = likeStatus.isLiked();
+
+                //게시글 작성자 회원번보
+                //게시글 정보 가져오기
+                Optional<Travel> travelInfo = travelRepository.findByNumber(relatedNumber);
+                int travelWriterNumber= travelInfo.get().getUserNumber();
+
+                //DTO
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, travelWriterNumber, imageUrl);
+                listReponse.add(dto);
+            }
+
+            return toPage(listReponse, pageRequest);
+
+        } else if (relatedType.equals("community")) {
+            // 커뮤니티 댓글 조회 로직
+            List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
+            List<Comment> sortedComments = sortComments(comments);
+
+            List<CommentListReponseDto> listReponse = new ArrayList<>();
+            for (Comment comment : sortedComments) {
+                // 댓글 작성자 조회
+                Optional<Users> user = userRepository.findByUserNumber(comment.getUserNumber());
+                String commentWriter = user.map(Users::getUserName).orElse("unknown");
+
+                // 댓글 작성자 프로필 이미지 URL
+                String imageUrl = imageRepository.findByRelatedTypeAndRelatedNumberAndOrder("profile", comment.getUserNumber(), 0).get().getUrl();
+
+                // 답글 수 계산: 부모 댓글일 때만 계산
+                long repliesCount = 0;
+                if (comment.getParentNumber() == 0) {// 부모일 경우
+                    repliesCount = commentRepository.countByRelatedTypeAndRelatedNumberAndParentNumber(relatedType, relatedNumber, comment.getCommentNumber()); // 답글 계산
+                } else {
+                    repliesCount = 0; //답글일 경우 답글 개수 0개
+                }
+
+                // 좋아요 상태 가져오기
+                LikeReadResponseDto likeStatus = LikeStatus.getLikeStatus(likeRepository, "comment", comment.getCommentNumber(), userNumber);
+                long likes = likeStatus.getTotalLikes();
+                boolean liked = likeStatus.isLiked();
+
+                //게시글 작성자 조회
+                Optional<Community> postInfo = communityRepository.findByPostNumber(relatedNumber);
+                int communityWritreNumber= postInfo.get().getUserNumber();
+
+                // DTO 생성
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked,communityWritreNumber, imageUrl);
+                listReponse.add(dto);
+            }
+            return toPage(listReponse, pageRequest);
 
             //travel도 community도 아닐 경우
         } else {
@@ -355,5 +433,16 @@ public class CommentService {
             }
         }
         return finalSortedComments;
+    }
+
+    //Page 객체 생성
+    private Page<CommentListReponseDto> toPage(List<CommentListReponseDto> responses, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), responses.size());
+
+        if (start > end) {
+            start = end;
+        }
+        return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }
 }

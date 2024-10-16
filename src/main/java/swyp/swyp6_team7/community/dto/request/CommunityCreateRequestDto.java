@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommunityCreateRequestDto {
 
-    private int categoryNumber;
+    private String categoryName;
     private String title;
     private String content;
 
-    public CommunityCreateRequestDto(int categoryNumber, String title, String content) {
-        this.categoryNumber = categoryNumber;
+    public CommunityCreateRequestDto(String categoryName, String title, String content) {
+        this.categoryName = categoryName;
         this.title = title;
         this.content = content;
     }

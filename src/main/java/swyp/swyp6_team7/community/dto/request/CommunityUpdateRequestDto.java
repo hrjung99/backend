@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommunityUpdateRequestDto {
 
-    private int categoryNumber;
-
+    private String categoryName;
     @Size(max = 20)
     private String title;
 

@@ -30,9 +30,7 @@ public class LikeController {
             Principal principal) {
 
         // user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         Object result = likeService.toggleLike(relatedType, relatedNumber, userNumber);
         return ResponseEntity.status(HttpStatus.OK)

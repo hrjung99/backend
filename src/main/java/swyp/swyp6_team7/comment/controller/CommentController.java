@@ -2,6 +2,8 @@ package swyp.swyp6_team7.comment.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +13,7 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.service.CommentService;
+import swyp.swyp6_team7.community.dto.response.CommunityListResponseDto;
 import swyp.swyp6_team7.likes.service.LikeService;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.service.MemberService;
@@ -46,17 +49,18 @@ public class CommentController {
 
     // List Read
     @GetMapping("/api/{relatedType}/{relatedNumber}/comments")
-    public ResponseEntity<List<CommentListReponseDto>> getComments(
+    public ResponseEntity<Page<CommentListReponseDto>> getComments(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
             Principal principal,
             @PathVariable String relatedType,
             @PathVariable int relatedNumber) {
 
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
-        List<CommentListReponseDto> comments = commentService.getList(relatedType, relatedNumber, userNumber);
+
+        Page<CommentListReponseDto> comments = commentService.getListPage(PageRequest.of(page, size), relatedType, relatedNumber, userNumber);
         return ResponseEntity.ok(comments);
     }
 

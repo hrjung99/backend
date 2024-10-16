@@ -2,20 +2,25 @@ package swyp.swyp6_team7.community.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
+import swyp.swyp6_team7.category.repository.CategoryRepository;
 import swyp.swyp6_team7.community.dto.request.CommunityCreateRequestDto;
 import swyp.swyp6_team7.community.dto.request.CommunityUpdateRequestDto;
 import swyp.swyp6_team7.community.dto.response.CommunityDetailResponseDto;
+import swyp.swyp6_team7.community.dto.response.CommunityListResponseDto;
+import swyp.swyp6_team7.community.dto.response.CommunitySearchCondition;
 import swyp.swyp6_team7.community.repository.CommunityCustomRepository;
 
+import swyp.swyp6_team7.community.service.CommunityListService;
 import swyp.swyp6_team7.community.service.CommunityService;
-import swyp.swyp6_team7.member.entity.Users;
+import swyp.swyp6_team7.community.util.CommunitySearchSortingType;
 import swyp.swyp6_team7.member.service.MemberService;
 
-import java.io.IOException;
 import java.security.Principal;
 
 @Slf4j
@@ -26,90 +31,106 @@ public class CommunityController {
     private final CommunityService communityService;
     private final MemberService memberService;
     private final CommunityCustomRepository communityCustomRepository;
+    private final CategoryRepository categoryRepository;
+    private final CommunityListService communityListService;
 
 
     //C
-    @PostMapping
+    @PostMapping("/posts")
     public ResponseEntity<CommunityDetailResponseDto> create(
-            @RequestBody CommunityCreateRequestDto request, Principal principal,
-            @RequestParam("files") MultipartFile[] images) throws IOException {
+            @RequestBody CommunityCreateRequestDto request, Principal principal) {
 
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         // 게시물 등록 동작 후 상세 정보 가져오기
-        CommunityDetailResponseDto detailResponse = communityService.create(request, userNumber, images);
+        CommunityDetailResponseDto detailResponse = communityService.create(request, userNumber);
 
-        return ResponseEntity.ok(detailResponse).badRequest().body(null);
+        return ResponseEntity.ok(detailResponse);
     }
 
     //게시물 목록
-//    @GetMapping("/list")
-//    public ResponseEntity<List<CommunityListResponseDto>> getList (Principal principal) {
-//
-//        return
-//    }
+    @GetMapping("/posts")
+    public ResponseEntity<Page<CommunityListResponseDto>> getList(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(defaultValue = "최신순") String sortingTypeName,
+            Principal principal) {
 
-    @GetMapping("/{postNumber}")
-    public ResponseEntity<CommunityDetailResponseDto> getDetail(
-            @PathVariable int postNumber, Principal principal
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
+
+        Integer categoryNumber = null;
+        // categoryName이 null이 아닐 경우에만 카테고리 번호를 조회
+        if (categoryName != null) {
+            // 카테고리 이름에 대한 조회 시 예외 처리
+            try {
+                categoryNumber = categoryRepository.findByCategoryName(categoryName).getCategoryNumber();
+            } catch (Exception e) {
+
+            }
+        }
+
+        CommunitySearchSortingType sortingType = CommunitySearchSortingType.of(sortingTypeName);
+
+        // 검색 조건 설정
+        CommunitySearchCondition condition = CommunitySearchCondition.builder()
+                .pageRequest(PageRequest.of(page, size))
+                .keyword(keyword)
+                .categoryNumber(categoryNumber)
+                .sortingType(String.valueOf(sortingType))
+                .build();
+
+        Page<CommunityListResponseDto> result = communityListService.getCommunityList(PageRequest.of(page, size), condition, userNumber);
+
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(result);    }
+
+
+    //R
+    @GetMapping("/posts/{postNumber}")
+    public ResponseEntity<CommunityDetailResponseDto> getDetail( @PathVariable int postNumber, Principal principal
     ) {
-        //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
 
-        //조회수 +1 동작
-        communityCustomRepository.incrementViewCount(postNumber);
+        //user number 가져오기
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         //게시물 상세보기 데이터 가져오기
-        CommunityDetailResponseDto detailResponse = communityService.getDetailsByPostNumber(postNumber, userNumber);
+        CommunityDetailResponseDto detailResponse = communityService.increaseView(postNumber, userNumber);
 
-//        //댓글 리스트 가져오기
-//        List<CommentListReponseDto> commentList = commentService.getList("community",detailResponse.getPostNumber(), userNumber);
-
-        return ResponseEntity.ok(detailResponse).badRequest().body(null);
+        return ResponseEntity.ok(detailResponse);
     }
 
-    @PutMapping("/{postNumber}")
+    //U
+    @PutMapping("/posts/{postNumber}")
     public ResponseEntity<CommunityDetailResponseDto> update(
-            @RequestBody CommunityUpdateRequestDto request, Principal principal,
-            @RequestParam("files") MultipartFile[] images,
-            @PathVariable int postNumber) throws IOException {
+            @RequestBody CommunityUpdateRequestDto request, Principal principal, @PathVariable int postNumber) {
 
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
+
 
         // 게시물 수정 동작 후 상세 정보 가져오기
-        CommunityDetailResponseDto detailResponse = communityService.update(request, postNumber, userNumber, images);
+        CommunityDetailResponseDto detailResponse = communityService.update(request, postNumber, userNumber);
 
-        return ResponseEntity.ok(detailResponse).badRequest().body(null);
+        return ResponseEntity.ok(detailResponse);
     }
 
-    @DeleteMapping("/{postNumber}")
-    public ResponseEntity<Void> delete(@PathVariable int postNumber, Principal principal) throws IOException {
+    @DeleteMapping("/posts/{postNumber}")
+    public ResponseEntity<Void> delete(@PathVariable int postNumber, Principal principal){
 
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         try {
-            // 게시물 삭제 동작
             communityService.delete(postNumber, userNumber);
-            return ResponseEntity.noContent().build(); // 삭제 성공 시 No Content 응답
-        } catch (IllegalArgumentException e) {
-            // 잘못된 요청 처리
-            log.error("게시물 삭제 실패: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(null); // 잘못된 요청
+            // 성공 시 204
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            // 다른 예외 처리
-            log.error("게시물 삭제 중 오류 발생: {}", e.getMessage());
-            return ResponseEntity.status(500).body(null); // 서버 오류
+            // 기타 오류 발생 시 500 Internal Server Error 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

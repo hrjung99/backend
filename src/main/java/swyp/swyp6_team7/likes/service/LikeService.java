@@ -19,7 +19,6 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 public class LikeService {
 
@@ -29,6 +28,7 @@ public class LikeService {
     private final CommunityRepository communityRepository;
     private final CommunityService communityService;
 
+    @Transactional
     public Object toggleLike(String relatedType, int relatedNumber, int userNumber) {
 
         //댓글 좋아요의 경우
@@ -73,7 +73,7 @@ public class LikeService {
                 Like like = new Like(relatedType, relatedNumber, userNumber);
                 likeRepository.save(like);
             }
-            return communityService.getDetailsByPostNumber(community.getPostNumber(), userNumber);
+            return communityService.getDetail(community.getPostNumber(), userNumber);
 
         } else {
             throw new IllegalArgumentException("유효하지 않은 relatedType: " + relatedType);
