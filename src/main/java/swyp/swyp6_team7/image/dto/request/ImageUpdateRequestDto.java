@@ -54,13 +54,13 @@ public class ImageUpdateRequestDto {
     }
 
     //이미지 임시저장 후 정식 저장 시 받는 빌더
-    @Builder
-    public ImageUpdateRequestDto(int relatedNumber, int order, String key, String url) {
-        this.relatedNumber = relatedNumber;
-        this.order = order;
-        this.key = key;
-        this.url = url;
-        this.uploadDate = LocalDateTime.now();
-    }
+//    @Builder
+//    public ImageUpdateRequestDto(int relatedNumber, int order, String key, String url) {
+//        this.relatedNumber = relatedNumber;
+//        this.order = order;
+//        this.key = key;
+//        this.url = url;
+//        this.uploadDate = LocalDateTime.now();
+//    }
 
 }

@@ -20,6 +20,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     Optional<Image> findByRelatedTypeAndRelatedNumberAndKey(String relatedType, int relatedNumber, String key);
     Optional<Image> findByRelatedTypeAndRelatedNumberAndOrder(String relatedType, int relatedNumber, int order);
     Optional<Image> findByKey(String key);
+    Optional<Image> findByUrl(String url);
 
 
     Optional<Image> findByImageNumber(Long imageNumber);

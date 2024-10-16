@@ -128,4 +128,5 @@ public class ImageService {
 
         return new ImageDetailResponseDto(image);
     }
+
 }

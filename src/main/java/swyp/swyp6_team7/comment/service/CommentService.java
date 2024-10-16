@@ -119,6 +119,17 @@ public class CommentService {
     public List<CommentListReponseDto> getList(String relatedType, int relatedNumber, int userNumber) {
         //이때 userNumber는 댓글 조회 요청자
 
+        if (relatedType.equals("travel")){
+            travelRepository.findByNumber(relatedNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다." + relatedType + " : " + relatedNumber));
+
+        } else if (relatedType.equals("community")) {
+            communityRepository.findByPostNumber(relatedNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다." + relatedType + " : " + relatedNumber));
+        } else {
+            throw new IllegalArgumentException("잘못된 타입입니다. : " + relatedType);
+        }
+
         if (relatedType.equals("travel")) {
             List<Comment> comments = commentRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber);
             List<Comment> sortedComments = sortComments(comments);

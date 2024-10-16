@@ -22,7 +22,6 @@ public class S3KeyHandler {
     public S3KeyHandler(S3Component s3Component) {
         //베이스 폴더 가져오기
         this.baseFolder = s3Component.getBaseFolder();
-        //userProfileRepository 가져오기 (relatedType, relatedNumber 검증을 위함
         //relatedType이 profile일때 relatedNumber는 userNumber
         this.s3Component = s3Component;
     }

@@ -1,5 +1,6 @@
 package swyp.swyp6_team7.community.repository;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -18,7 +19,9 @@ import swyp.swyp6_team7.likes.domain.QLike;
 import swyp.swyp6_team7.member.entity.QUsers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Repository
@@ -47,34 +50,35 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
     public Page<CommunitySearchDto> search(PageRequest pageRequest, CommunitySearchCondition searchCondition) {
+        // 1. 좋아요 수 집계 쿼리
+        Map<Integer, Long> likeCountMap = getLikeCountByPostNumbers();
+
+        // 2. 게시글과 관련된 정보 조회 + 좋아요 수 매핑
         List<CommunitySearchDto> content = queryFactory
-                .select(new QCommunitySearchDto(
-                        community,
-                        users.userName,
-                        categories.categoryName,
-                        like.count().as("likeCount")
-                ))
+                .select(community, users.userName, categories.categoryName)
                 .from(community)
                 .leftJoin(users).on(community.userNumber.eq(users.userNumber))
                 .leftJoin(categories).on(community.categoryNumber.eq(categories.categoryNumber))
-                .leftJoin(like).on(like.relatedType.eq("community")
-                        .and(like.relatedNumber.eq(community.postNumber)))
                 .where(
                         keywordContains(searchCondition.getKeyword()),
                         categoryEquals(searchCondition.getCategoryNumber())
                 )
-                .orderBy(getOrderBy(searchCondition.getSortingType()).toArray(new OrderSpecifier[0]))
                 .offset(pageRequest.getOffset())
                 .limit(pageRequest.getPageSize())
-                .fetch();
+                .fetch()
+                .stream()
+                .map(tuple -> new CommunitySearchDto(
+                        tuple.get(community),
+                        tuple.get(users.userName),
+                        tuple.get(categories.categoryName),
+                        likeCountMap.getOrDefault(tuple.get(community.postNumber), 0L)
+                ))
+                .toList();
 
+        // 3. 전체 게시글 수 조회
         Long totalCount = queryFactory
                 .select(community.count())
                 .from(community)
-                .leftJoin(users).on(community.userNumber.eq(users.userNumber))
-                .leftJoin(categories).on(community.categoryNumber.eq(categories.categoryNumber))
-                .leftJoin(like).on(like.relatedType.eq("community")
-                        .and(like.relatedNumber.eq(community.postNumber)))
                 .where(
                         keywordContains(searchCondition.getKeyword()),
                         categoryEquals(searchCondition.getCategoryNumber())
@@ -83,6 +87,23 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
         return PageableExecutionUtils.getPage(content, searchCondition.getPageRequest(), () -> totalCount);
     }
+
+    private Map<Integer, Long> getLikeCountByPostNumbers() {
+        List<Tuple> likeCounts = queryFactory
+                .select(like.relatedNumber, like.count())
+                .from(like)
+                .where(like.relatedType.eq("community"))
+                .groupBy(like.relatedNumber)
+                .fetch();
+
+        // 결과를 Map으로 변환
+        Map<Integer, Long> likeCountMap = new HashMap<>();
+        for (Tuple tuple : likeCounts) {
+            likeCountMap.put(tuple.get(like.relatedNumber), tuple.get(like.count()));
+        }
+        return likeCountMap;
+    }
+
 
     // 키워드 검색 조건
     private BooleanExpression keywordContains(String keyword) {
@@ -102,8 +123,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
 
 
     // 정렬 조건 설정
-    private List<OrderSpecifier<?>> getOrderBy(CommunitySearchSortingType sortingType) {
-
+    private List<OrderSpecifier<?>> getOrderBy(CommunitySearchSortingType sortingType, Map<Integer, Long> likeCountMap) {
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
         if (sortingType == null) {
@@ -113,34 +133,26 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 case REG_DATE_DESC:
                     orderSpecifiers.add(community.regDate.desc());
                     orderSpecifiers.add(community.viewCount.desc());
-                    orderSpecifiers.add(like.count().desc());
                     break;
                 case REG_DATE_ASC:
                     orderSpecifiers.add(community.regDate.asc());
                     orderSpecifiers.add(community.viewCount.desc());
-                    orderSpecifiers.add(like.count().desc());
                     break;
-
                 case VIEW_COUNT_DESC:
                     orderSpecifiers.add(community.viewCount.desc());
                     orderSpecifiers.add(community.regDate.desc());
-                    orderSpecifiers.add(like.count().desc());
                     break;
                 case VIEW_COUNT_ASC:
                     orderSpecifiers.add(community.viewCount.asc());
                     orderSpecifiers.add(community.regDate.desc());
-                    orderSpecifiers.add(like.count().desc());
                     break;
-
                 case LIKE_COUNT_DESC:
-                    orderSpecifiers.add(like.count().desc());
+                    orderSpecifiers.add(getLikeCountOrderSpecifier(likeCountMap, false));
                     orderSpecifiers.add(community.regDate.desc());
-                    orderSpecifiers.add(community.viewCount.desc());
                     break;
                 case LIKE_COUNT_ASC:
-                    orderSpecifiers.add(like.count().asc());
+                    orderSpecifiers.add(getLikeCountOrderSpecifier(likeCountMap, true));
                     orderSpecifiers.add(community.regDate.desc());
-                    orderSpecifiers.add(community.viewCount.desc());
                     break;
                 default:
                     orderSpecifiers.add(community.regDate.asc());
@@ -148,6 +160,15 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
             }
         }
         return orderSpecifiers;
+    }
 
+    // 좋아요 수에 따른 정렬 조건 생성
+    private OrderSpecifier<Long> getLikeCountOrderSpecifier(Map<Integer, Long> likeCountMap, boolean ascending) {
+        // Map에 저장된 좋아요 수를 기준으로 정렬 (커스텀 정렬)
+        return new OrderSpecifier<>(
+                ascending ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
+                com.querydsl.core.types.dsl.Expressions.numberTemplate(Long.class,
+                        "function('coalesce', {0}, 0)", likeCountMap)
+        );
     }
 }

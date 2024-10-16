@@ -147,7 +147,7 @@ public class S3Uploader {
         
         //기존 경로의 이미지 삭제
        deleteFile(sourceKey);
-       
+
        //경로 이동 후 path 리턴
         return destinationKey;
     }

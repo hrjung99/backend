@@ -10,7 +10,6 @@ import swyp.swyp6_team7.image.dto.request.ImageCommunityRequestDto;
 import swyp.swyp6_team7.image.dto.request.ImageSaveRequestDto;
 import swyp.swyp6_team7.image.dto.response.ImageDetailResponseDto;
 import swyp.swyp6_team7.image.service.ImageCommunityService;
-import swyp.swyp6_team7.image.service.ImageService;
 import swyp.swyp6_team7.member.service.MemberService;
 
 import java.io.IOException;
@@ -38,7 +37,7 @@ public class ImageCommunityController {
     //이미지 정식 저장
     @PostMapping("/{postNumber}/images")
     public ResponseEntity<ImageDetailResponseDto[]> saveImages(
-            @RequestParam int postNumber,
+            @PathVariable int postNumber,
             @RequestBody ImageSaveRequestDto allUrls
     ) {
 
@@ -58,7 +57,7 @@ public class ImageCommunityController {
     //게시글 별 이미지 수정
     @PutMapping("/{postNumber}/images")
     public ResponseEntity<ImageDetailResponseDto[]> updateImages(
-            @RequestParam int postNumber, @RequestBody ImageCommunityRequestDto request, Principal principal) {
+            @PathVariable int postNumber, @RequestBody ImageCommunityRequestDto request, Principal principal) {
 
         //user number 가져오기
         int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
@@ -69,7 +68,7 @@ public class ImageCommunityController {
 
     //게시글 별 이미지 삭제
     @DeleteMapping("/{postNumber}/images")
-    public ResponseEntity<Void> deleteImages(@RequestParam int postNumber, Principal principal) {
+    public ResponseEntity<Void> deleteImages(@PathVariable int postNumber, Principal principal) {
 
         //user number 가져오기
         int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
