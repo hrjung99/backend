@@ -178,4 +178,7 @@ public class TravelService {
     public void updateEnrollmentLastViewedAt(int travelNumber, LocalDateTime lastViewedAt) {
         travelRepository.updateEnrollmentsLastViewedAtByNumber(travelNumber, lastViewedAt);
     }
+    public List<Travel> getTravelsByDeletedUser(Integer deletedUserNumber) {
+        return travelRepository.findByDeletedUserNumber(deletedUserNumber);
+    }
 }
