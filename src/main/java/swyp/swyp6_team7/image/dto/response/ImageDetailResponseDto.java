@@ -15,55 +15,47 @@ import java.time.LocalDateTime;
 public class ImageDetailResponseDto {
 
     private Long imageNumber;
-    private String originalName;
-    private Long size;
 
     private String relatedType;
     private int relatedNumber;
 
-    private String path;
+    private String key;
+    private String url;
+
     @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH시 MM분")
     private LocalDateTime uploadDate;
 
-    private String url;
 
     @Builder
     public ImageDetailResponseDto(
-            Long imageNumber, String originalName, Long size, String relatedType,
-            Integer relatedNumber, String path, LocalDateTime uploadDate,  String url)
+            Long imageNumber, String relatedType, int relatedNumber, String key, String url, LocalDateTime uploadDate)
     {
         this.imageNumber = imageNumber;
-        this.originalName = originalName;
-        this.size = size;
         this.relatedType = relatedType;
         this.relatedNumber = relatedNumber;
-        this.path = path;
-        this.uploadDate = uploadDate;
+        this.key = key;
         this.url = url;
+        this.uploadDate = uploadDate;
     }
 
-    public ImageDetailResponseDto(Image image, String url) {
+    public ImageDetailResponseDto(Image image) {
         this.imageNumber = image.getImageNumber();
-        this.originalName = image.getOriginalName();
-        this.size = image.getSize();
         this.relatedType = image.getRelatedType();
         this.relatedNumber = image.getRelatedNumber();
-        this.path = image.getPath();
+        this.key = image.getKey();
+        this.url = image.getUrl();
         this.uploadDate = image.getUploadDate();
-        this.url = url;
     }
 
     @Override
     public String toString() {
         return "ImageDetailResponseDto{" +
                 "imageNumber=" + imageNumber +
-                ", originalName='" + originalName + '\'' +
-                ", size=" + size +
                 ", relatedType='" + relatedType + '\'' +
                 ", relatedNumber=" + relatedNumber +
-                ", path='" + path + '\'' +
-                ", uploadDate=" + uploadDate +
+                ", key='" + key + '\'' +
                 ", url='" + url + '\'' +
+                ", uploadDate=" + uploadDate +
                 '}';
     }
 

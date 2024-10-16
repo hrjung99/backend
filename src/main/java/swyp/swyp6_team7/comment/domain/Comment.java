@@ -1,6 +1,7 @@
 package swyp.swyp6_team7.comment.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class Comment {
 
     //댓글 내용
     @Column(name = "comment_content", length = 1000, nullable = false)
+    @Size(max = 1000)
     private String content;
 
     //부모 댓글 번호
