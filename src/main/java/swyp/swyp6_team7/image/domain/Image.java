@@ -65,7 +65,7 @@ public class Image {
 
     //파일로 Create
     @Builder
-    public Image(String originalName, String storageName, Long size, String format, String relatedType, int relatedNumber, int order, String path, String key, String url, LocalDateTime uploadDate) {
+    public Image(String originalName, String storageName, Long size, String format, String relatedType, int relatedNumber, int order, String key, String url, LocalDateTime uploadDate) {
         this.originalName = originalName;
         this.storageName = storageName;
         this.size = size;
