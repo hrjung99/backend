@@ -17,6 +17,7 @@ import swyp.swyp6_team7.image.util.S3KeyHandler;
 import swyp.swyp6_team7.image.util.StorageNameHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -210,7 +211,6 @@ public class ImageCommunityService {
                 //순서값 +1
                 order++;
 
-
             } else if (status.equals("d")) {
 
                 //S3 에서 이미지 삭제
@@ -227,8 +227,47 @@ public class ImageCommunityService {
 
                 //순서값 변동 X
 
-            } else {
-                throw new IllegalArgumentException(" 잘못된 입력입니다. status 값을 확인해주세요");
+            } else if (status.equals("i")) {
+                //임시 저장 이미지
+                String tempUrl = url;
+                // 임시 경로 key 추출
+                String tempKey = s3KeyHandler.getKeyByUrl(tempUrl);
+                System.out.println("tempKey : " + tempKey);
+
+                //해당 경로에 이미지가 존재하는지 확인
+                if (s3Uploader.existObject(tempKey)) {
+
+                    //unique한 값인 key로 db의 임시 이미지 데이터 가져오기
+                    Image tempImage = imageRepository.findByKey(tempKey)
+                            .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다."));
+
+
+                    //정식 경로 key 생성
+                    String newKey = s3KeyHandler.generateS3Key(relatedType, relatedNumber, tempImage.getStorageName(), order);
+                    System.out.println("newKey : " + newKey);
+                    //임시 경로에 있는 이미지 정식 경로로 이동
+                    s3Uploader.moveImage(tempKey, newKey);
+                    //정식 경로 key로 url 가져오기
+                    String newUrl = s3Uploader.getImageUrl(newKey);
+                    System.out.println("newUrl : " + newUrl);
+
+                    //DB 업데이트 동작
+                    ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+                            .relatedType(relatedType)
+                            .relatedNumber(relatedNumber)
+                            .order(order)
+                            .key(newKey)
+                            .url(newUrl) // 새 이미지 URL
+                            .build();
+                    finalizeTemporaryImages(tempKey, updateRequest);
+
+                    //순서값 +1
+                    order++;
+
+                } else {
+                    throw new IllegalArgumentException(" 잘못된 입력입니다. status 값을 확인해주세요");
+
+                }
             }
         }
         ImageDetailResponseDto[] responses = communityImageDetail(relatedNumber);
@@ -276,6 +315,7 @@ public class ImageCommunityService {
         imageRepository.delete(image.get());
 
     }
+
 
     @Transactional
     public ImageDetailResponseDto finalizeTemporaryImages(String sourceKey, ImageUpdateRequestDto updateRequest) {
