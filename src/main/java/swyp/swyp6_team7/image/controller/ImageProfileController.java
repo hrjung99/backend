@@ -38,6 +38,12 @@ public class ImageProfileController {
         return ResponseEntity.ok(response);
     }
 
+//    //임시 저장
+//    @PutMapping("/temp")
+//    public ResponseEntity<String> {
+//        return null;
+//    }
+
     //새로운 이미지 파일로 프로필 수정
     @PutMapping("")
     public ResponseEntity<ImageDetailResponseDto> updatedProfileImage(@RequestParam(value = "file") MultipartFile file, Principal principal) throws IOException {

@@ -174,4 +174,13 @@ public class ImageProfileService {
 
         }
     }
+
+    //임시저장
+//    public String temporaryImage (MultipartFile file, int userNumber) throws IOException {
+//        String relatedType = "profile";
+//
+//        String temKey = S3Uploader.uploadInTemporary(file, relatedType);
+//
+//    }
+
 }
