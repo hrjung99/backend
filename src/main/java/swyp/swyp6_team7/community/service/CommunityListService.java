@@ -15,6 +15,7 @@ import swyp.swyp6_team7.community.dto.response.CommunityListResponseDto;
 import swyp.swyp6_team7.community.dto.response.CommunitySearchCondition;
 import swyp.swyp6_team7.community.dto.response.CommunitySearchDto;
 import swyp.swyp6_team7.community.repository.CommunityCustomRepository;
+import swyp.swyp6_team7.community.repository.CommunityRepository;
 import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.likes.dto.response.LikeReadResponseDto;
 import swyp.swyp6_team7.likes.repository.LikeRepository;
@@ -35,13 +36,13 @@ public class CommunityListService {
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
     private final ImageRepository imageRepository;
+    private final CommunityRepository communityRepository;
 
     @Transactional(readOnly = true)
     public Page<CommunityListResponseDto> getCommunityList(PageRequest pageRequest, CommunitySearchCondition searchCondition, int userNumber) {
         // userNumer : 현재 조회 요청하는 사용자
 
-        Page<CommunitySearchDto> searchedCommunities = communityCustomRepository.search(pageRequest, searchCondition);
-        log.info("Number of searched communities: {}", searchedCommunities.getTotalElements());
+        List<CommunitySearchDto> searchedCommunities = communityCustomRepository.search(searchCondition);
         log.info("Search Condition: {}", searchCondition);
 
 
@@ -49,6 +50,7 @@ public class CommunityListService {
         List<CommunityListResponseDto> responseDtos = searchedCommunities.stream()
                 .map(dto -> {
                     Community community = dto.getCommunity();
+                    //댓글 작성자 가져오기
                     String postWriter = userRepository.findByUserNumber(community.getUserNumber())
                             .map(user -> user.getUserName())
                             .orElse("알 수 없는 사용자");
@@ -69,7 +71,7 @@ public class CommunityListService {
                     String thumbnailUrl = imageRepository.findByRelatedTypeAndRelatedNumberAndOrder("community", community.getPostNumber(), 1)
                             .map(image -> image.getUrl())  // 이미지가 존재하는 경우 URL 반환
                             .orElse(null); // 이미지가 없을 경우 null
-
+                    System.out.println("썸네일 가져오기 : postNumber : " + community.getPostNumber() +"/url : "+thumbnailUrl);
 
                     // CommunityListResponseDto 생성
                     return CommunityListResponseDto.fromEntity(
