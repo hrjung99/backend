@@ -96,7 +96,7 @@ public class ImageService {
 
             // 1대1
             Image image = imageRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new IllegalArgumentException("이미지 삭제 실패 : 해당 이미지를 찾을 수 없습니다." + relatedType + ":" + relatedNumber));
 
             // S3에서 파일 삭제
             s3Uploader.deleteFile(image.getKey()); // 이미지의 경로를 사용하여 S3에서 삭제
@@ -124,7 +124,7 @@ public class ImageService {
     // 이미지 정보
     public ImageDetailResponseDto getImageDetailByNumber(String relatedType, int relatedNumber, int order) {
         Image image = imageRepository.findByRelatedTypeAndRelatedNumberAndOrder(relatedType, relatedNumber, order)
-                .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다." + relatedType + ":" + relatedNumber));
+                .orElseThrow(() -> new IllegalArgumentException("이미지 상세 조회 : 해당 이미지를 찾을 수 없습니다." + relatedType + ":" + relatedNumber));
 
         return new ImageDetailResponseDto(image);
     }
