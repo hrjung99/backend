@@ -4,19 +4,3 @@ spring:
     include:
       - credentials
       - s3
-#spring:
-#  datasource:
-#    driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://localhost:3306/moing
-#    username: root
-#    password: 2478
-#
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
-#    properties:
-#      jakarta.persistence.jdbc.url: jdbc:mariadb://localhost:3306/moing
-#      hibernate:
-#        dialect: org.hibernate.dialect.MariaDBDialect
-#    show-sql: true
-
