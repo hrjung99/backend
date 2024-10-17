@@ -276,6 +276,7 @@ public class ImageCommunityService {
 
     }
 
+    @Transactional
     public ImageDetailResponseDto finalizeTemporaryImages(String sourceKey, ImageUpdateRequestDto updateRequest) {
         Optional<Image> searchImage = imageRepository.findByKey(sourceKey);
         Image image = searchImage.get();
