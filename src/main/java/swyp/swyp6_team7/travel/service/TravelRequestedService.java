@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.bookmark.repository.BookmarkRepository;
+import swyp.swyp6_team7.enrollment.domain.EnrollmentStatus;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
@@ -32,9 +33,10 @@ public class TravelRequestedService {
 
     @Transactional(readOnly = true)
     public Page<TravelListResponseDto> getRequestedTripsByUser(Integer userNumber, Pageable pageable) {
-        // 사용자가 신청한 모든 여행 목록 조회
+        // 사용자가 신청한 모든 여행 중 주최자가 아직 수락하지 않은 여행 조회
         List<Integer> travelNumbers = enrollmentRepository.findByUserNumber(userNumber).stream()
-                .map(Enrollment::getTravelNumber) // 사용자가 신청한 여행의 travelNumber 가져오기
+                .filter(enrollment -> enrollment.getStatus() == EnrollmentStatus.PENDING) // 주최자가 수락하지 않은 상태만 필터링
+                .map(Enrollment::getTravelNumber)
                 .collect(Collectors.toList());
 
         List<Travel> requestedTravels = travelRepository.findAllById(travelNumbers).stream()
