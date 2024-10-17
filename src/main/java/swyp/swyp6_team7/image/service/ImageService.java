@@ -11,6 +11,7 @@ import swyp.swyp6_team7.image.dto.request.ImageUpdateRequestDto;
 import swyp.swyp6_team7.image.dto.response.ImageDetailResponseDto;
 import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
+import swyp.swyp6_team7.image.util.S3KeyHandler;
 import swyp.swyp6_team7.image.util.StorageNameHandler;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final S3Uploader s3Uploader;
     private final StorageNameHandler storageNameHandler;
+    private final S3KeyHandler s3KeyHandler;
 
 
     //단일 파일 이미지 업로드 후 DB 저장
@@ -127,6 +129,23 @@ public class ImageService {
                 .orElseThrow(() -> new IllegalArgumentException("이미지 상세 조회 : 해당 이미지를 찾을 수 없습니다." + relatedType + ":" + relatedNumber));
 
         return new ImageDetailResponseDto(image);
+    }
+
+    //임시저장
+    public String temporaryImage (MultipartFile file) throws IOException {
+        String relatedType = "profile";
+
+        //임시 저장 경로에 업로드
+        String tempKey = s3Uploader.uploadInTemporary(file, relatedType);
+        String temUrl = s3Uploader.getImageUrl(tempKey);
+
+        return temUrl;
+    }
+
+    //임시 저장 삭제
+    public void deleteTempImage(String temUrl) {
+        String tempKey = s3KeyHandler.getKeyByUrl(temUrl);
+        s3Uploader.deleteFile(tempKey);
     }
 
 }

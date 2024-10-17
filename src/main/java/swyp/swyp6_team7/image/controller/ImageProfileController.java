@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swyp.swyp6_team7.image.dto.request.ImageDefaultRequestDto;
+import swyp.swyp6_team7.image.dto.request.TempDeleteRequestDto;
+import swyp.swyp6_team7.image.dto.request.TempUploadRequestDto;
 import swyp.swyp6_team7.image.dto.response.ImageDetailResponseDto;
 import swyp.swyp6_team7.image.service.ImageProfileService;
 import swyp.swyp6_team7.image.service.ImageService;
@@ -23,8 +25,8 @@ import java.util.NoSuchElementException;
 public class ImageProfileController {
 
     private final ImageService imageService;
-    private final ImageProfileService imageProfileService;
     private final MemberService memberService;
+    private final ImageProfileService imageProfileService;
 
 
     //초기 프로필 등록
@@ -38,19 +40,36 @@ public class ImageProfileController {
         return ResponseEntity.ok(response);
     }
 
-//    //임시 저장
-//    @PutMapping("/temp")
-//    public ResponseEntity<String> {
-//        return null;
-//    }
+    //임시 저장
+    @PostMapping("/temp")
+    public ResponseEntity<String> createTempImage (@RequestParam(value = "file") MultipartFile file, Principal principal) throws IOException{
 
-    //새로운 이미지 파일로 프로필 수정
+        String tempUrl = imageService.temporaryImage(file);
+        return ResponseEntity.ok(tempUrl);
+    }
+
+    //임시 저장 삭제
+    @DeleteMapping("/temp")
+    public ResponseEntity<String> deleteTempImage(@RequestBody TempDeleteRequestDto request, Principal principal) {
+
+        try {
+            imageService.deleteTempImage(request.getDeletedTempUrl());
+            // 성공 시 204
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            // 기타 오류 발생 시 500 Internal Server Error 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    //새로운 이미지 파일로 프로필 수정 (정식 저장)
     @PutMapping("")
-    public ResponseEntity<ImageDetailResponseDto> updatedProfileImage(@RequestParam(value = "file") MultipartFile file, Principal principal) throws IOException {
+    public ResponseEntity<ImageDetailResponseDto> updatedProfileImage(@RequestBody TempUploadRequestDto request, Principal principal){
         //user number 가져오기
         int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
-        ImageDetailResponseDto response = imageProfileService.uploadProfileImage(userNumber, file);
+        ImageDetailResponseDto response = imageProfileService.uploadProfileImage("profile", userNumber, request.getImageUrl());
+
         return ResponseEntity.ok(response);
     }
 
@@ -61,7 +80,7 @@ public class ImageProfileController {
         //user number 가져오기
         int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
-        ImageDetailResponseDto response = imageProfileService.uploadDefaultImage(userNumber, request.getDefaultNumber());
+        ImageDetailResponseDto response = imageProfileService.updateProfileByDefaultUrl(userNumber, request.getDefaultNumber());
         return ResponseEntity.ok(response);
     }
 
