@@ -1,20 +1,17 @@
 package swyp.swyp6_team7.member.service;
 
-import io.jsonwebtoken.Jwt;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.member.dto.UserRequestDto;
 import swyp.swyp6_team7.member.entity.*;
 import swyp.swyp6_team7.member.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import swyp.swyp6_team7.profile.dto.ProfileCreateRequest;
 import swyp.swyp6_team7.profile.service.ProfileService;
-
-import org.springframework.security.core.GrantedAuthority;
 import swyp.swyp6_team7.tag.domain.Tag;
 import swyp.swyp6_team7.tag.domain.UserTagPreference;
 import swyp.swyp6_team7.tag.repository.UserTagPreferenceRepository;
@@ -42,16 +39,14 @@ public class MemberService {
 
 
     @Autowired
-
-
-    public MemberService(UserRepository userRepository,
-                         PasswordEncoder passwordEncoder,
-                         ProfileService profileService,
-                         @Lazy JwtProvider jwtProvider,
-                         TagService tagService,
-                         UserTagPreferenceRepository userTagPreferenceRepository,
-                         MemberDeletedService memberDeletedService){
-
+    public MemberService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            ProfileService profileService,
+            @Lazy JwtProvider jwtProvider,
+            TagService tagService,
+            UserTagPreferenceRepository userTagPreferenceRepository,
+            MemberDeletedService memberDeletedService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -68,19 +63,6 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
     }
 
-    @Transactional(readOnly = true)
-    public List<String> findPreferredTagsByEmail(String email) {
-        Users user = userRepository.findByUserEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-        if (user.getPreferredTags().isEmpty()) {
-            throw new IllegalArgumentException("사용자 태그가 설정되어 있지 않습니다.");
-        }
-
-        return user.getPreferredTags().stream()
-                .map(tag -> tag.getName())
-                .toList();
-    }
 
     public Map<String, Object> signUp(UserRequestDto userRequestDto) {
 
@@ -104,7 +86,7 @@ public class MemberService {
         AgeGroup ageGroup;
         try {
 
-            ageGroup =  AgeGroup.fromValue(userRequestDto.getAgegroup());
+            ageGroup = AgeGroup.fromValue(userRequestDto.getAgegroup());
 
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid age group provided.");
@@ -158,7 +140,7 @@ public class MemberService {
 
         // JWT 발급
         long tokenExpirationTime = 3600000; // 토큰 만료 시간 추가(1시간)
-        String token = jwtProvider.createToken(newUser.getEmail(), newUser.getUserNumber(),roles, tokenExpirationTime);
+        String token = jwtProvider.createToken(newUser.getEmail(), newUser.getUserNumber(), roles, tokenExpirationTime);
 
         // 응답 데이터에 userId와 accessToken 포함
         Map<String, Object> response = new HashMap<>();
@@ -217,7 +199,7 @@ public class MemberService {
 
         // JWT 발급
         long tokenExpirationTime = 3600000; // 토큰 만료 시간 1시간
-        String token = jwtProvider.createToken(newAdmin.getUserEmail(),newAdmin.getUserNumber(), roles, tokenExpirationTime);
+        String token = jwtProvider.createToken(newAdmin.getUserEmail(), newAdmin.getUserNumber(), roles, tokenExpirationTime);
 
         // 응답 데이터
         Map<String, Object> response = new HashMap<>();
@@ -253,6 +235,7 @@ public class MemberService {
         return userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 사용자를 찾을 수 없습니다: " + email));
     }
+
     @Transactional
     public void deleteUser(Integer userNumber) {
         Optional<Users> optionalUser = userRepository.findById(userNumber);
