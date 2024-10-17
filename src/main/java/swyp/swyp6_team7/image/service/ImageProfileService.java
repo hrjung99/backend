@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import swyp.swyp6_team7.image.domain.Image;
 import swyp.swyp6_team7.image.dto.request.ImageCreateRequestDto;
 import swyp.swyp6_team7.image.dto.request.ImageUpdateRequestDto;
@@ -14,9 +13,6 @@ import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.image.util.S3KeyHandler;
 import swyp.swyp6_team7.image.util.StorageNameHandler;
-
-
-import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
