@@ -39,10 +39,11 @@ public class ImageCreateRequestDto {
 
         // 최소 필드만 받는 생성자 (프로필 이미지 기본 이미지용)
     @Builder
-    public ImageCreateRequestDto(String relatedType, int relatedNumber, int order, String url) {
+    public ImageCreateRequestDto(String relatedType, int relatedNumber, int order, String key, String url) {
         this.relatedType = relatedType;
         this.relatedNumber = relatedNumber;
         this.order = order;
+        this.key = key;
         this.url = url;
         this.uploadDate = LocalDateTime.now();
     }

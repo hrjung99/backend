@@ -33,4 +33,9 @@ public class StorageNameHandler {
         return UUID.randomUUID().toString();
     }
 
+    //key로 storageName 추출
+    public String extractStorageName(String s3Key) {
+        // 마지막 '/' 이후의 문자열을 추출
+        return s3Key.substring(s3Key.lastIndexOf('/') + 1);
+    }
 }
