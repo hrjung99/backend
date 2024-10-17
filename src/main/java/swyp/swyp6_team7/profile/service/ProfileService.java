@@ -101,13 +101,13 @@ public class ProfileService {
 
     // 현재 비밀번호 검증 로직
     @Transactional(readOnly = true)
-    public void verifyCurrentPassword(Integer userNumber, String currentPassword) {
+    public void verifyCurrentPassword(Integer userNumber, String confirmPassword) {
         // 사용자 조회
         Users user = userRepository.findById(userNumber)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // 현재 비밀번호 확인
-        if (!passwordEncoder.matches(currentPassword, user.getUserPw())) {
+        if (!passwordEncoder.matches(confirmPassword, user.getUserPw())) {
             throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
         }
     }
