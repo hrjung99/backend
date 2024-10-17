@@ -87,7 +87,9 @@ public class S3Uploader {
     //해당 경로에 특정 파일이 존재하는지 확인하는 메소드 (key로 확인)
     public boolean existObject(String key) {
         return amazonS3.doesObjectExist(s3Component.getBucket(), key);
+
     }
+
 
     // S3 파일 삭제 메소드
     public void deleteFile(String S3Key) {
@@ -103,9 +105,6 @@ public class S3Uploader {
             System.err.println("S3 파일 삭제 실패: " + e.getMessage());
         }
     }
-
-
-
 
 
     // S3 key 로 URL 추출
@@ -138,17 +137,16 @@ public class S3Uploader {
     }
 
 
-
     // 이미지 경로 이동 메서드
     public String moveImage(String sourceKey, String destinationKey) {
-        
+
         //기존 경로에서 이미지 복사
         copyImage(sourceKey, destinationKey);
-        
-        //기존 경로의 이미지 삭제
-       deleteFile(sourceKey);
 
-       //경로 이동 후 path 리턴
+        //기존 경로의 이미지 삭제
+        deleteFile(sourceKey);
+
+        //경로 이동 후 path 리턴
         return destinationKey;
     }
 

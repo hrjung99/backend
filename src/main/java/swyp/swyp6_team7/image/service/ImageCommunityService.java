@@ -102,7 +102,7 @@ public class ImageCommunityService {
             }
         }
 
-        if (tempUrls != null && tempUrls.isEmpty()) {
+        if (tempUrls != null && !tempUrls.isEmpty()) {
             // 정식등록 할 이미지 처리
             for (int i = 0; i < tempUrls.size(); i++) {
 
@@ -248,9 +248,10 @@ public class ImageCommunityService {
     //게시물 별 이미지 조회
     public ImageDetailResponseDto[] communityImageDetail(int postNumber) {
         System.out.println("게시물 별 이미지 조회 들어옴 : " + postNumber);
-        ImageDetailResponseDto[] responses = {};
 
         List<Image> images = imageRepository.findAllByRelatedTypeAndRelatedNumber("community", postNumber);
+        ImageDetailResponseDto[] responses = new ImageDetailResponseDto[images.size()];
+
         for (int i = 0; i < images.size(); i++) {
 
             Image image = images.get(i);
@@ -278,33 +279,31 @@ public class ImageCommunityService {
 
     @Transactional
     public ImageDetailResponseDto finalizeTemporaryImages(String sourceKey, ImageUpdateRequestDto updateRequest) {
-        Optional<Image> searchImage = imageRepository.findByKey(sourceKey);
-        Image image = searchImage.get();
-        System.out.println(image);
+        System.out.println("이미지 정식 저장된 이미지 DB업데이트 메소드 동작 : " + updateRequest.getOrder());
 
-        if (searchImage.isPresent()) {
-            //update 메소드 호출
-            image.update(
-                    updateRequest.getOriginalName(),
-                    updateRequest.getStorageName(),
-                    updateRequest.getSize(),
-                    updateRequest.getFormat(),
-                    updateRequest.getRelatedType(),
-                    updateRequest.getRelatedNumber(),
-                    updateRequest.getOrder(),
-                    updateRequest.getKey(),
-                    updateRequest.getUrl(),
-                    updateRequest.getUploadDate() // 현재 시간으로 업로드 날짜 설정
-            );
+        Image searchImage = imageRepository.findByKey(sourceKey)
+                .orElseThrow(() -> new IllegalArgumentException("정식 저장 DB update 동작 에러 : 수정할 이미지를 찾을 수 없습니다. : " + sourceKey));
 
-            //DB에 update 적용
-            Image updatedImage = imageRepository.save(image);
-            return new ImageDetailResponseDto(updatedImage);
-        } else {
-            throw new IllegalArgumentException("존재하지 않는 이미지입니다.");
+        //update 메소드 호출
+        searchImage.update(
+                updateRequest.getOriginalName(),
+                updateRequest.getStorageName(),
+                updateRequest.getSize(),
+                updateRequest.getFormat(),
+                updateRequest.getRelatedType(),
+                updateRequest.getRelatedNumber(),
+                updateRequest.getOrder(),
+                updateRequest.getKey(),
+                updateRequest.getUrl(),
+                updateRequest.getUploadDate()
+        );
+        Image updatedImage = imageRepository.save(searchImage); // save 호출 추가
 
 
-        }
+        System.out.println("finalizeTemporaryImages 메소드 동작 : " + updatedImage.getOrder());
+
+        //DB에 update 적용
+        return new ImageDetailResponseDto(updatedImage);
     }
 
 }
