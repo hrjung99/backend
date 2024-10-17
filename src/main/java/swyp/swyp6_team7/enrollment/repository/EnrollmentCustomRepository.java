@@ -9,6 +9,8 @@ public interface EnrollmentCustomRepository {
 
     List<EnrollmentResponse> findEnrollmentsByTravelNumber(int travelNumber);
 
+    List<Integer> findEnrolledUserNumbersByTravelNumber(int travelNumber);
+
     List<Tuple> findEnrollmentsByUserNumber(int userNumber);
 
 }

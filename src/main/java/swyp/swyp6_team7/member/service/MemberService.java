@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +33,7 @@ public class MemberService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
-
+    private final MemberDeletedService memberDeletedService;
     private final ProfileService profileService;
     private final TagService tagService;
     private final UserTagPreferenceRepository userTagPreferenceRepository;
@@ -48,7 +49,8 @@ public class MemberService {
                          ProfileService profileService,
                          @Lazy JwtProvider jwtProvider,
                          TagService tagService,
-                         UserTagPreferenceRepository userTagPreferenceRepository){
+                         UserTagPreferenceRepository userTagPreferenceRepository,
+                         MemberDeletedService memberDeletedService){
 
 
         this.userRepository = userRepository;
@@ -57,6 +59,7 @@ public class MemberService {
         this.profileService = profileService;
         this.tagService = tagService;
         this.userTagPreferenceRepository = userTagPreferenceRepository;
+        this.memberDeletedService = memberDeletedService;
     }
 
     @Transactional(readOnly = true)
@@ -249,5 +252,21 @@ public class MemberService {
     public Users getUserByEmail(String email) {
         return userRepository.findByUserEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 사용자를 찾을 수 없습니다: " + email));
+    }
+    @Transactional
+    public void deleteUser(Integer userNumber) {
+        Optional<Users> optionalUser = userRepository.findById(userNumber);
+
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        Users user = optionalUser.get();
+        memberDeletedService.deleteUserData(user);  // 삭제 로직 실행
+    }
+
+    private Users findUserById(Integer userNumber) {
+        return userRepository.findById(userNumber)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
     }
 }

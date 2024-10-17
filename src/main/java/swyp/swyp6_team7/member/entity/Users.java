@@ -36,7 +36,7 @@ public class Users {
     @Column(nullable = false, length = 50)
     private String userName;
 
-    @Column(nullable = false, length = 2)
+    @Column(nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
     private Gender userGender;
 

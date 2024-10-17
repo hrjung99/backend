@@ -57,4 +57,22 @@ public class NotificationMaker {
                 .build();
     }
 
+    public static Notification travelNewCommentMessageToHost(Travel targetTravel) {
+        return Notification.builder()
+                .receiverNumber(targetTravel.getUserNumber())
+                .title(NotificationMessageType.TRAVEL_NEW_COMMENT_HOST.getTitle())
+                .content(NotificationMessageType.TRAVEL_NEW_COMMENT_HOST.getContent(targetTravel.getTitle()))
+                .isRead(false)
+                .build();
+    }
+
+    public static Notification travelNewCommentMessageToEnrollments(Travel targetTravel, int enrolledUserNumber) {
+        return Notification.builder()
+                .receiverNumber(enrolledUserNumber)
+                .title(NotificationMessageType.TRAVEL_NEW_COMMENT_ENROLLMENT.getTitle())
+                .content(NotificationMessageType.TRAVEL_NEW_COMMENT_ENROLLMENT.getContent(targetTravel.getTitle()))
+                .isRead(false)
+                .build();
+    }
+
 }

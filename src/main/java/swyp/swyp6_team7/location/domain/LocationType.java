@@ -9,7 +9,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum LocationType {
     DOMESTIC("국내"),
-    INTERNATIONAL("해외");
+    INTERNATIONAL("해외"),
+    UNKNOWN("알 수 없음");
 
     private final String description;
 

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class BookmarkResponse {
     private int travelNumber;           // 여행 번호
     private String title;               // 여행 제목
-    private String locaiton;
+    private String location;
     private int userNumber;             // 사용자 번호
     private String userName;            // 사용자 이름
     private List<String> tags;          // 태그 리스트
