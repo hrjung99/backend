@@ -9,6 +9,7 @@ import swyp.swyp6_team7.image.domain.Image;
 import swyp.swyp6_team7.image.dto.request.ImageCreateRequestDto;
 import swyp.swyp6_team7.image.dto.request.ImageUpdateRequestDto;
 import swyp.swyp6_team7.image.dto.response.ImageDetailResponseDto;
+import swyp.swyp6_team7.image.dto.response.ImageTempResponseDto;
 import swyp.swyp6_team7.image.repository.ImageRepository;
 import swyp.swyp6_team7.image.s3.S3Uploader;
 import swyp.swyp6_team7.image.util.S3KeyHandler;
@@ -132,14 +133,15 @@ public class ImageService {
     }
 
     //임시저장
-    public String temporaryImage (MultipartFile file) throws IOException {
+    public ImageTempResponseDto temporaryImage (MultipartFile file) throws IOException {
         String relatedType = "profile";
 
         //임시 저장 경로에 업로드
         String tempKey = s3Uploader.uploadInTemporary(file, relatedType);
         String temUrl = s3Uploader.getImageUrl(tempKey);
 
-        return temUrl;
+
+        return new ImageTempResponseDto(temUrl);
     }
 
     //임시 저장 삭제

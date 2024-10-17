@@ -10,6 +10,7 @@ import swyp.swyp6_team7.image.dto.request.ImageDefaultRequestDto;
 import swyp.swyp6_team7.image.dto.request.TempDeleteRequestDto;
 import swyp.swyp6_team7.image.dto.request.TempUploadRequestDto;
 import swyp.swyp6_team7.image.dto.response.ImageDetailResponseDto;
+import swyp.swyp6_team7.image.dto.response.ImageTempResponseDto;
 import swyp.swyp6_team7.image.service.ImageProfileService;
 import swyp.swyp6_team7.image.service.ImageService;
 import swyp.swyp6_team7.member.service.MemberService;
@@ -42,10 +43,10 @@ public class ImageProfileController {
 
     //임시 저장
     @PostMapping("/temp")
-    public ResponseEntity<String> createTempImage (@RequestParam(value = "file") MultipartFile file, Principal principal) throws IOException{
+    public ResponseEntity<ImageTempResponseDto> createTempImage (@RequestParam(value = "file") MultipartFile file, Principal principal) throws IOException{
 
-        String tempUrl = imageService.temporaryImage(file);
-        return ResponseEntity.ok(tempUrl);
+        ImageTempResponseDto response = imageService.temporaryImage(file);
+        return ResponseEntity.ok(response);
     }
 
     //임시 저장 삭제
