@@ -131,6 +131,7 @@ public class ImageCommunityService {
                 String newUrl = s3Uploader.getImageUrl(newKey);
                 System.out.println("newUrl : " + newUrl);
 
+                //DB 업데이트 동작
                 ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
                         .relatedType(relatedType)
                         .relatedNumber(relatedNumber)
@@ -138,6 +139,7 @@ public class ImageCommunityService {
                         .key(newKey)
                         .url(newUrl) // 새 이미지 URL
                         .build();
+                finalizeTemporaryImages(tempKey, updateRequest);
 
             } else {
                 throw new IllegalArgumentException("임시 저장된 데이터가 존재하지 않습니다. Url을 확인해주세요.");
@@ -199,6 +201,7 @@ public class ImageCommunityService {
                         .key(destinationKey)
                         .url(newUrl) // 새 이미지 URL
                         .build();
+                finalizeTemporaryImages(key, updateRequest);
 
                 //순서값 +1
                 order++;
@@ -240,12 +243,15 @@ public class ImageCommunityService {
 
     //게시물 별 이미지 조회
     public ImageDetailResponseDto[] communityImageDetail(int postNumber) {
+        System.out.println("게시물 별 이미지 조회 들어옴 : " + postNumber);
         ImageDetailResponseDto[] responses = {};
 
         List<Image> images = imageRepository.findAllByRelatedTypeAndRelatedNumber("community", postNumber);
         for (int i = 0; i < images.size(); i++) {
 
             Image image = images.get(i);
+            System.out.println("postNumber : " + postNumber);
+            System.out.println("order : " + image.getOrder());
 
             ImageDetailResponseDto response = imageService.getImageDetailByNumber("community", postNumber, image.getOrder());
             responses[i] = response;
