@@ -101,11 +101,28 @@ public class ImageService {
             Image image = imageRepository.findByRelatedTypeAndRelatedNumber(relatedType, relatedNumber)
                     .orElseThrow(() -> new IllegalArgumentException("이미지 삭제 실패 : 해당 이미지를 찾을 수 없습니다." + relatedType + ":" + relatedNumber));
 
-            // S3에서 파일 삭제
-            s3Uploader.deleteFile(image.getKey()); // 이미지의 경로를 사용하여 S3에서 삭제
 
-            // 데이터베이스에서 이미지 삭제
-            imageRepository.delete(image);
+            String presentKey = image.getKey();
+
+            //이전 이미지가 파일 업로드인지 default 이미지인지 확인
+            //key가 "images/profile/relatedNumber"로 시작하면, 이전 이미지는 파일 업로드 이미지
+            if (presentKey.startsWith("images/profile/" + relatedNumber)) {
+                //이미지 삭제
+                s3Uploader.deleteFile(presentKey);
+                // 데이터베이스에서 이미지 삭제
+                imageRepository.delete(image);
+            }
+            //key가 "images/profile/default"로 시작하면, 이전 이미지는 디폴트 이미지
+            else if (presentKey.startsWith("images/profile/default")) {
+                //이미지 삭제 동작 필요 없음
+            } else {
+                throw new IllegalArgumentException("업데이트 전 DB  데이터에 오류가 있습니다.");
+            }
+
+
+
+
+
 
         } else if ("community".equals(relatedType)) {
 
