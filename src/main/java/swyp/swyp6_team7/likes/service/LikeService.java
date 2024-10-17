@@ -32,7 +32,7 @@ public class LikeService {
     public Object toggleLike(String relatedType, int relatedNumber, int userNumber) {
 
         //댓글 좋아요의 경우
-        if ("  ".equals(relatedType)) {
+        if ("comment".equals(relatedType)) {
             // 댓글 존재 여부 검증
             Comment comment = commentRepository.findByCommentNumber(relatedNumber)
                     .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다: " + relatedNumber));
