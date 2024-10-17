@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers(HttpMethod.GET, "/api/notices/**").permitAll() // 모든 사용자 조회 가능
                         .requestMatchers(HttpMethod.POST, "/api/notices").hasRole("ADMIN") // POST는 관리자만 가능
                         .requestMatchers(HttpMethod.PUT, "/api/notices/**").hasRole("ADMIN") // PUT은 관리자만 가능
@@ -50,17 +51,22 @@ public class SecurityConfig {
                                 "/api/logout",
                                 "/api/users/new",
                                 "/api/token/refresh",
-                                "/login/oauth/kakao/**",
+                                "/api/social/login",
+                                "/api/social/kakao/complete-signup",
+                                "/api/social/google/complete-signup",
+                                "/login/oauth/kakao/**","/login/oauth/naver/**","/login/oauth/google/**",
                                 "/error",
                                 "/api/users-email",
                                 "/actuator/health", // Health check endpoint permission
-                                "/api/image/**"
+                                "/api/community/images/**",
+                                "/api/community/*/images"
                         ).permitAll()
 
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+
 
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )

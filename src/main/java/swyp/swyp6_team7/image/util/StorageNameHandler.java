@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class FileNameHandler {
+public class StorageNameHandler {
 
     public String generateUniqueFileName(String originalFileName) {
         //확장자 추출
@@ -19,8 +19,6 @@ public class FileNameHandler {
     }
 
 
-
-
     // 파일 확장자 추출 메소드
     private String extractExtension(String fileName) {
         int dotIndex = fileName.lastIndexOf(".");
@@ -29,8 +27,6 @@ public class FileNameHandler {
         }
         return "";  // 확장자가 없는 경우 빈 문자열 반환
     }
-
-
 
     // UUID를 사용해 고유한 이름 생성 메소드
     private String generateUUID() {
