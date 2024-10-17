@@ -50,6 +50,11 @@ public class TravelAppliedService {
 
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
+
+        if (start > end || start > dtos.size()) {
+            return new PageImpl<>(List.of(), pageable, dtos.size());
+        }
+
         return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 
