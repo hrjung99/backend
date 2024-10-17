@@ -70,82 +70,86 @@ public class ImageCommunityService {
         String relatedType = "community";
         int order = 0;
 
+        if (deletedTempUrls != null) {
+            //임시 저장 했지만 최종 게시물 등록시에는 삭제된 이미지 처리
+            for (int i = 0; i < deletedTempUrls.size(); i++) {
+                String deletedTempUrl = deletedTempUrls.get(i);
+                System.out.println("deletedTempUrl : " + deletedTempUrl);
 
-        //임시 저장 했지만 최종 게시물 등록시에는 삭제된 이미지 처리
-        for (int i = 0; i < deletedTempUrls.size(); i++) {
-            String deletedTempUrl = deletedTempUrls.get(i);
-            System.out.println("deletedTempUrl : " + deletedTempUrl);
+                // deletedTempKey 찾기
+                String deletedTempKey = imageRepository.findByUrl(deletedTempUrl)
+                        .map(Image::getKey)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 이미지의 키를 찾을 수 없습니다."));
+                System.out.println("deletedTempKey : " + deletedTempKey);
 
-            // deletedTempKey 찾기
-            String deletedTempKey = imageRepository.findByUrl(deletedTempUrl)
-                    .map(Image::getKey)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 이미지의 키를 찾을 수 없습니다."));
-            System.out.println("deletedTempKey : " + deletedTempKey);
+                // DB에서 이미지 삭제
+                Image deletedTempImage = imageRepository.findByKey(deletedTempKey)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다."));
 
-            // DB에서 이미지 삭제
-            Image deletedTempImage = imageRepository.findByKey(deletedTempKey)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다."));
+                try {
+                    imageRepository.delete(deletedTempImage);
+                    System.out.println("파일 삭제 완료: " + deletedTempKey);
+                } catch (DataAccessException e) {
+                    throw new IllegalArgumentException("이미지 삭제에 실패했습니다: " + e.getMessage());
+                }
 
-            try {
-                imageRepository.delete(deletedTempImage);
-                System.out.println("파일 삭제 완료: " + deletedTempKey);
-            } catch (DataAccessException e) {
-                throw new IllegalArgumentException("이미지 삭제에 실패했습니다: " + e.getMessage());
-            }
-
-            // S3에서 삭제
-            if (s3Uploader.existObject(deletedTempKey)) {
-                s3Uploader.deleteFile(deletedTempKey);
-            } else {
-                throw new IllegalArgumentException("유효하지 않은 URL 입니다 : deletedTempUrl 을 확인해주세요 :" + deletedTempUrl);
+                // S3에서 삭제
+                if (s3Uploader.existObject(deletedTempKey)) {
+                    s3Uploader.deleteFile(deletedTempKey);
+                } else {
+                    throw new IllegalArgumentException("유효하지 않은 URL 입니다 : deletedTempUrl 을 확인해주세요 :" + deletedTempUrl);
+                }
             }
         }
 
-        // 정식등록 할 이미지 처리
-        for (int i = 0; i < tempUrls.size(); i++) {
+        if (tempUrls != null) {
+            // 정식등록 할 이미지 처리
+            for (int i = 0; i < tempUrls.size(); i++) {
 
-            // 이미지 순서 설정
-            order = i + 1;
+                // 이미지 순서 설정
+                order = i + 1;
 
-            // 임시 경로에 저장된 이미지의 url 하나씩 뽑아서
-            String tempUrl = tempUrls.get(i);
-            System.out.println("tempUrl" + tempUrl);
-            // 임시 경로 key 추출
-            String tempKey = s3KeyHandler.getKeyByUrl(tempUrl);
-            System.out.println("tempKey : " + tempKey);
+                // 임시 경로에 저장된 이미지의 url 하나씩 뽑아서
+                String tempUrl = tempUrls.get(i);
+                System.out.println("tempUrl" + tempUrl);
+                // 임시 경로 key 추출
+                String tempKey = s3KeyHandler.getKeyByUrl(tempUrl);
+                System.out.println("tempKey : " + tempKey);
 
-            //해당 경로에 이미지가 존재하는지 확인
-            if (s3Uploader.existObject(tempKey)) {
+                //해당 경로에 이미지가 존재하는지 확인
+                if (s3Uploader.existObject(tempKey)) {
 
-                //unique한 값인 key로 db의 임시 이미지 데이터 가져오기
-                Image tempImage = imageRepository.findByKey(tempKey)
-                        .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다."));
+                    //unique한 값인 key로 db의 임시 이미지 데이터 가져오기
+                    Image tempImage = imageRepository.findByKey(tempKey)
+                            .orElseThrow(() -> new IllegalArgumentException("해당 이미지를 찾을 수 없습니다."));
 
 
-                //정식 경로 key 생성
-                String newKey = s3KeyHandler.generateS3Key(relatedType, relatedNumber, tempImage.getStorageName(), order);
-                System.out.println("newKey : " + newKey);
-                //임시 경로에 있는 이미지 정식 경로로 이동
-                s3Uploader.moveImage(tempKey, newKey);
-                //정식 경로 key로 url 가져오기
-                String newUrl = s3Uploader.getImageUrl(newKey);
-                System.out.println("newUrl : " + newUrl);
+                    //정식 경로 key 생성
+                    String newKey = s3KeyHandler.generateS3Key(relatedType, relatedNumber, tempImage.getStorageName(), order);
+                    System.out.println("newKey : " + newKey);
+                    //임시 경로에 있는 이미지 정식 경로로 이동
+                    s3Uploader.moveImage(tempKey, newKey);
+                    //정식 경로 key로 url 가져오기
+                    String newUrl = s3Uploader.getImageUrl(newKey);
+                    System.out.println("newUrl : " + newUrl);
 
-                //DB 업데이트 동작
-                ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
-                        .relatedType(relatedType)
-                        .relatedNumber(relatedNumber)
-                        .order(order)
-                        .key(newKey)
-                        .url(newUrl) // 새 이미지 URL
-                        .build();
-                finalizeTemporaryImages(tempKey, updateRequest);
+                    //DB 업데이트 동작
+                    ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+                            .relatedType(relatedType)
+                            .relatedNumber(relatedNumber)
+                            .order(order)
+                            .key(newKey)
+                            .url(newUrl) // 새 이미지 URL
+                            .build();
+                    finalizeTemporaryImages(tempKey, updateRequest);
 
-            } else {
-                throw new IllegalArgumentException("임시 저장된 데이터가 존재하지 않습니다. Url을 확인해주세요.");
+                } else {
+                    throw new IllegalArgumentException("임시 저장된 데이터가 존재하지 않습니다. Url을 확인해주세요.");
+                }
             }
         }
         ImageDetailResponseDto[] responses = communityImageDetail(relatedNumber);
+
         return responses;
     }
 
