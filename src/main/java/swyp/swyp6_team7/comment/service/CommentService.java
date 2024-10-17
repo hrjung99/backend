@@ -368,41 +368,23 @@ public class CommentService {
         Comment comment = commentRepository.findByCommentNumber(commentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
 
-        // 댓글 번호로 게시글 번호 가져오기
-        int travelNumber = comment.getRelatedNumber();
-
-        // 게시글 번호로 작성자 회원 번호 가져오기
-        int travelWriterNumber = travelRepository.findByNumber(travelNumber).get().getUserNumber();
-
+        int postWriterNumber = 0;
+        if(comment.getRelatedType().equals("travel")) {
+            // 댓글 번호로 게시글 번호 가져오기
+            int travelNumber = comment.getRelatedNumber();
+            // 게시글 번호로 작성자 회원 번호 가져오기
+            postWriterNumber = travelRepository.findByNumber(travelNumber).get().getUserNumber();
+        } else if(comment.getRelatedType().equals("community")) {
+            int communityNumber = comment.getRelatedNumber();
+            postWriterNumber = communityRepository.findByPostNumber(communityNumber).get().getUserNumber();
+        }
 
         // 요청한 사용자(=로그인 중인 사용자)가 댓글 작성자 혹은 게시글 작성자인지 확인
-        if (comment.getUserNumber() != userNumber | travelWriterNumber != userNumber) {
+        if (userNumber != postWriterNumber) {
             throw new IllegalArgumentException("댓글 작성자 혹은 게시글 작성자에게만 유효한 동작입니다.");
         }
     }
 
-    //게시글 작성자 인지 확인
-    @Transactional(readOnly = true)
-    public void validateWriter(String relatedType, int relatedNumber, int requestUserNumber) {
-
-        int writerNumber = 0;
-
-        if (relatedType.equals("travel")) {
-            // 존재하는 게시글인지 확인
-            Travel travel = travelRepository.findByNumber(relatedNumber)
-                    .orElseThrow(() -> new IllegalArgumentException("travel not found: " + relatedNumber));
-            writerNumber = travel.getUserNumber();
-        } else if (relatedType.equals("community")) {
-            Community post = communityRepository.findByPostNumber(relatedNumber)
-                    .orElseThrow(() -> new IllegalArgumentException("community not found: " + relatedNumber));
-            writerNumber = post.getUserNumber();
-        }
-
-        // 요청한 사용자(=로그인 중인 사용자)가 게시글 작성자인지 확인
-        if (writerNumber != requestUserNumber) {
-            throw new IllegalArgumentException("해당 게시글 작성자가 아닙니다.");
-        }
-    }
 
 
     //댓글 작성자인지 확인

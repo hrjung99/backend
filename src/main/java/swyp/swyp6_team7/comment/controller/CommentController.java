@@ -38,10 +38,8 @@ public class CommentController {
             @PathVariable(name = "relatedNumber") int relatedNumber
     ) {
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
-        
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
+
         Comment createdComment = commentService.create(request, userNumber, relatedType, relatedNumber);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(commentService.getCommentByNumber(createdComment.getCommentNumber()));
@@ -71,9 +69,7 @@ public class CommentController {
             @PathVariable int commentNumber
     ) {
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         CommentDetailResponseDto updateResponse = commentService.update(request, userNumber, commentNumber);
 
@@ -88,9 +84,7 @@ public class CommentController {
             Principal principal
     ) {
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         commentService.delete(commentNumber, userNumber);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
