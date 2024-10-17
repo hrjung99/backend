@@ -36,7 +36,6 @@ public class CommunityListService {
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
     private final ImageRepository imageRepository;
-    private final CommunityRepository communityRepository;
 
     @Transactional(readOnly = true)
     public Page<CommunityListResponseDto> getCommunityList(PageRequest pageRequest, CommunitySearchCondition searchCondition, int userNumber) {
@@ -44,7 +43,7 @@ public class CommunityListService {
 
         List<CommunitySearchDto> searchedCommunities = communityCustomRepository.search(searchCondition);
         log.info("Search Condition: {}", searchCondition);
-
+        System.out.println("게시물 목록 조회 서비스(정렬 전) - sortingType : " + searchCondition.getSortingType());
 
 
         List<CommunityListResponseDto> responseDtos = searchedCommunities.stream()
@@ -71,7 +70,6 @@ public class CommunityListService {
                     String thumbnailUrl = imageRepository.findByRelatedTypeAndRelatedNumberAndOrder("community", community.getPostNumber(), 1)
                             .map(image -> image.getUrl())  // 이미지가 존재하는 경우 URL 반환
                             .orElse(null); // 이미지가 없을 경우 null
-                    System.out.println("썸네일 가져오기 : postNumber : " + community.getPostNumber() +"/url : "+thumbnailUrl);
 
                     // CommunityListResponseDto 생성
                     return CommunityListResponseDto.fromEntity(
