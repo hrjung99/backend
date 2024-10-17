@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
-import swyp.swyp6_team7.member.service.MemberService;
+import swyp.swyp6_team7.member.util.MemberAuthorizeUtil;
 import swyp.swyp6_team7.notification.dto.NotificationDto;
 import swyp.swyp6_team7.notification.dto.TravelNotificationDto;
 import swyp.swyp6_team7.notification.entity.Notification;
@@ -30,7 +29,6 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final MemberService memberService;
     private final TravelRepository travelRepository;
     private final EnrollmentRepository enrollmentRepository;
 
@@ -84,11 +82,10 @@ public class NotificationService {
 
 
     public Page<NotificationDto> getNotificationsByUser(PageRequest pageRequest) {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Users user = memberService.findByEmail(userName);
+        Integer loginUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
 
         Page<Notification> notifications = notificationRepository
-                .getNotificationsByReceiverNumberOrderByIsReadAscCreatedAtDesc(user.getUserNumber(), pageRequest);
+                .getNotificationsByReceiverNumberOrderByIsReadAscCreatedAtDesc(loginUserNumber, pageRequest);
 
         return notifications.map(notification -> makeDto(notification));
     }
