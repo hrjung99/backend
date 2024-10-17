@@ -40,25 +40,25 @@ public class NotificationService {
         //notification to host
         Notification newNotificationToHost = NotificationMaker.travelEnrollmentMessageToHost(targetTravel);
         newNotificationToHost = notificationRepository.save(newNotificationToHost);
-        log.info("[알림]여행신청 =" + newNotificationToHost.toString());
+        //log.info("[알림]여행신청 =" + newNotificationToHost.toString());
 
         Notification newNotification = NotificationMaker.travelEnrollmentMessage(targetTravel, user);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]참가신청 =" + newNotification.toString());
+        //log.info("[알림]참가신청 =" + newNotification.toString());
     }
 
     @Async
     public void createAcceptNotification(Travel targetTravel, Enrollment enrollment) {
         Notification newNotification = NotificationMaker.travelAcceptMessage(targetTravel, enrollment);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]참가확정 = " + newNotification.toString());
+        //log.info("[알림]참가확정 = " + newNotification.toString());
     }
 
     @Async
     public void createRejectNotification(Travel targetTravel, Enrollment enrollment) {
         Notification newNotification = NotificationMaker.travelRejectMessage(targetTravel, enrollment);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]참가거절 = " + newNotification.toString());
+        //log.info("[알림]참가거절 = " + newNotification.toString());
     }
 
     @Async
