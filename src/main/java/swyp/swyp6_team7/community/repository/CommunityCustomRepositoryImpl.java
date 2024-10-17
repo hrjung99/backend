@@ -43,41 +43,41 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
                 .execute();
     }
 
-    public List<CommunitySearchDto> search(CommunitySearchCondition searchCondition) {
-        //좋아요 수 집계
-        Map<Integer, Long> likeCountMap = getLikeCountByPostNumbers();
-
-        //게시글과 관련된 정보 + 좋아요 수 매핑
-        List<CommunitySearchDto> content = queryFactory
-                .select(community, categories.categoryName)
-                .from(community)
-                .leftJoin(categories).on(community.categoryNumber.eq(categories.categoryNumber))
-                .where(
-                        keywordContains(searchCondition.getKeyword()),
-                        categoryEquals(searchCondition.getCategoryNumber())
-                )
-                .orderBy(getOrderBy(searchCondition.getSortingType(), likeCountMap).toArray(new OrderSpecifier[0])) // 정렬 조건 추가
-                .fetch()
-                .stream()
-                .map(tuple -> new CommunitySearchDto(
-                        tuple.get(community),
-                        tuple.get(categories.categoryName),
-                        likeCountMap.getOrDefault(tuple.get(community.postNumber), 0L)
-                ))
-                .toList();
-
-        // 3. 전체 게시글 수 조회
-        Long totalCount = queryFactory
-                .select(community.count())
-                .from(community)
-                .where(
-                        keywordContains(searchCondition.getKeyword()),
-                        categoryEquals(searchCondition.getCategoryNumber())
-                )
-                .fetchOne();
-
-        return content; // 페이징 제거 후 전체 결과 반환
-    }
+//    public List<CommunitySearchDto> search(CommunitySearchCondition searchCondition) {
+//        //좋아요 수 집계
+//        Map<Integer, Long> likeCountMap = getLikeCountByPostNumbers();
+//
+//        //게시글과 관련된 정보 + 좋아요 수 매핑
+//        List<CommunitySearchDto> content = queryFactory
+//                .select(community, categories.categoryName)
+//                .from(community)
+//                .leftJoin(categories).on(community.categoryNumber.eq(categories.categoryNumber))
+//                .where(
+//                        keywordContains(searchCondition.getKeyword()),
+//                        categoryEquals(searchCondition.getCategoryNumber())
+//                )
+//                .orderBy(getOrderBy(searchCondition.getSortingType(), likeCountMap).toArray(new OrderSpecifier[0])) // 정렬 조건 추가
+//                .fetch()
+//                .stream()
+//                .map(tuple -> new CommunitySearchDto(
+//                        tuple.get(community),
+//                        tuple.get(categories.categoryName),
+//                        likeCountMap.getOrDefault(tuple.get(community.postNumber), 0L)
+//                ))
+//                .toList();
+//
+//        // 3. 전체 게시글 수 조회
+//        Long totalCount = queryFactory
+//                .select(community.count())
+//                .from(community)
+//                .where(
+//                        keywordContains(searchCondition.getKeyword()),
+//                        categoryEquals(searchCondition.getCategoryNumber())
+//                )
+//                .fetchOne();
+//
+//        return content; // 페이징 제거 후 전체 결과 반환
+//    }
 
     private Map<Integer, Long> getLikeCountByPostNumbers() {
         List<Tuple> likeCounts = queryFactory
@@ -113,22 +113,87 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     }
 
 
-    // 정렬 조건 설정
-    private List<OrderSpecifier<?>> getOrderBy(CommunitySearchSortingType sortingType, Map<Integer, Long> likeCountMap) {
+//    // 정렬 조건 설정
+//    private List<OrderSpecifier<?>> getOrderBy(CommunitySearchSortingType sortingType, Map<Integer, Long> likeCountMap) {
+//        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+//
+//        if (sortingType == null) {
+//            orderSpecifiers.add(community.regDate.desc());
+//        } else {
+//            switch (sortingType) {
+//                case REG_DATE_DESC: //최신순
+//                    orderSpecifiers.add(community.regDate.desc());
+//                    break;
+//                case REG_DATE_ASC://등록일순
+//                    orderSpecifiers.add(community.regDate.asc());
+//                    break;
+//                case LIKE_COUNT_DESC: //추천순
+//                    orderSpecifiers.add(getLikeCountOrderSpecifier(likeCountMap, false));
+//                    break;
+//                default:
+//                    orderSpecifiers.add(community.regDate.desc());
+//                    break;
+//            }
+//        }
+//        return orderSpecifiers;
+//    }
+//
+//    // 좋아요 수에 따른 정렬 조건 생성
+//    private OrderSpecifier<Long> getLikeCountOrderSpecifier(Map<Integer, Long> likeCountMap, boolean ascending) {
+//        // Map에 저장된 좋아요 수를 기준으로 정렬 (커스텀 정렬)
+//        return new OrderSpecifier<>(
+//                ascending ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
+//                com.querydsl.core.types.dsl.Expressions.numberTemplate(Long.class,
+//                        "function('coalesce', {0}, 0)", likeCountMap)
+//        );
+//    }
+
+    public List<CommunitySearchDto> search(CommunitySearchCondition searchCondition) {
+        // 게시글과 관련된 정보 + 좋아요 수 집계 쿼리
+        List<Tuple> content = queryFactory
+                .select(
+                        community,
+                        categories.categoryName,
+                        like.count().coalesce(0L) // 좋아요 수 집계
+                )
+                .from(community)
+                .leftJoin(categories).on(community.categoryNumber.eq(categories.categoryNumber))
+                .leftJoin(like).on(community.postNumber.eq(like.relatedNumber)
+                        .and(like.relatedType.eq("community")))
+                .where(
+                        keywordContains(searchCondition.getKeyword()),
+                        categoryEquals(searchCondition.getCategoryNumber())
+                )
+                .groupBy(community.postNumber, categories.categoryName) // group by 적용
+                .orderBy(getOrderBy(searchCondition.getSortingType()).toArray(new OrderSpecifier[0])) // 가변인자로 변환
+                .fetch();
+
+        // 결과를 DTO로 변환
+        return content.stream()
+                .map(tuple -> new CommunitySearchDto(
+                        tuple.get(community),
+                        tuple.get(categories.categoryName),
+                        tuple.get(like.count().coalesce(0L)) // 좋아요 수 가져오기
+                ))
+                .toList();
+    }
+
+    // 정렬 조건 설정 (좋아요 순 정렬 포함)
+    private List<OrderSpecifier<?>> getOrderBy(CommunitySearchSortingType sortingType) {
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
         if (sortingType == null) {
             orderSpecifiers.add(community.regDate.desc());
         } else {
             switch (sortingType) {
-                case REG_DATE_DESC: //최신순
+                case REG_DATE_DESC: // 최신순
                     orderSpecifiers.add(community.regDate.desc());
                     break;
-                case REG_DATE_ASC://등록일순
+                case REG_DATE_ASC: // 등록일순
                     orderSpecifiers.add(community.regDate.asc());
                     break;
-                case LIKE_COUNT_DESC: //추천순
-                    orderSpecifiers.add(getLikeCountOrderSpecifier(likeCountMap, false));
+                case LIKE_COUNT_DESC: // 추천순(좋아요 순)
+                    orderSpecifiers.add(like.count().coalesce(0L).desc());
                     break;
                 default:
                     orderSpecifiers.add(community.regDate.desc());
@@ -138,13 +203,4 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return orderSpecifiers;
     }
 
-    // 좋아요 수에 따른 정렬 조건 생성
-    private OrderSpecifier<Long> getLikeCountOrderSpecifier(Map<Integer, Long> likeCountMap, boolean ascending) {
-        // Map에 저장된 좋아요 수를 기준으로 정렬 (커스텀 정렬)
-        return new OrderSpecifier<>(
-                ascending ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
-                com.querydsl.core.types.dsl.Expressions.numberTemplate(Long.class,
-                        "function('coalesce', {0}, 0)", likeCountMap)
-        );
-    }
 }
