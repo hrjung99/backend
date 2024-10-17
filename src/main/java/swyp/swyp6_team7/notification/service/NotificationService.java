@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.enrollment.domain.Enrollment;
 import swyp.swyp6_team7.enrollment.repository.EnrollmentRepository;
 import swyp.swyp6_team7.member.entity.Users;
-import swyp.swyp6_team7.member.service.MemberService;
+import swyp.swyp6_team7.member.util.MemberAuthorizeUtil;
 import swyp.swyp6_team7.notification.dto.NotificationDto;
 import swyp.swyp6_team7.notification.dto.TravelNotificationDto;
 import swyp.swyp6_team7.notification.entity.Notification;
@@ -30,37 +29,34 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final MemberService memberService;
     private final TravelRepository travelRepository;
     private final EnrollmentRepository enrollmentRepository;
 
 
     @Async
-    public void createEnrollNotificationToHost(Travel targetTravel) {
-        Notification newNotification = NotificationMaker.travelEnrollmentMessageToHost(targetTravel);
-        newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]여행신청 =" + newNotification.toString());
-    }
-
-    @Async
     public void createEnrollNotification(Travel targetTravel, Users user) {
+        //notification to host
+        Notification newNotificationToHost = NotificationMaker.travelEnrollmentMessageToHost(targetTravel);
+        newNotificationToHost = notificationRepository.save(newNotificationToHost);
+        //log.info("[알림]여행신청 =" + newNotificationToHost.toString());
+
         Notification newNotification = NotificationMaker.travelEnrollmentMessage(targetTravel, user);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]참가신청 =" + newNotification.toString());
+        //log.info("[알림]참가신청 =" + newNotification.toString());
     }
 
     @Async
     public void createAcceptNotification(Travel targetTravel, Enrollment enrollment) {
         Notification newNotification = NotificationMaker.travelAcceptMessage(targetTravel, enrollment);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]참가확정 = " + newNotification.toString());
+        //log.info("[알림]참가확정 = " + newNotification.toString());
     }
 
     @Async
     public void createRejectNotification(Travel targetTravel, Enrollment enrollment) {
         Notification newNotification = NotificationMaker.travelRejectMessage(targetTravel, enrollment);
         newNotification = notificationRepository.save(newNotification);
-        log.info("[알림]참가거절 = " + newNotification.toString());
+        //log.info("[알림]참가거절 = " + newNotification.toString());
     }
 
     @Async
@@ -77,20 +73,19 @@ public class NotificationService {
 
         // notification to each enrollment
         List<Integer> enrolledUserNumbers = enrollmentRepository.findEnrolledUserNumbersByTravelNumber(targetTravel.getNumber());
-        enrolledUserNumbers.stream()
+        List<Notification> createdNotifications = enrolledUserNumbers.stream()
                 .distinct()
-                .forEach(userNumber -> notificationRepository.save(
-                        NotificationMaker.travelNewCommentMessageToEnrollments(targetTravel, userNumber))
-                );
+                .map(userNumber -> NotificationMaker.travelNewCommentMessageToEnrollments(targetTravel, userNumber))
+                .toList();
+        notificationRepository.saveAll(createdNotifications);
     }
 
 
     public Page<NotificationDto> getNotificationsByUser(PageRequest pageRequest) {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Users user = memberService.findByEmail(userName);
+        Integer loginUserNumber = MemberAuthorizeUtil.getLoginUserNumber();
 
         Page<Notification> notifications = notificationRepository
-                .getNotificationsByReceiverNumberOrderByIsReadAscCreatedAtDesc(user.getUserNumber(), pageRequest);
+                .getNotificationsByReceiverNumberOrderByIsReadAscCreatedAtDesc(loginUserNumber, pageRequest);
 
         return notifications.map(notification -> makeDto(notification));
     }

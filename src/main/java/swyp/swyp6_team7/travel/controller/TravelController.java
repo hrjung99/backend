@@ -39,8 +39,11 @@ public class TravelController {
     public ResponseEntity<TravelDetailResponse> getDetailsByNumber(
             @PathVariable("travelNumber") int travelNumber
     ) {
+        TravelDetailResponse travelDetails = travelService.getDetailsByNumber(travelNumber);
+        travelService.addViewCount(travelNumber); //조회수 update
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(travelService.getDetailsByNumber(travelNumber));
+                .body(travelDetails);
     }
 
     @PutMapping("/api/travel/{travelNumber}")

@@ -70,7 +70,7 @@ public class ImageCommunityService {
         String relatedType = "community";
         int order = 0;
 
-        if (deletedTempUrls != null) {
+        if (deletedTempUrls != null && !deletedTempUrls.isEmpty()) {
             //임시 저장 했지만 최종 게시물 등록시에는 삭제된 이미지 처리
             for (int i = 0; i < deletedTempUrls.size(); i++) {
                 String deletedTempUrl = deletedTempUrls.get(i);
@@ -102,7 +102,7 @@ public class ImageCommunityService {
             }
         }
 
-        if (tempUrls != null) {
+        if (tempUrls != null && tempUrls.isEmpty()) {
             // 정식등록 할 이미지 처리
             for (int i = 0; i < tempUrls.size(); i++) {
 
