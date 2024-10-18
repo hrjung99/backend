@@ -59,7 +59,7 @@ public class EnrollmentCustomRepositoryImpl implements EnrollmentCustomRepositor
                 .from(enrollment)
                 .where(
                         enrollment.travelNumber.eq(travelNumber),
-                        enrollment.status.in(List.of(EnrollmentStatus.PENDING, EnrollmentStatus.ACCEPTED))
+                        enrollment.status.eq(EnrollmentStatus.ACCEPTED)
                 ).fetch();
     }
 
