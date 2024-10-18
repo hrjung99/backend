@@ -17,7 +17,13 @@ public class CompanionService {
 
 
     public List<CompanionInfoDto> findCompanionsByTravelNumber(int travelNumber) {
-        List<CompanionInfoDto> companions = companionRepository.findCompanionInfoByTravelNumber(travelNumber);
+        List<CompanionInfoDto> companions = companionRepository
+                .findCompanionInfoByTravelNumber(travelNumber);
+
+        for (CompanionInfoDto companion : companions) {
+            log.info("companion = " + companion.toString());
+        }
+
         return companions;
     }
 
