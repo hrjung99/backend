@@ -119,7 +119,7 @@ public class CommentService {
     public List<CommentListReponseDto> getList(String relatedType, int relatedNumber, int userNumber) {
         //이때 userNumber는 댓글 조회 요청자
 
-        if (relatedType.equals("travel")){
+        if (relatedType.equals("travel")) {
             travelRepository.findByNumber(relatedNumber)
                     .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다." + relatedType + " : " + relatedNumber));
 
@@ -165,8 +165,11 @@ public class CommentService {
                 Optional<Travel> travelInfo = travelRepository.findByNumber(relatedNumber);
                 int travelWriterNumber = travelInfo.get().getUserNumber();
 
+                //답글 작성 여부 가져오기
+                Boolean commented = getCommented(comment, userNumber);
+
                 //DTO
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, travelWriterNumber, imageUrl);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, travelWriterNumber, imageUrl,commented);
                 listReponse.add(dto);
             }
             return listReponse;
@@ -203,8 +206,11 @@ public class CommentService {
                 Optional<Community> postInfo = communityRepository.findByPostNumber(relatedNumber);
                 int communityWritreNumber = postInfo.get().getUserNumber();
 
+                //답글 작성 여부 가져오기
+                Boolean commented = getCommented(comment, userNumber);
+
                 // DTO 생성
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, communityWritreNumber, imageUrl);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, communityWritreNumber, imageUrl, commented);
                 listReponse.add(dto);
             }
             return listReponse;
@@ -255,12 +261,15 @@ public class CommentService {
                 Optional<Travel> travelInfo = travelRepository.findByNumber(relatedNumber);
                 int travelWriterNumber = travelInfo.get().getUserNumber();
 
+                //답글 작성 여부 가져오기
+                Boolean commented = getCommented(comment, userNumber);
+
                 //DTO
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, travelWriterNumber, imageUrl);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, travelWriterNumber, imageUrl, commented);
                 listReponse.add(dto);
             }
-
             return toPage(listReponse, pageRequest);
+
 
         } else if (relatedType.equals("community")) {
             // 커뮤니티 댓글 조회 로직
@@ -293,8 +302,11 @@ public class CommentService {
                 Optional<Community> postInfo = communityRepository.findByPostNumber(relatedNumber);
                 int communityWritreNumber = postInfo.get().getUserNumber();
 
+                //답글 작성 여부 가져오기
+                Boolean commented = getCommented(comment, userNumber);
+
                 // DTO 생성
-                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, communityWritreNumber, imageUrl);
+                CommentListReponseDto dto = CommentListReponseDto.fromEntity(comment, commentWriter, repliesCount, likes, liked, communityWritreNumber, imageUrl, commented);
                 listReponse.add(dto);
             }
             return toPage(listReponse, pageRequest);
@@ -369,12 +381,12 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("comment not found: " + commentNumber));
 
         int postWriterNumber = 0;
-        if(comment.getRelatedType().equals("travel")) {
+        if (comment.getRelatedType().equals("travel")) {
             // 댓글 번호로 게시글 번호 가져오기
             int travelNumber = comment.getRelatedNumber();
             // 게시글 번호로 작성자 회원 번호 가져오기
             postWriterNumber = travelRepository.findByNumber(travelNumber).get().getUserNumber();
-        } else if(comment.getRelatedType().equals("community")) {
+        } else if (comment.getRelatedType().equals("community")) {
             int communityNumber = comment.getRelatedNumber();
             postWriterNumber = communityRepository.findByPostNumber(communityNumber).get().getUserNumber();
         }
@@ -384,7 +396,6 @@ public class CommentService {
             throw new IllegalArgumentException("댓글 작성자 혹은 게시글 작성자에게만 유효한 동작입니다.");
         }
     }
-
 
 
     //댓글 작성자인지 확인
@@ -439,5 +450,25 @@ public class CommentService {
             start = end;
         }
         return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
+    }
+
+    //답글 작성 여부 가져오기
+    private Boolean getCommented (Comment comment, int userNumber) {
+        //답글 작성 여부 가져오기
+        Boolean commented = null;
+        //나의 자식 댓글들 조회
+        List<Comment> childComments = commentRepository.findByRelatedTypeAndRelatedNumberAndParentNumber(comment.getRelatedType(), comment.getRelatedNumber(), comment.getCommentNumber());
+        if (!childComments.isEmpty()) { //자식 답글이 있을 경우
+            commented = false; //
+            //자식 답글들을 순회하며 조회 중인 유저 번호와 일치하는지 확인
+            for (Comment childComment : childComments) {
+                if (childComment.getUserNumber() == userNumber) {
+                    //하나라도 일치할 경우 commented를 true하고 for문 빠져나오기
+                    commented = true;
+                    break;
+                }
+            }
+        }
+        return commented;
     }
 }
