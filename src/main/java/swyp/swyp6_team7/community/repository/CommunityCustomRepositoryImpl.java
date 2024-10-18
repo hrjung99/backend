@@ -12,6 +12,7 @@ import swyp.swyp6_team7.community.dto.response.CommunitySearchCondition;
 import swyp.swyp6_team7.community.dto.response.CommunitySearchDto;
 import swyp.swyp6_team7.community.util.CommunitySearchSortingType;
 import swyp.swyp6_team7.likes.domain.QLike;
+import swyp.swyp6_team7.member.entity.QUsers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
     QCommunity community = QCommunity.community;
     QCategory categories = QCategory.category;
     QLike like = QLike.like;
+    QUsers users = QUsers.users;
 
 
     @Autowired
@@ -203,4 +205,33 @@ public class CommunityCustomRepositoryImpl implements CommunityCustomRepository 
         return orderSpecifiers;
     }
 
+    public List<CommunitySearchDto> getMyList(CommunitySearchSortingType sortingType, int userNumber) {
+        //userNumber는 조회중인 유저
+
+        // 게시글과 관련된 정보 + 좋아요 수 집계 쿼리
+        List<Tuple> content = queryFactory
+                .select(
+                        community,
+                        categories.categoryName,
+                        like.count().coalesce(0L) // 좋아요 수 집계
+                )
+                .from(community)
+                .leftJoin(categories).on(community.categoryNumber.eq(categories.categoryNumber))
+                .leftJoin(like).on(community.postNumber.eq(like.relatedNumber)
+                        .and(like.relatedType.eq("community")))
+                .where(
+                        community.userNumber.eq(userNumber)
+                )                .groupBy(community.postNumber, categories.categoryName) // group by 적용
+                .orderBy(getOrderBy(sortingType).toArray(new OrderSpecifier[0])) // 가변인자로 변환
+                .fetch();
+
+        // 결과를 DTO로 변환
+        return content.stream()
+                .map(tuple -> new CommunitySearchDto(
+                        tuple.get(community),
+                        tuple.get(categories.categoryName),
+                        tuple.get(like.count().coalesce(0L)) // 좋아요 수 가져오기
+                ))
+                .toList();
+    }
 }
