@@ -157,24 +157,14 @@ public class ImageService {
     }
 
     //임시 저장 삭제
-    public void deleteTempImage(String temUrl, int userNumber) {
+    public void deleteTempImage(String temUrl) {
         String tempKey = s3KeyHandler.getKeyByUrl(temUrl);
         s3Uploader.deleteFile(tempKey);
 
-        //이전 이미지가 파일 업로드인지 default 이미지인지 확인
-        //key가 "images/profile/relatedNumber"로 시작하면, 이전 이미지는 파일 업로드 이미지
-        if (tempKey.startsWith("images/profile/" + userNumber)) {
-            //이미지 삭제
-            s3Uploader.deleteFile(tempKey);
-        }
-        //key가 "images/profile/default"로 시작하면, 이전 이미지는 디폴트 이미지
-        else if (tempKey.startsWith("images/profile/default")) {
-            //이미지 삭제 동작 필요 없음
-        } else {
-            throw new IllegalArgumentException("업데이트 전 DB  데이터에 오류가 있습니다.");
-        }
 
 
     }
+
+    //
 
 }

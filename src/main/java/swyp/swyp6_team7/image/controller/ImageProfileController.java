@@ -58,7 +58,7 @@ public class ImageProfileController {
 
 
         try {
-            imageService.deleteTempImage(request.getDeletedTempUrl(), userNumber);
+            imageService.deleteTempImage(request.getDeletedTempUrl());
             // 성공 시 204
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
