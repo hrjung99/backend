@@ -72,7 +72,7 @@ public class CommentService {
         ));
 
         //create notification to Host and Enrolled Users
-        notificationService.createCommentNotifications(relatedType, relatedNumber);
+        notificationService.createCommentNotifications(userNumber, relatedType, relatedNumber);
 
         return savedComment;
     }
