@@ -1,9 +1,11 @@
 package swyp.swyp6_team7.profile.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
 import swyp.swyp6_team7.profile.dto.PasswordChangeRequest;
+import swyp.swyp6_team7.profile.dto.PasswordVerifyRequest;
 import swyp.swyp6_team7.profile.service.ProfileService;
 
 @RestController
@@ -20,9 +22,12 @@ public class PasswordController {
 
     // 현재 비밀번호 확인
     @PostMapping("/verify")
-    public ResponseEntity<Void> verifyCurrentPassword(@RequestHeader("Authorization") String token, @RequestBody PasswordChangeRequest passwordChangeRequest) {
+    public ResponseEntity<String> verifyCurrentPassword(@RequestHeader("Authorization") String token, @RequestBody PasswordVerifyRequest passwordVerifyRequest) {
+        if (passwordVerifyRequest.getConfirmPassword() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Confirm password is required");
+        }
         Integer userNumber = jwtProvider.getUserNumber(token.substring(7)); // "Bearer " 제거
-        profileService.verifyCurrentPassword(userNumber, passwordChangeRequest.getCurrentPassword());
+        profileService.verifyCurrentPassword(userNumber, passwordVerifyRequest.getConfirmPassword());
         return ResponseEntity.ok().build();
     }
 

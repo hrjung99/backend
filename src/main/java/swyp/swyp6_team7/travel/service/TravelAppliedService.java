@@ -30,7 +30,7 @@ public class TravelAppliedService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
 
-
+    // 주최자가 수락한 신청 리스트
     @Transactional(readOnly = true)
     public Page<TravelListResponseDto> getAppliedTripsByUser(Integer userNumber, Pageable pageable) {
         // 사용자가 승인된 동반자 목록 조회
@@ -50,6 +50,11 @@ public class TravelAppliedService {
 
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), dtos.size());
+
+        if (start > end || start > dtos.size()) {
+            return new PageImpl<>(List.of(), pageable, dtos.size());
+        }
+
         return new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
     }
 

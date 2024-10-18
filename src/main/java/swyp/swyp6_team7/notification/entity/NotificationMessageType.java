@@ -28,6 +28,18 @@ public enum NotificationMessageType {
         public String getContent(String travelTitle) {
             return String.format("[%s]에 참가가 아쉽게도 거절되었어요. 다른 여행을 찾아볼까요?", travelTitle);
         }
+    },
+
+    TRAVEL_NEW_COMMENT_HOST("멤버 댓글 알림") {
+        public String getContent(String travelTitle) {
+            return String.format("개설하신 [%s]에 멤버 댓글이 달렸어요. 확인해보세요.", travelTitle);
+        }
+    },
+
+    TRAVEL_NEW_COMMENT_ENROLLMENT("멤버 댓글 알림") {
+        public String getContent(String travelTitle) {
+            return String.format("참가 신청하신 [%s]에 멤버 댓글이 달렸어요. 확인해보세요.", travelTitle);
+        }
     };
 
     private final String title;

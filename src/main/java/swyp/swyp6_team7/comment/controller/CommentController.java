@@ -2,6 +2,8 @@ package swyp.swyp6_team7.comment.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +13,10 @@ import swyp.swyp6_team7.comment.dto.request.CommentUpdateRequestDto;
 import swyp.swyp6_team7.comment.dto.response.CommentDetailResponseDto;
 import swyp.swyp6_team7.comment.dto.response.CommentListReponseDto;
 import swyp.swyp6_team7.comment.service.CommentService;
-import swyp.swyp6_team7.likes.service.CommentLikeService;
-import swyp.swyp6_team7.member.entity.Users;
+
 import swyp.swyp6_team7.member.service.MemberService;
 
 import java.security.Principal;
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,7 +24,6 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
-    private final CommentLikeService commentLikeService;
     private final MemberService memberService;
 
     //Create
@@ -32,14 +31,12 @@ public class CommentController {
     public ResponseEntity<CommentDetailResponseDto> create(
             @RequestBody CommentCreateRequestDto request,
             Principal principal,
-            @PathVariable String relatedType,
-            @PathVariable int relatedNumber
+            @PathVariable(name = "relatedType") String relatedType,
+            @PathVariable(name = "relatedNumber") int relatedNumber
     ) {
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
-        
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
+
         Comment createdComment = commentService.create(request, userNumber, relatedType, relatedNumber);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(commentService.getCommentByNumber(createdComment.getCommentNumber()));
@@ -47,17 +44,18 @@ public class CommentController {
 
     // List Read
     @GetMapping("/api/{relatedType}/{relatedNumber}/comments")
-    public ResponseEntity<List<CommentListReponseDto>> getComments(
+    public ResponseEntity<Page<CommentListReponseDto>> getComments(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
             Principal principal,
             @PathVariable String relatedType,
             @PathVariable int relatedNumber) {
 
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
-        List<CommentListReponseDto> comments = commentService.getList(relatedType, relatedNumber, userNumber);
+
+        Page<CommentListReponseDto> comments = commentService.getListPage(PageRequest.of(page, size), relatedType, relatedNumber, userNumber);
         return ResponseEntity.ok(comments);
     }
 
@@ -68,9 +66,7 @@ public class CommentController {
             @PathVariable int commentNumber
     ) {
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         CommentDetailResponseDto updateResponse = commentService.update(request, userNumber, commentNumber);
 
@@ -85,29 +81,10 @@ public class CommentController {
             Principal principal
     ) {
         //user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
+        int userNumber = memberService.findByEmail(principal.getName()).getUserNumber();
 
         commentService.delete(commentNumber, userNumber);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-
-    //좋아요
-    @PostMapping("/api/comments/{commentNumber}/like")
-    public ResponseEntity<List<CommentListReponseDto>> toggleLike(
-            @PathVariable int commentNumber,
-            Principal principal) {
-
-        // user number 가져오기
-        String userEmail = principal.getName();
-        Users user = memberService.findByEmail(userEmail);
-        int userNumber = user.getUserNumber();
-
-        List<CommentListReponseDto> result = commentLikeService.toggleLike(commentNumber, userNumber);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(result);
     }
 }
 

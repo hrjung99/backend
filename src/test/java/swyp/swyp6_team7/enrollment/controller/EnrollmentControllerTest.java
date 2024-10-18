@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -48,6 +49,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestPropertySource(properties = {
+        "kakao.client-id=fake-client-id",
+        "kakao.client-secret=fake-client-secret",
+        "kakao.redirect-uri=http://localhost:8080/login/oauth2/code/kakao",
+        "kakao.token-url=https://kauth.kakao.com/oauth/token",
+        "kakao.user-info-url=https://kapi.kakao.com/v2/user/me"
+})
 class EnrollmentControllerTest {
 
     @Autowired

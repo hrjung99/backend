@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.member.repository.UserRepository;
 import swyp.swyp6_team7.profile.dto.PasswordChangeRequest;
@@ -80,12 +81,14 @@ class ProfileServiceTest {
         // given
         ProfileUpdateRequest request = new ProfileUpdateRequest();
         request.setName("New Name");
+        request.setAgeGroup(AgeGroup.TWENTY.getValue());
         request.setProIntroduce("New Introduction");
         request.setPreferredTags(new String[]{"Tag1", "Tag2"});
 
         Users user = new Users();
         user.setUserNumber(1);
         user.setUserName("Old Name");
+        user.setUserAgeGroup(AgeGroup.TEEN);
         Set<UserTagPreference> tagPreferences = new HashSet<>();
         user.setTagPreferences(tagPreferences);
 
@@ -106,6 +109,7 @@ class ProfileServiceTest {
 
         // then
         assertThat(user.getUserName()).isEqualTo("New Name");
+        assertThat(user.getUserAgeGroup()).isEqualTo(AgeGroup.TWENTY);
         assertThat(userProfile.getProIntroduce()).isEqualTo("New Introduction");
         assertThat(tagPreferences).hasSize(2);
 
@@ -139,10 +143,12 @@ class ProfileServiceTest {
         // given
         ProfileUpdateRequest request = new ProfileUpdateRequest();
         request.setName("New Name");
+        request.setAgeGroup(AgeGroup.TWENTY.getValue());
 
         Users user = new Users();
         user.setUserNumber(1);
         user.setUserName("Old Name");
+        user.setUserAgeGroup(AgeGroup.TEEN);
 
         when(userRepository.findUserWithTags(1)).thenReturn(Optional.of(user));
         when(userProfileRepository.findByUserNumber(1)).thenReturn(Optional.empty());

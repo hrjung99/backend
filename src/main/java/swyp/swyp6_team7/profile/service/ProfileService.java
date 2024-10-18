@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import swyp.swyp6_team7.auth.jwt.JwtProvider;
+import swyp.swyp6_team7.member.entity.AgeGroup;
 import swyp.swyp6_team7.member.entity.Users;
 import swyp.swyp6_team7.profile.dto.PasswordChangeRequest;
 import swyp.swyp6_team7.profile.repository.UserProfileRepository;
@@ -48,7 +49,8 @@ public class ProfileService {
         Users user = userRepository.findUserWithTags(userNumber)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        user.setUserName(request.getName());  // 이름 수정 가능
+        user.setUserName(request.getName());
+        user.setUserAgeGroup(AgeGroup.fromValue(request.getAgeGroup()));
         userRepository.save(user);
 
         // UserProfile 엔티티 업데이트
@@ -99,13 +101,13 @@ public class ProfileService {
 
     // 현재 비밀번호 검증 로직
     @Transactional(readOnly = true)
-    public void verifyCurrentPassword(Integer userNumber, String currentPassword) {
+    public void verifyCurrentPassword(Integer userNumber, String confirmPassword) {
         // 사용자 조회
         Users user = userRepository.findById(userNumber)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // 현재 비밀번호 확인
-        if (!passwordEncoder.matches(currentPassword, user.getUserPw())) {
+        if (!passwordEncoder.matches(confirmPassword, user.getUserPw())) {
             throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
         }
     }

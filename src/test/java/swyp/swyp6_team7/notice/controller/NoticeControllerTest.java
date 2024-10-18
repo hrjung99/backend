@@ -14,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import swyp.swyp6_team7.notice.dto.NoticeRequestDto;
@@ -34,6 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "kakao.client-id=fake-client-id",
+        "kakao.client-secret=fake-client-secret",
+        "kakao.redirect-uri=http://localhost:8080/login/oauth2/code/kakao",
+        "kakao.token-url=https://kauth.kakao.com/oauth/token",
+        "kakao.user-info-url=https://kapi.kakao.com/v2/user/me"
+})
 public class NoticeControllerTest {
 
     @Autowired
